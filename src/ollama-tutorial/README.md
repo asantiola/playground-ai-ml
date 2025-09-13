@@ -1,4 +1,4 @@
-# AI playground
+# Ollama playground
 
 ### Select devcontainer 
 - https://github.com/asantiola/developer-notes/tree/master/python/python-ai/gpu/.devcontainer
