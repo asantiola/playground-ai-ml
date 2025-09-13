@@ -7,6 +7,7 @@
 ### Install libraries
 - pip install --upgrade pip
 - pip install pandas numpy matplotlib
+- pip install openai
 - https://pytorch.org/
     - CUDA (XPS 9500 / CUDA 12.6)
         - pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
