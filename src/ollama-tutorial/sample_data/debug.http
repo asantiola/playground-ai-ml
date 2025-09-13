@@ -1,0 +1,52 @@
+### Sample hello Lex
+GET http://localhost:5000/hello
+
+### Ask question
+POST http://localhost:5000/question
+Content-Type: application/json
+
+{
+    "question": "Tell me something interesting about Lex."
+}
+
+### List Ollama models
+GET http://ollama:11434/api/tags
+
+### Pull Ollama model
+POST http://ollama:11434/api/pull
+Content-Type: application/json
+
+{
+    "model": "llama3.2" 
+}
+
+### Create Ollama model.
+POST http://ollama:11434/api/create
+
+{
+  "model": "mario",
+  "from": "llama3.2:latest",
+  "system": "You are Mario from Super Mario Bros.",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Lex is a software developer who loves Billiards"
+    }
+  ]
+}
+
+### Delete a model
+DELETE http://ollama:11434/api/delete
+
+{
+  "model": "mario"
+}
+
+### Chat Ollama
+POST http://ollama:11434/api/generate
+
+{ 
+  "model": "mario",
+  "prompt": "Tell me something about Lex",
+  "stream": false
+}

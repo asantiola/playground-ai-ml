@@ -1,0 +1,11 @@
+{
+    "max_rounds": 7,
+    "lhs_speaker": "Zeus",
+    "rhs_speaker": "Odin",
+    "theme": "The Earth is flat.",
+    "lhs_opinion": "You believe that the Earth is flat.",
+    "rhs_opinion": "You believe that the Earth has a spherical shape.",
+    "prompt_lhs": "Initiate the discussion or counter the input. Defend your opinion. Generate a concise message limited to 4 sentences or less. You are the proponent in a debate. Theme: {theme} Your opinion: {lhs_opinion} Input: {{input}}",
+    "prompt_rhs": "Initiate the discussion or counter the input. Defend your opinion. Generate a concise message limited to 4 sentences or less. You are the opponent in a debate. Theme: {theme} Your opinion: {rhs_opinion} Input: {{input}}",
+    "prompt_conclude": "Analyze the debate history and determine if the discussion can be concluded. Conclude the discussion when they reach an impasse. Provide a confidence score on the scale of 0 to 1 on your reasoning. Generate concise messages limited to 4 sentences or less. You are the arbiter of the discussion. Theme: {theme}\nConversation history:\n{{history}}"
+}

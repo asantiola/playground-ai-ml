@@ -1,0 +1,25 @@
+This document talks about Lex's software engineering info.
+
+Lex have used the following programming languages in his software engineering career:
+- C++
+- Python
+- Golang
+- Java
+- C
+- C#
+- Perl
+- SQL
+- Stored Procedures
+- Visual Basic
+- JavaScript
+- Angular
+
+He has also used the following frameworks / architectures:
+- Spring
+- Spring Boot
+- REST API
+- Web services
+- Microservices
+- Common Object Request Broker Architecture (CORBA)
+
+He is experienced in using Linux, Unix, Windows and Mainframe operating systems.

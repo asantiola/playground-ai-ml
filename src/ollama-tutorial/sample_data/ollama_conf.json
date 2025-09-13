@@ -1,0 +1,10 @@
+{
+    "llm_model": "llama3.1",
+    "llm_temp": 0.75,
+    "sentencetransformer_embeddings_model": "thenlper/gte-small",
+    "hf_embeddings_device": "cpu",
+    "ollama_embeddings_model": "paraphrase-multilingual",
+    "ollama_embeddings_dimensions": 768,
+    "splitter_chunk_size": 500,
+    "splitter_chunk_overlap": 50
+}
