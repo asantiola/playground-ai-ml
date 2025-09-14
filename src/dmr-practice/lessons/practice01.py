@@ -9,6 +9,7 @@ client = openai.OpenAI(
 
 completion = client.chat.completions.create(
     model="ai/llama3.1:latest", 
+    # model="ai/gpt-oss:latest", 
     messages=[
         {"role": "system", "content": "You are a helpful AI assistant."},
         {"role": "user", "content": "What is the capital of the United States of America?"}
