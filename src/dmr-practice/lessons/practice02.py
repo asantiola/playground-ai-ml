@@ -5,7 +5,6 @@ llm = ChatOpenAI(
     temperature=0,
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
-    
 )
 
 messages = [
