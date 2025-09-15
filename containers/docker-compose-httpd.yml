@@ -2,5 +2,7 @@ version: '3'
 services: 
     apache:
         image: httpd:2.4
+        ports:
+            - "3000:80"
         volumes:
             - ../data/documents-html:/usr/local/apache2/htdocs/
