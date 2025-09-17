@@ -38,7 +38,6 @@ splits = text_splitter.split_documents(documents=documents)
 vector_store = Chroma.from_documents(
     documents=splits,
     embedding=hf_embeddings,
-    # persist_directory=persist_directory
 )
 
 prompt = PromptTemplate(

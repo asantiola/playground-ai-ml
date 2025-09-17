@@ -1,39 +1,62 @@
-import chromadb
-from chromadb.utils import embedding_functions
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_openai import ChatOpenAI
+from langchain.prompts import PromptTemplate
 import os
 
-client = chromadb.PersistentClient(
-    path="/Users/asantiola/repo/playground-ai-ml/.chromadb",
-)
-hb_time = client.heartbeat()
-print(f"heartbeat: {hb_time}")
-
-os.environ["HUGGINGFACE_HUB_CACHE"] = "/Users/asantiola/repo/playground-ai-ml/.cache"
 embeddings_model = "thenlper/gte-small"
-hf_ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+
+# Warning seen: huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+# To disable this warning, you can either:
+# - Avoid using `tokenizers` before the fork if possible
+# - Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+os.environ["TOKENIZERS_PARALLELISM"] = ""
+
+hf_embeddings = HuggingFaceEmbeddings(
+    cache_folder="/Users/asantiola/repo/playground-ai-ml/.cache",
     model_name=embeddings_model,
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": False},
 )
 
-collection_name="persisted_documents"
-collection = client.get_or_create_collection(
-    name=collection_name,
-    embedding_function=hf_ef,
+chromadb_path="/Users/asantiola/repo/playground-ai-ml/.chromadb"
+vector_store = Chroma(
+    embedding_function=hf_embeddings,
+    persist_directory=chromadb_path
 )
+
+prompt = PromptTemplate(
+    template="""You are an assistant for question-answering tasks. 
+        Use the following documents to answer the question. 
+
+        If you don't know the answer, just say that you don't know. 
+
+        Use three sentences maximum and keep the answer concise:
+        Question: {question} 
+        Documents: {documents} 
+        Answer: 
+        """,
+    input_variables=["question", "documents"],
+)
+
+llm = ChatOpenAI(
+    model="ai/llama3.1",
+    temperature=0,
+    base_url="http://localhost:12434/engines/v1",
+    api_key="docker",
+)
+
+retriever = vector_store.as_retriever()
+rag_chain = prompt | llm
 
 def query(question):
-    question = "Tell me the interests of Lex."
-    results = collection.query(
-        query_texts=[question],
-        n_results=5 # Retrieve top 5 most relevant chunks
-    )
-
-    print("\n--- Query Results ---")
-    for _, (doc, meta) in enumerate(zip(results['documents'][0], results['metadatas'][0])):
-        print(f"Result:")
-        print(f"  Source: {meta['source']}")
-        print(f"  Chunk Index: {meta['chunk_index']}")
-        print(f"  Content: {doc[:200]}...") # Print first 200 characters of the chunk
-        print("-" * 30)
+    print(f"Question: \"{question}\"\n")
+    documents = retriever.invoke(question)
+    answer = rag_chain.invoke({
+        "documents": documents,
+        "question": question,
+    })
+    print(f"Answer: {answer.content}\n\n")
 
 questions = "/Users/asantiola/repo/playground-ai-ml/data/questions.txt"
 with open(questions) as file:
