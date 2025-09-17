@@ -1,80 +1,78 @@
-import chromadb
-from chromadb.utils import embedding_functions
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_community.document_loaders import TextLoader
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_openai import ChatOpenAI
+from langchain.prompts import PromptTemplate
 import os
 
-client = chromadb.EphemeralClient()
-hb_time = client.heartbeat()
-print(f"heartbeat: {hb_time}")
-
-os.environ["HUGGINGFACE_HUB_CACHE"] = "/Users/asantiola/repo/playground-ai-ml/.cache"
 embeddings_model = "thenlper/gte-small"
-hf_ef = embedding_functions.SentenceTransformerEmbeddingFunction(
+
+# Warning seen: huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+# To disable this warning, you can either:
+# - Avoid using `tokenizers` before the fork if possible
+# - Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+os.environ["TOKENIZERS_PARALLELISM"] = ""
+
+hf_embeddings = HuggingFaceEmbeddings(
+    cache_folder="/Users/asantiola/repo/playground-ai-ml/.cache",
     model_name=embeddings_model,
+    model_kwargs={"device": "cpu"},
+    encode_kwargs={"normalize_embeddings": False},
 )
 
-collection_name="my_documents"
-collection = client.get_or_create_collection(
-    name=collection_name,
-    embedding_function=hf_ef,
-)
+doc_path = "/Users/asantiola/repo/playground-ai-ml/data/documents-txt"
+documents = []
+for filename in os.listdir(doc_path):
+    if filename.endswith('.txt'):
+        file_path = os.path.join(doc_path, filename)
+        loader = TextLoader(file_path)
+        documents.extend(loader.load())
 
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size=500,
     chunk_overlap=100,
-    length_function=len,
-    is_separator_regex=False,
+)
+splits = text_splitter.split_documents(documents=documents)
+
+vector_store = Chroma.from_documents(
+    documents=splits,
+    embedding=hf_embeddings,
+    # persist_directory=persist_directory
 )
 
-doc_path = "/Users/asantiola/repo/playground-ai-ml/data/documents-txt"
-files = [os.path.join(doc_path, file) for file in os.listdir(doc_path)]
+prompt = PromptTemplate(
+    template="""You are an assistant for question-answering tasks. 
+        Use the following documents to answer the question. 
 
-documents = []
-metadatas = []
-ids = []
-current_id = 0
+        If you don't know the answer, just say that you don't know. 
 
-for filename in os.listdir(doc_path):
-    if filename.endswith(".txt"):
-        filepath = os.path.join(doc_path, filename)
-        with open(filepath, "r", encoding="utf-8") as f:
-            raw_text = f.read()
+        Use three sentences maximum and keep the answer concise:
+        Question: {question} 
+        Documents: {documents} 
+        Answer: 
+        """,
+    input_variables=["question", "documents"],
+)
 
-        # Chunk the text
-        chunks = text_splitter.split_text(raw_text)
+llm = ChatOpenAI(
+    model="ai/llama3.1",
+    temperature=0,
+    base_url="http://localhost:12434/engines/v1",
+    api_key="docker",
+)
 
-        # Prepare data for ChromaDB
-        for i, chunk in enumerate(chunks):
-            documents.append(chunk)
-            metadatas.append({"source": filename, "chunk_index": i})
-            ids.append(f"{filename.replace('.txt', '')}_chunk_{current_id}")
-            current_id += 1
-
-if documents:
-    collection.add(
-        documents=documents,
-        metadatas=metadatas,
-        ids=ids
-    )
-    print(f"Added {len(documents)} chunks to ChromaDB collection '{collection_name}'.")
-else:
-    print("No text files found or no chunks generated.")
+retriever = vector_store.as_retriever()
+rag_chain = prompt | llm
 
 def query(question):
-    question = "Tell me the interests of Lex."
-    results = collection.query(
-        query_texts=[question],
-        n_results=5 # Retrieve top 5 most relevant chunks
-    )
-
-    print("\n--- Query Results ---")
-    for _, (doc, meta) in enumerate(zip(results['documents'][0], results['metadatas'][0])):
-        print(f"Result:")
-        print(f"  Source: {meta['source']}")
-        print(f"  Chunk Index: {meta['chunk_index']}")
-        print(f"  Content: {doc[:200]}...") # Print first 200 characters of the chunk
-        print("-" * 30)
+    print(f"Question: \"{question}\"\n")
+    documents = retriever.invoke(question)
+    answer = rag_chain.invoke({
+        "documents": documents,
+        "question": question,
+    })
+    print(f"Answer: {answer.content}\n\n")
 
 questions = "/Users/asantiola/repo/playground-ai-ml/data/questions.txt"
 with open(questions) as file:
