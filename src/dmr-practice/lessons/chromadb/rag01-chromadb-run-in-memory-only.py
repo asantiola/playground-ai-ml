@@ -42,6 +42,7 @@ vector_store = Chroma.from_documents(
 
 prompt = PromptTemplate(
     template="""You are an assistant for question-answering tasks.
+        Basing on your training data, augmented by these documents, please answer.
         Use three sentences maximum and keep the answer concise:
         Question: {question} 
         Documents: {documents} 
@@ -51,7 +52,7 @@ prompt = PromptTemplate(
 )
 
 llm = ChatOpenAI(
-    model="ai/phi4",
+    model="ai/llama3.1",
     temperature=0,
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",

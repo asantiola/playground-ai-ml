@@ -39,21 +39,22 @@ vector_store = RedisVectorStore(
 for docs_list in docs_lists:
     vector_store.add_documents(docs_list)
 
-llm = ChatOpenAI(
-    model="ai/phi4",
-    temperature=0,
-    base_url="http://localhost:12434/engines/v1",
-    api_key="docker",
-)
-
 prompt = PromptTemplate(
     template="""You are an assistant for question-answering tasks.
+        Basing on your training data, augmented by these documents, please answer.
         Use three sentences maximum and keep the answer concise:
         Question: {question} 
         Documents: {documents} 
         Answer: 
         """,
     input_variables=["question", "documents"],
+)
+
+llm = ChatOpenAI(
+    model="ai/llama3.1",
+    temperature=0,
+    base_url="http://localhost:12434/engines/v1",
+    api_key="docker",
 )
 
 rag_chain = prompt | llm
