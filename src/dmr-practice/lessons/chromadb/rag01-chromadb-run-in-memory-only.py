@@ -42,7 +42,6 @@ vector_store = Chroma.from_documents(
 
 prompt = PromptTemplate(
     template="""You are an assistant for question-answering tasks.
-        If you don't know the answer, just say that you don't know. 
         Use three sentences maximum and keep the answer concise:
         Question: {question} 
         Documents: {documents} 
