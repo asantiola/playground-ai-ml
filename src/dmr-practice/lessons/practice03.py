@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -136,11 +137,16 @@ def ask_question(cursor, question):
     sql = generate_sql(vector_store=vector_store, question=question)
     return run_sql(cursor=cursor, sql=sql)
 
+db_name = "/Users/asantiola/repo/playground-ai-ml/data/practice03.db"
+do_setup = False
 try:
-    conn = sqlite3.connect("/Users/asantiola/repo/playground-ai-ml/data/practice03.db")
+    do_setup = not os.path.exists(db_name)
+    conn = sqlite3.connect(db_name)
     cursor = conn.cursor()
-    # setup(cursor=cursor)
 
+    if do_setup:
+        setup(cursor=cursor)
+    
     print_tables(cursor=cursor)
 
     result = ask_question(question="What is the department with the largest number of employees?", cursor=cursor)
