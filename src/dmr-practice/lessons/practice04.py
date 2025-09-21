@@ -79,6 +79,26 @@ def get_tables_columns(cursor):
         info += f"table name: {table_name}, column names: {column_names}. "
     return info
 
+def setup(cursor):
+    populate_departments(cursor)
+    populate_employees(cursor)
+    populate_contacts(cursor)
+
+def print_tables(cursor):
+    cursor.execute("select * from departments")
+    res = cursor.fetchall()
+    print(f"departments: {res}")
+
+    cursor.execute("select * from employees")
+    res = cursor.fetchall()
+    print(f"employees: {res}")
+
+    cursor.execute("select * from contacts")
+    res = cursor.fetchall()
+    print(f"contacts: {res}")
+
+    print("")
+
 def convert_to_vector_store(info):
     embeddings_model = "ai/mxbai-embed-large"
 
@@ -110,22 +130,24 @@ llm = ChatOpenAI(
 )
 
 class SqlQuery(BaseModel):
+    score: float = Field(
+        description="Confidence score on the scale of 0 to 1 on the query relevance."
+    )
     sql_query: str = Field(
         description="The generated SQL query."
-    )
-    score: float = Field(
-        description="Confidence score on the scale of 0 to 1 on your answer."
     )
 
 def generate_sql(retriever, question) -> SqlQuery:
     prompt = PromptTemplate(
-        template="""You are a database expert that generates SQL query for sqlite3 database.
-            Your response should be a JSON string with 2 fields: sql_query and score.
+        template="""You are a database expert that analyzes questions and table information from sqlite3 database.
+            Your response should be a JSON string with a field: score and sql_query.
+            Provide a confidence score on the scale of 0 to 1 on the relevance between the tables & columns, and the question.
+            A score greater than 0.7 means the SQL will be executed to get an answer.
             Analyze the question and documents to generate the SQL query into sql_query field.
             For the SQL query, you can perform table joins if needed.
             Do not break the SQL string into multiple lines.
             No need to enclose the JSON in backticks or quotes.
-            Provide a confidence score on the scale of 0 to 1 on the generated SQL and relevance to the question.
+            No need to add explanations.
             Question: {question} 
             Documents: {documents}  
             """,
@@ -137,7 +159,7 @@ def generate_sql(retriever, question) -> SqlQuery:
         | llm.with_structured_output(SqlQuery)
     )
     sql_query = rag_chain.invoke(question)
-    # print(f"sql: {sql_query}")
+    # print(f"sql_query: {sql_query}")
     return sql_query
 
 def format_answer(question, sql_response):
@@ -157,40 +179,36 @@ def format_answer(question, sql_response):
     })
     return answer.content
 
-def run_sql(cursor, sql):
+def run_sql(cursor, sql, question):
     cursor.execute(sql)
-    result = cursor.fetchall()
-    return result
+    sql_response = cursor.fetchall()
+    answer = format_answer(question=question, sql_response=sql_response)
+    print(f"\nquestion: {question}\nanswer: {answer}\n")
 
-def setup(cursor):
-    populate_departments(cursor)
-    populate_employees(cursor)
-    populate_contacts(cursor)
-
-def print_tables(cursor):
-    cursor.execute("select * from departments")
-    res = cursor.fetchall()
-    print(f"departments: {res}")
-
-    cursor.execute("select * from employees")
-    res = cursor.fetchall()
-    print(f"employees: {res}")
-
-    cursor.execute("select * from contacts")
-    res = cursor.fetchall()
-    print(f"contacts: {res}")
-
-    print("")
+def query_llm(question):
+    prompt = PromptTemplate(
+        template="""You are an assistant for question-answering tasks.
+            Basing on your training data, please answer the question.
+            Use three sentences maximum and keep the answer concise:
+            Question: {question}
+            Answer: 
+            """,
+        input_variables=["question"],
+    )
+    rag_chain = prompt | llm
+    answer = rag_chain.invoke({
+        "question": question,
+    })
+    print(f"\nquestion: {question}\nanswer: {answer.content}\n")
 
 def ask_question(cursor, question):
     info = get_tables_columns(cursor)
     vector_store = convert_to_vector_store(info)
     sql_query = generate_sql(retriever=vector_store.as_retriever(), question=question)
-    sql_response = ""
     if sql_query.score > 0.7:
-        sql_response = run_sql(cursor=cursor, sql=sql_query.sql_query)
-    answer = format_answer(question=question, sql_response=sql_response)
-    print(f"\nquestion: {question}\nanswer: {answer}\n")
+        run_sql(cursor=cursor, sql=sql_query.sql_query, question=question)
+    else:
+        query_llm(question=question)
 
 db_name = "/Users/asantiola/repo/playground-ai-ml/data/practice04.db"
 do_setup = False
