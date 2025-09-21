@@ -6,7 +6,7 @@ from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
-def create_tables(cursor):
+def populate_departments(cursor):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS departments (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -14,6 +14,12 @@ def create_tables(cursor):
         )
     ''')
 
+    cursor.execute("INSERT INTO departments VALUES (1, 'IT');")
+    cursor.execute("INSERT INTO departments VALUES (2, 'HR');")
+    cursor.execute("INSERT INTO departments VALUES (3, 'Marketing');")
+    cursor.execute("INSERT INTO departments VALUES (4, 'Finance');")
+
+def populate_employees(cursor):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS employees (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,15 +29,7 @@ def create_tables(cursor):
             FOREIGN KEY (department_id) REFERENCES departments(id)
         )
     ''')
-    conn.commit()
 
-def populate_departments(cursor):
-    cursor.execute("INSERT INTO departments VALUES (1, 'IT');")
-    cursor.execute("INSERT INTO departments VALUES (2, 'HR');")
-    cursor.execute("INSERT INTO departments VALUES (3, 'Marketing');")
-    cursor.execute("INSERT INTO departments VALUES (4, 'Finance');")
-
-def populate_employees(cursor):
     cursor.execute("INSERT INTO employees VALUES(1, 1, 'Alex', 10000);")
     cursor.execute("INSERT INTO employees VALUES(2, 1, 'John', 9000);")
     cursor.execute("INSERT INTO employees VALUES(3, 1, 'Mary', 9500);")
@@ -44,6 +42,23 @@ def populate_employees(cursor):
     cursor.execute("INSERT INTO employees VALUES(8, 3, 'Fred', 7200);")
     cursor.execute("INSERT INTO employees VALUES(9, 3, 'Michelle', 8100);")
     cursor.execute("INSERT INTO employees VALUES(10, 3, 'Janice', 9800);")
+
+def populate_contacts(cursor):
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS contacts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            employee_id INTEGER,
+            phone TEXT,
+            email TEXT,
+            address TEXT,
+            FOREIGN KEY (employee_id) REFERENCES employees(id)
+        )
+    ''')
+
+    cursor.execute("INSERT INTO contacts VALUES(1, 2, '1234-5678', 'john@email.com', 'binondo, manila');")
+    cursor.execute("INSERT INTO contacts VALUES(2, 8, '1111-2222', 'fred@email.com', 'ermita, manila');")
+    cursor.execute("INSERT INTO contacts VALUES(3, 10, '3456-1234', 'janice@email.com', 'makati, manila');")
+    cursor.execute("INSERT INTO contacts VALUES(4, 7, NULL, 'owen@email.com', NULL);")
 
 def get_tables_columns(cursor):
     cursor.execute('''
@@ -91,23 +106,43 @@ llm = ChatOpenAI(
     api_key="docker",
 )
 
-def generate_sql(vector_store, question):
+def generate_sql(retriever, question):
     prompt = PromptTemplate(
-        template="""You are an assistant that generates SQL code for sqlite3 database.
-            Use the documents to generate the SQL that will answer the question.
-            Running the SQL should generate a result for a human reader.
-            Return the resulting SQL without any extra information or text.
+        template="""You are a database expert that generates SQL query for sqlite3 database.
+            Analyze the question and documents to generate the SQL query.
+            For the SQL query, you can perform table joins if needed.
+            Do not break the SQL string into multiple lines.
+            No need to enclose the SQL in backticks or quotes.
+            No need for explanations.
+            If the documents are irrelevant to the question, you can return an empty string.
             Question: {question} 
             Documents: {documents}  
             """,
         input_variables=["question", "documents"],
     )
-    retriever = vector_store.as_retriever()
+    rag_chain = (
+        {"documents": retriever, "question": lambda x: x} 
+        | prompt 
+        | llm
+    )
+    sql_response = rag_chain.invoke(question)
+    # print(f"sql: {sql_response.content}")
+    return sql_response.content
+
+def format_answer(question, sql_response):
+    prompt = PromptTemplate(
+        template="""You are an assistant that formats SQL result from sqlite3 database.
+            If you think the response is valid, you can revise it so it is expresed in in proper sentences, no need for explanations.
+            If you think the response is invalid, you can say that you have insufficient information to answer the question.
+            Question: {question} 
+            SQL Response: {sql_response}  
+            """,
+        input_variables=["question", "sql_response"],
+    )
     rag_chain = prompt | llm
-    documents = retriever.invoke(question)
     answer = rag_chain.invoke({
-        "documents": documents,
         "question": question,
+        "sql_response": sql_response,
     })
     return answer.content
 
@@ -117,10 +152,9 @@ def run_sql(cursor, sql):
     return result
 
 def setup(cursor):
-    create_tables(cursor)
     populate_departments(cursor)
     populate_employees(cursor)
-    conn.commit()
+    populate_contacts(cursor)
 
 def print_tables(cursor):
     cursor.execute("select * from departments")
@@ -131,11 +165,19 @@ def print_tables(cursor):
     res = cursor.fetchall()
     print(f"employees: {res}")
 
+    cursor.execute("select * from contacts")
+    res = cursor.fetchall()
+    print(f"contacts: {res}")
+
+    print("")
+
 def ask_question(cursor, question):
     info = get_tables_columns(cursor)
     vector_store = convert_to_vector_store(info)
-    sql = generate_sql(vector_store=vector_store, question=question)
-    return run_sql(cursor=cursor, sql=sql)
+    sql = generate_sql(retriever=vector_store.as_retriever(), question=question)
+    sql_response = run_sql(cursor=cursor, sql=sql)
+    answer = format_answer(question=question, sql_response=sql_response)
+    print(f"\nquestion: {question}\nanswer: {answer}\n")
 
 db_name = "/Users/asantiola/repo/playground-ai-ml/data/practice03.db"
 do_setup = False
@@ -146,14 +188,21 @@ try:
 
     if do_setup:
         setup(cursor=cursor)
+        conn.commit()
     
     print_tables(cursor=cursor)
 
-    result = ask_question(question="What is the department with the largest number of employees?", cursor=cursor)
-    print(f"result: {result}")
+    question="Which department has the most number of employees, and how many employees does it have?"
+    ask_question(question=question, cursor=cursor)
 
-    result = ask_question(question="Give me the top 3 employees based on salary.", cursor=cursor)
-    print(f"result: {result}")
+    question="Give me the top 3 employees based on salary."
+    ask_question(question=question, cursor=cursor)
+
+    question="Give me the email of the employee with highest salary and has a contact information."
+    ask_question(question=question, cursor=cursor)
+
+    question="What is the largest bone in the human body?"
+    ask_question(question=question, cursor=cursor)
 except sqlite3.Error as e:
     print(f"Error caught: {e}")
 finally:
