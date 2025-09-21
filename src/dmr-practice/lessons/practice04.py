@@ -195,8 +195,8 @@ def query_llm(question):
             """,
         input_variables=["question"],
     )
-    rag_chain = prompt | llm
-    answer = rag_chain.invoke({
+    chain = prompt | llm
+    answer = chain.invoke({
         "question": question,
     })
     print(f"\nquestion: {question}\nanswer: {answer.content}\n")
