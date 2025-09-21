@@ -1,5 +1,7 @@
 from langchain_openai import ChatOpenAI
 
+# practice code using langchain_openai.ChatOpenAI
+
 llm = ChatOpenAI(
     model="ai/llama3.1",
     temperature=0,

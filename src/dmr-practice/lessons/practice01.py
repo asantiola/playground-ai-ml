@@ -1,5 +1,7 @@
 import openai 
 
+# practice code using openai.OpenAi.chat.completions
+
 base_url = "http://localhost:12434/engines/v1"
 
 client = openai.OpenAI(

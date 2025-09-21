@@ -6,6 +6,8 @@ from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
+# practice code multiple agents
+
 def populate_departments(cursor):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS departments (

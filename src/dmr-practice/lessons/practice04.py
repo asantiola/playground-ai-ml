@@ -7,6 +7,8 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from pydantic import BaseModel, Field
 
+# practice code multiple agents, using structured output
+
 def populate_departments(cursor):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS departments (
