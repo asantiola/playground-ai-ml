@@ -234,6 +234,9 @@ try:
 
     question="What is the largest bone in the human body?"
     ask_question(question=question, cursor=cursor)
+
+    question="How much is John's salary?"
+    ask_question(question=question, cursor=cursor)
 except sqlite3.Error as e:
     print(f"Error caught: {e}")
 finally:
