@@ -118,7 +118,7 @@ def database_query(sql: str):
         sql (str): The SQL query to be done.
     """
 
-    print(f"database_query: {sql}")
+    print(f"database_query: {sql}\n")
     try:
         cursor.execute(sql)
     except sqlite3.Error as e:
@@ -215,7 +215,7 @@ def agent_expert(question):
 
 def ask_alex(question):
     answer = agent_expert(question)
-    print(f"\nquestion: {question}\nanswer: {answer}\n\n")
+    print(f"question: {question}\nanswer: {answer}\n")
 
 ask_alex("Who is the employee with the highest salary, and how much was the salary?")
 ask_alex("Who are the top three highest earning employees, and what are their salaries?")
@@ -225,3 +225,37 @@ ask_alex("Among the employees with contact information, who has the highest sala
 ask_alex("How many moons does Jupiter have?")
 
 conn.close()
+
+# # results using gpt-oss
+
+# departments: [(1, 'IT'), (2, 'HR'), (3, 'Marketing'), (4, 'Finance')]
+# employees: [(1, 1, 'Alex', 10000.0), (2, 1, 'John', 9000.0), (3, 1, 'Mary', 9500.0), (4, 1, 'Joseph', 9700.0), (5, 1, 'Jane', 9200.0), (6, 2, 'Monique', 8000.0), (7, 2, 'Owen', 8100.0), (8, 3, 'Fred', 7200.0), (9, 3, 'Michelle', 8100.0), (10, 3, 'Janice', 9800.0)]
+# contacts: [(1, 2, '1234-5678', 'john@email.com', 'binondo, manila'), (2, 8, '1111-2222', 'fred@email.com', 'ermita, manila'), (3, 10, '3456-1234', 'janice@email.com', 'makati, manila'), (4, 7, None, 'owen@email.com', None)]
+
+# database_query: SELECT '[' || group_concat(name || ', (' || cols || ')', ', ') || ']' AS result FROM (SELECT name, (SELECT group_concat(name, ', ') FROM pragma_table_info(t.name)) AS cols FROM sqlite_master t WHERE type='table' ORDER BY name)
+
+# database_query: SELECT name, salary FROM employees ORDER BY salary DESC LIMIT 1
+
+# question: Who is the employee with the highest salary, and how much was the salary?
+# answer:  Alex earns the highest salary, which is $10,000.
+
+# database_query: SELECT name, salary FROM employees ORDER BY salary DESC LIMIT 3
+
+# question: Who are the top three highest earning employees, and what are their salaries?
+# answer:  The top three highest‑earning employees are Alex, who earns $10,000; Janice, who earns $9,800; and Joseph, who earns $9,700.
+
+# question: What is the largest bone in the human body?
+# answer: The largest bone in the human body is the **femur** (thigh bone).
+
+# database_query: SELECT d.name, COUNT(e.id) AS employee_count FROM departments d JOIN employees e ON d.id = e.department_id GROUP BY d.id ORDER BY employee_count DESC LIMIT 1;
+
+# question: Which department has the most number of employees, and how many employees does it have?
+# answer:  The IT department has the most employees, with a total of five.
+
+# database_query: SELECT e.name, c.email FROM employees e JOIN contacts c ON e.id = c.employee_id ORDER BY e.salary DESC LIMIT 1;
+
+# question: Among the employees with contact information, who has the highest salary and what is the email address?.
+# answer:  Janice, whose email address is janice@email.com, has the highest salary among employees with contact information.
+
+# question: How many moons does Jupiter have?
+# answer: Jupiter has **79 known moons** (as of the most recent counts in 2023).
