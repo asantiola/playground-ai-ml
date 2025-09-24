@@ -4,6 +4,7 @@ from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 import os
 
+HOME=os.environ["HOME"]
 embeddings_model = "thenlper/gte-small"
 
 # Warning seen: huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
@@ -13,13 +14,13 @@ embeddings_model = "thenlper/gte-small"
 os.environ["TOKENIZERS_PARALLELISM"] = ""
 
 hf_embeddings = HuggingFaceEmbeddings(
-    cache_folder="/Users/asantiola/repo/playground-ai-ml/.cache",
+    cache_folder=HOME + "/repo/playground-ai-ml/.cache",
     model_name=embeddings_model,
     model_kwargs={"device": "cpu"},
     encode_kwargs={"normalize_embeddings": False},
 )
 
-doc_path = "/Users/asantiola/repo/playground-ai-ml/data/documents-txt"
+doc_path = HOME + "/repo/playground-ai-ml/data/documents-txt"
 documents = []
 for filename in os.listdir(doc_path):
     if filename.endswith('.txt'):
@@ -33,7 +34,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 splits = text_splitter.split_documents(documents=documents)
 
-chromadb_path="/Users/asantiola/repo/playground-ai-ml/.chromadb"
+chromadb_path=HOME + "/repo/playground-ai-ml/.chromadb"
 vector_store = Chroma.from_documents(
     documents=splits,
     embedding=hf_embeddings,

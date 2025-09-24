@@ -6,6 +6,7 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import os
 
+HOME=os.environ["HOME"]
 embeddings_model = "thenlper/gte-small"
 
 # Warning seen: huggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
@@ -15,13 +16,13 @@ embeddings_model = "thenlper/gte-small"
 os.environ["TOKENIZERS_PARALLELISM"] = ""
 
 hf_embeddings = HuggingFaceEmbeddings(
-    cache_folder="/Users/asantiola/repo/playground-ai-ml/.cache",
+    cache_folder=HOME + "/repo/playground-ai-ml/.cache",
     model_name=embeddings_model,
     model_kwargs={"device": "cpu"},
     encode_kwargs={"normalize_embeddings": False},
 )
 
-doc_path = "/Users/asantiola/repo/playground-ai-ml/data/documents-txt"
+doc_path = HOME + "/repo/playground-ai-ml/data/documents-txt"
 documents = []
 for filename in os.listdir(doc_path):
     if filename.endswith('.txt'):
@@ -70,7 +71,7 @@ def query(question):
     })
     print(f"Answer: {answer.content}\n\n")
 
-questions = "/Users/asantiola/repo/playground-ai-ml/data/questions.txt"
+questions = HOME + "/repo/playground-ai-ml/data/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())
