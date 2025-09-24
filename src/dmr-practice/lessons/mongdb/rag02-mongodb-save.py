@@ -19,7 +19,7 @@ oa_embeddings = OpenAIEmbeddings(
     check_embedding_ctx_length=False,
 )
 
-doc_path = "/Users/asantiola/repo/playground-ai-ml/data/documents-txt"
+doc_path = HOME + "/repo/playground-ai-ml/data/documents-txt"
 documents = []
 for filename in os.listdir(doc_path):
     if filename.endswith('.txt'):
