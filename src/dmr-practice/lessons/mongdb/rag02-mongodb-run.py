@@ -4,6 +4,9 @@ from pymongo.operations import SearchIndexModel
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
+import os
+
+HOME=os.environ["HOME"]
 
 embeddings_model = "ai/mxbai-embed-large"
 embeddings_model_dimensions = 1024
@@ -79,7 +82,7 @@ def query(question):
     })
     print(f"Answer: {answer.content}\n\n")
 
-questions = "/Users/asantiola/repo/playground-ai-ml/data/questions.txt"
+questions = HOME + "/repo/playground-ai-ml/data/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

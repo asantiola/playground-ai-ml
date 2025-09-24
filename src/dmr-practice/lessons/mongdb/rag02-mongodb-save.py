@@ -6,6 +6,8 @@ from pymongo import MongoClient
 from pymongo.operations import SearchIndexModel
 from langchain_mongodb import MongoDBAtlasVectorSearch
 
+HOME=os.environ["HOME"]
+
 embeddings_model = "ai/mxbai-embed-large"
 embeddings_model_dimensions = 1024
 
