@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field
 
 # practice code multiple agents, using structured output
 
+HOME=os.environ["HOME"]
+
 def populate_departments(cursor):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS departments (
@@ -210,7 +212,7 @@ def ask_question(cursor, question):
     else:
         query_llm(question=question)
 
-db_name = "/Users/asantiola/repo/playground-ai-ml/data/practice04.db"
+db_name = HOME + "/repo/playground-ai-ml/data/sql-multiple-agents02.db"
 do_setup = False
 try:
     do_setup = not os.path.exists(db_name)

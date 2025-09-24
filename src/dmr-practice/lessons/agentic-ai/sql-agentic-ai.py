@@ -5,6 +5,9 @@ from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool
 
 # practice code agentic ai
+# improvements from sql-multiple-agents*.py
+
+HOME=os.environ["HOME"]
 
 def populate_departments(cursor):
     cursor.execute('''
@@ -75,7 +78,7 @@ def print_tables(cursor):
 
     print("")
 
-db_name = "/Users/asantiola/repo/playground-ai-ml/data/practice05.db"
+db_name = HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
 db_type = "sqlite3"
 
 conn = None
