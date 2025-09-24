@@ -3,11 +3,14 @@ from langchain_community.document_loaders import TextLoader
 from langchain_redis import RedisConfig, RedisVectorStore
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
+import os
+
+HOME=os.environ["HOME"]
 
 embeddings_model = "thenlper/gte-small"
 
 hf_embeddings = HuggingFaceEmbeddings(
-    cache_folder="/Users/asantiola/repo/playground-ai-ml/.cache",
+    cache_folder=HOME + "/repo/playground-ai-ml/.cache",
     model_name=embeddings_model,
     model_kwargs={"device": "cpu"},
     encode_kwargs={"normalize_embeddings": False},
@@ -55,7 +58,7 @@ def query(question):
     })
     print(f"Answer: {answer.content}\n\n")
 
-questions = "/Users/asantiola/repo/playground-ai-ml/data/questions.txt"
+questions = HOME + "/repo/playground-ai-ml/data/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

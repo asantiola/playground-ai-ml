@@ -6,9 +6,11 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import redis
 
+HOME=os.environ["HOME"]
+
 embeddings_model = "ai/mxbai-embed-large"
 
-doc_path = "/Users/asantiola/repo/playground-ai-ml/data/documents-txt"
+doc_path = HOME + "/repo/playground-ai-ml/data/documents-txt"
 files = [os.path.join(doc_path, file) for file in os.listdir(doc_path)]
 docs_lists = [TextLoader(file).load_and_split() for file in files]
 
@@ -70,7 +72,7 @@ def query(question):
     })
     print(f"Answer: {answer.content}\n\n")
 
-questions = "/Users/asantiola/repo/playground-ai-ml/data/questions.txt"
+questions = HOME + "/repo/playground-ai-ml/data/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())
