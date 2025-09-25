@@ -214,7 +214,16 @@ def agent_tableinfo(llm: ChatOpenAI, db: MySqlite3Db):
         input_variables=["dbtype", "format"],
     )
     db_execute_fetchall = tool(db.execute_fetchall)
-    chain = (prompt | llm.bind_tools([db_execute_fetchall]))
+
+    tool_list = [
+        db_execute_fetchall,
+    ]
+
+    tools_map = {
+        "execute_fetchall": db_execute_fetchall,
+    }
+    
+    chain = (prompt | llm.bind_tools(tool_list))
     response = chain.invoke({
         "dbtype": db.get_dbtype(),
         "format": format,
@@ -222,9 +231,10 @@ def agent_tableinfo(llm: ChatOpenAI, db: MySqlite3Db):
 
     info = ""
     for tool_call in response.tool_calls:
-        if tool_call["name"] == "execute_fetchall":
-            tool_response = db_execute_fetchall.invoke(tool_call["args"])
+        if function_to_call := tools_map.get(tool_call["name"]):
+            tool_response = function_to_call.invoke(tool_call["args"])
             info += " " + agent_paraphraser(llm=llm, input=tool_response, format=format)
+    
     return info
 
 def agent_expert(llm: ChatOpenAI, dbinfo: str, db: MySqlite3Db, question: str):
@@ -254,7 +264,6 @@ def agent_expert(llm: ChatOpenAI, dbinfo: str, db: MySqlite3Db, question: str):
         "question": question,
         "dbinfo": dbinfo,
     })
-    print(f"response: {response}")
 
     format = f"The input is SQL query output to the question {question}."
     info = ""
