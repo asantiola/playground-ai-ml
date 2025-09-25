@@ -205,46 +205,40 @@ class AgentParaphraser:
         })
         return response.content
 
-class AgentTablesInfo:
-    def __init__(self, llm: ChatOpenAI, db: MySqlite3Db, format: str):
-        self.db = db
-        self.format = format
-        prompt = PromptTemplate(
-            template="""You are a helpful assistant, with expertise in {dbtype} database.
-                Given a database, generate a SQL that can be called with the tool.
-                No need for explanation, call the tool with the SQL.
-                The SQL query provide me information in the following format:
-                {format}
-                """,
-            input_variables=["dbtype", "format"],
-        )
-        db_execute_fetchall = tool(self.db.execute_fetchall)
+def agent_tablesinfo(llm: ChatOpenAI, db: MySqlite3Db, format: str):
+    prompt = PromptTemplate(
+        template="""You are a helpful assistant, with expertise in {dbtype} database.
+            Given a database, generate a SQL that can be called with the tool.
+            No need for explanation, call the tool with the SQL.
+            The SQL query provide me information in the following format:
+            {format}
+            """,
+        input_variables=["dbtype", "format"],
+    )
+    db_execute_fetchall = tool(db.execute_fetchall)
 
-        tool_list = [
-            db_execute_fetchall,
-        ]
+    tool_list = [
+        db_execute_fetchall,
+    ]
 
-        self.tools_map = {
-            "execute_fetchall": db_execute_fetchall,
-        }
-        
-        self.chain = (prompt | llm.bind_tools(tool_list))
-
-        self.agent_paraphraser = AgentParaphraser(llm)
+    tools_map = {
+        "execute_fetchall": db_execute_fetchall,
+    }
     
-    def __call__(self):
-        response = self.chain.invoke({
-            "dbtype": self.db.get_dbtype(),
-            "format": self.format,
-        })
+    chain = (prompt | llm.bind_tools(tool_list))
+    response = chain.invoke({
+        "dbtype": db.get_dbtype(),
+        "format": format,
+    })
 
-        info = ""
-        for tool_call in response.tool_calls:
-            if function_to_call := self.tools_map.get(tool_call["name"]):
-                tool_response = function_to_call.invoke(tool_call["args"])
-                info += " " + self.agent_paraphraser(tool_response, format)
-        
-        return info    
+    agent_paraphraser = AgentParaphraser(llm)
+    info = ""
+    for tool_call in response.tool_calls:
+        if function_to_call := tools_map.get(tool_call["name"]):
+            tool_response = function_to_call.invoke(tool_call["args"])
+            info += " " + agent_paraphraser(tool_response, format)
+    
+    return info
 
 class AgentExpert:
     def __init__(self, llm: ChatOpenAI, db: MySqlite3Db, dbinfo: str):
@@ -308,8 +302,7 @@ try:
     db.print_tables()
 
     info_format = "[table1, (column1, column2, ...), table2, (column1, column2, ...), ...]"
-    agent_tables_info = AgentTablesInfo(llm, db, info_format)
-    dbinfo = agent_tables_info()
+    dbinfo = agent_tablesinfo(llm, db, info_format)
 
     agent_expert = AgentExpert(llm, db, dbinfo)
 
