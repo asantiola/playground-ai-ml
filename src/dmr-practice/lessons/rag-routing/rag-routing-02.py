@@ -91,7 +91,7 @@ def agent_expert(question: str):
     response = rag_chain.invoke(question)
     print(f"\nquestion: {question}\nanswer: {response.content}\n")
 
-agent_expert("What are Lex's break cue?")
+agent_expert("What are Lex's break cues?")
 agent_expert("Where is Cebu City?")
 agent_expert("How many guitars does Lex have?")
 agent_expert("Is Lex a programmer?")

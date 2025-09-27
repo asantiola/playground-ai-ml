@@ -358,7 +358,7 @@ try:
     dbinfo = agent_tableinfo(llm=llm, db=db)
 
     agent_expert(dbinfo=dbinfo, db=db, question="Who are the top three highest earning employees, and what are their salaries?")
-    agent_expert(dbinfo, db, "What are Lex's break cue?")
+    agent_expert(dbinfo, db, "What are Lex's break cues?")
     agent_expert(dbinfo, db, "Where is Cebu City?")
     agent_expert(dbinfo, db, "Among the employees with contact information, who has the highest salary and what is the email address?.")
     agent_expert(dbinfo, db, "What is the largest bone in the human body?")

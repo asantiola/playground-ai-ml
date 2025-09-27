@@ -88,7 +88,7 @@ def ask_expert(question: str):
     response = rag_chain.invoke(question)
     print(f"\nquestion: {question}\nanswer: {response.content}\n")
 
-ask_expert("What are Lex's break cue?")
+ask_expert("What are Lex's break cues?")
 ask_expert("Where is Cebu City?")
 ask_expert("How many guitars does Lex have?")
 ask_expert("Is Lex a programmer?")
