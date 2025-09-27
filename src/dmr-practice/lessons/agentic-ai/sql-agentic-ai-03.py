@@ -143,7 +143,7 @@ class MySqlite3Db:
 
         self.conn.commit()
 
-    def _populate_employees(self, cursor):
+    def _populate_employees(self):
         self.cursor.execute("""
             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
