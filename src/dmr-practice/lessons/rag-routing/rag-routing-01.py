@@ -7,6 +7,8 @@ from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 import os
 
+# practice rag selection using a function checking for keywords
+
 embeddings_model = "ai/mxbai-embed-large"
 HOME=os.environ["HOME"]
 
