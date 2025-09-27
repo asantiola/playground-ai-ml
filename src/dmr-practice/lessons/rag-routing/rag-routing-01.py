@@ -19,7 +19,6 @@ oa_embeddings = OpenAIEmbeddings(
 )
 
 def create_retriever(doc_path):
-    # doc_path = HOME + "/repo/playground-ai-ml/data/documents-txt"
     documents = []
     for filename in os.listdir(doc_path):
         if filename.endswith('.txt'):
@@ -42,7 +41,7 @@ def create_retriever(doc_path):
 
 retriever_billiards = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
 retriever_guitars = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/guitars")
-retriever_technologies = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
+retriever_technologies = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/technologies")
 
 def select_retriever(question: str):
     """
@@ -59,7 +58,7 @@ def select_retriever(question: str):
     elif "guitar" in  question.lower():
         return retriever_guitars
 
-    return None
+    return retriever_technologies
 
 retriever_selector = RunnableLambda(select_retriever)
 
@@ -73,39 +72,24 @@ llm = ChatOpenAI(
 rag_prompt = PromptTemplate(
     template="""You are an assistant for question-answering tasks.
         Basing on your training data, augmented by the context, please answer.
-        Use three sentences maximum and keep the answer concise:
+        Use three sentences maximum and keep the answer concise.
         Question: {question} 
         Context: {context}
         """,
     input_variables=["question", "context"],
 )
 
-prompt = PromptTemplate(
-    template="""You are an assistant for question-answering tasks.
-        Basing on your training data please answer.
-        Use three sentences maximum and keep the answer concise:
-        Question: {question} 
-        """,
-    input_variables=["question" ],
-)
-
 def ask_expert(question: str):
-    retriever = select_retriever(question)
-    if retriever != None:
-        rag_chain = (
-            { "context": retriever, "question": RunnablePassthrough() } | 
-            rag_prompt | 
-            llm
-        )
-        response = rag_chain.invoke(question)
-        print(f"\nquestion: {question}\nanswer: {response.content}\n")
-    else:
-        chain = (prompt | llm)
-        response = chain.invoke(question)
-        print(f"\nquestion: {question}\nanswer: {response.content}\n")
-
+    rag_chain = (
+        { "context": select_retriever, "question": RunnablePassthrough() } | 
+        rag_prompt | 
+        llm
+    )
+    response = rag_chain.invoke(question)
+    print(f"\nquestion: {question}\nanswer: {response.content}\n")
 
 ask_expert("What are Lex's break cue?")
 ask_expert("Where is Cebu City?")
 ask_expert("How many guitars does Lex have?")
-ask_expert("Is C++ a programming language?")
+ask_expert("Is Lex a programmer?")
+ask_expert("What is the largest bone in the human body?")
