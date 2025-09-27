@@ -74,7 +74,7 @@ def agent_selector(question: str):
     return retrievers[int(response.content)]
 
 rag_prompt = PromptTemplate(
-    template="""You are an assistant for question-answering tasks.
+    template="""You are an assistant helping answer questions.
         Basing on your training data, augmented by the context, please answer.
         Use three sentences maximum and keep the answer concise.
         Question: {question} 
