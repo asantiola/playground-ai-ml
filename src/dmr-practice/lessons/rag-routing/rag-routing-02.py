@@ -1,7 +1,7 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
 from langchain_openai.embeddings import OpenAIEmbeddings
-from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
@@ -41,11 +41,10 @@ def create_retriever(doc_path):
 
     return vector_store.as_retriever()
 
-retriever_none = None
 retriever_billiards = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
 retriever_guitars = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/guitars")
 retriever_technologies = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/technologies")
-retrievers = (retriever_none, retriever_billiards, retriever_guitars, retriever_technologies)
+retrievers = (None, retriever_billiards, retriever_guitars, retriever_technologies)
 
 llm = ChatOpenAI(
     model="ai/gpt-oss",

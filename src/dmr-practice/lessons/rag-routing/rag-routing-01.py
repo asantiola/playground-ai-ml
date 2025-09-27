@@ -62,8 +62,6 @@ def select_retriever(question: str):
 
     return retriever_technologies
 
-retriever_selector = RunnableLambda(select_retriever)
-
 llm = ChatOpenAI(
     model="ai/gpt-oss",
     temperature=0,
