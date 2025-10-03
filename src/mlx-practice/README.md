@@ -10,3 +10,9 @@ pip install mlx-lm
 mlx_lm.generate --model mlx-community/Meta-Llama-3-8B-Instruct-4bit --prompt "tell me an animal joke."
 mlx_lm.generate --model mlx-community/gpt-oss-20b-MXFP4-Q4 --prompt "why do birds fly south? No need for explanations."
 ```
+
+### starting the server
+```
+mlx_lm.server --help
+mlx_lm.server --port 12434
+```
