@@ -102,7 +102,7 @@ except sqlite3.Error as e:
     exit(1)
 
 llm = ChatOpenAI(
-    model="ai/gpt-oss",
+    model="ai/gpt-oss:latest",
     temperature=0,
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",

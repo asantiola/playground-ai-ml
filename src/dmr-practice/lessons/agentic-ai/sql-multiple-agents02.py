@@ -125,7 +125,7 @@ def convert_to_vector_store(info):
     return vector_store
 
 llm = ChatOpenAI(
-    model="ai/llama3.1",
+    model="ai/llama3.1:latest",
     temperature=0,
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
