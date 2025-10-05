@@ -14,7 +14,7 @@ completion = client.chat.completions.create(
     # model="ai/gpt-oss:latest", 
     messages=[
         {"role": "system", "content": "You are a helpful AI assistant."},
-        {"role": "user", "content": "What is the capital of the United States of America?"}
+        {"role": "user", "content": "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."}
         ],
 )
 

@@ -3,11 +3,11 @@ from langchain_openai import ChatOpenAI
 # practice code using langchain_openai.ChatOpenAI
 
 llm = ChatOpenAI(
-    # model="ai/llama3.1",
-    model="ai/gpt-oss:latest", 
+    # model = "mlx-community/Meta-Llama-3-8B-Instruct-4bit",
+    model="mlx-community/gpt-oss-20b-MXFP4-Q4",
     temperature=0,
-    base_url="http://localhost:12434/engines/v1",
-    api_key="docker",
+    base_url="http://localhost:12434/v1",
+    api_key="mlx-lm",
 )
 
 messages = [

@@ -6,7 +6,7 @@ base_url = "http://localhost:12434/v1"
 
 client = openai.OpenAI(
   base_url = base_url,
-  api_key = "docker"
+  api_key = "mlx-lm"
 )
 
 completion = client.chat.completions.create(
@@ -14,7 +14,7 @@ completion = client.chat.completions.create(
     model = "mlx-community/gpt-oss-20b-MXFP4-Q4",
     messages=[
         {"role": "system", "content": "You are a helpful AI assistant."},
-        {"role": "user", "content": "What is the capital of the United States of America?"}
+        {"role": "user", "content": "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."}
         ],
 )
 
