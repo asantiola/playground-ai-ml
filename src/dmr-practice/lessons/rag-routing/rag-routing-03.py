@@ -277,7 +277,7 @@ retriever_technologies = create_retriever(HOME + "/repo/playground-ai-ml/data/ro
 retrievers = (None, retriever_billiards, retriever_guitars, retriever_technologies)
 
 llm = ChatOpenAI(
-    model="ai/gpt-oss",
+    model="ai/gpt-oss:latest",
     temperature=0,
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
