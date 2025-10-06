@@ -1,0 +1,296 @@
+import os
+import sqlite3
+from langchain_openai import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
+from langchain_core.messages import HumanMessage, AIMessage
+
+# practice code agentic ai
+# OOP approach 3 of sql-agentic-ai-01.py
+
+HOME=os.environ["HOME"]
+
+class MySqlite3Db:
+    """A database object."""
+    
+    def __init__(self, **kwargs):
+        self.conn = None
+        self.cursor = None
+        self.db_name = ""
+        self.connect(**kwargs)
+    
+    def __del__(self):
+        if self.conn == None:
+            return
+        
+        self.conn.close()
+    
+    def get_db_type(self):
+        return "sqlite3"
+    
+    def get_dbname(self):
+        return self.dbname
+
+    def execute(self, sql):
+        if self.conn == None:
+            return
+        
+        if self.cursor == None:
+            return
+        
+        self.cursor.execute(sql)
+    
+    def fetchall(self):
+        if self.conn == None:
+            return None
+        
+        if self.cursor == None:
+            return None
+        
+        return self.cursor.fetchall()
+    
+    def execute_fetchall(self, sql: str):
+        """
+        Executes a SQL for this DB instance and returns the results.
+
+        Args:
+            sql: The SQL query to be done.
+        """
+        if self.conn == None:
+            return None
+        
+        if self.cursor == None:
+            return None
+        
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+    
+    def execute_commit(self, sql:str):
+        """
+        Executes a SQL for this DB instance and calls commit.
+
+        Args:
+            sql: The SQL query to be done.
+        """
+        if self.conn == None:
+            return None
+        
+        if self.cursor == None:
+            return None
+        
+        self.cursor.execute(sql)
+        self.conn.commit()
+
+    def fetchone(self):
+        if self.conn == None:
+            return None
+        
+        if self.cursor == None:
+            return None
+        
+        return self.cursor.fetchone()
+    
+    def fetchmany(self, size):
+        if self.conn == None:
+            return None
+        
+        if self.cursor == None:
+            return None
+        
+        return self.cursor.fetchmany(size)
+    
+    def commit(self):
+        self.conn.commit()
+
+    def connect(self, **kwargs):
+        if "db_name" in kwargs:
+            self.db_name = kwargs["db_name"]
+        if len(self.db_name) == 0:
+            return
+                
+        self.conn = sqlite3.connect(self.db_name)
+        self.cursor = self.conn.cursor()
+
+class AgentSqlDeveloper:
+    def __init__(self, llm, db_type, enable_history=False):
+        self.llm = llm
+        self.db_type = db_type
+        self.enable_history = enable_history
+        self.chat_history = []
+
+    def __call__(self, description: str):
+        system_msg =  """You are a helpful assistant expert in {db_type} database.
+            You can use unions and joins if required.
+            No need to enclose the SQL in quotes.
+            No need to provide an explanation for your answer.
+            """
+        human_msg = "Create a SQL for the given description. Description: {description}"
+
+        if self.enable_history:
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", system_msg),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", human_msg),
+            ])
+            chain = (prompt | llm)
+            response = chain.invoke({
+                "db_type": self.db_type,
+                "description": description,
+                "chat_history": self.chat_history,
+            })
+
+            self.chat_history.append(HumanMessage(content=human_msg.format(description=description)))
+            self.chat_history.append(AIMessage(content=response.content))
+
+            return response.content
+        
+        prompt = ChatPromptTemplate.from_messages([
+            ("system", system_msg),
+            ("human", human_msg),
+        ])
+        chain = (prompt | llm)
+        response = chain.invoke({
+            "db_type": self.db_type,
+            "description": description,
+        })
+
+        return response.content
+
+class AgentParaphraser:
+    def __init__(self, llm):
+        prompt = PromptTemplate(
+            template="""You are a helpful assistant that paraphrase the input into sentence form.
+                Take note of the input description to help in your conversion.
+                Input: {input}
+                Input format: {format}
+                """,
+            input_variables=["input", "format",],
+        )
+        self.chain = (prompt | llm)
+    
+    def __call__(self, input, format):
+        response = self.chain.invoke({
+            "input": input,
+            "format": format,
+        })
+        return response.content
+
+class AgentDbExpert:
+    def __init__(self, db, agent_db_viewer, agent_paraphraser, db_info):
+        self.db = db
+        self.agent_db_viewer = agent_db_viewer
+        self.agent_paraphraser = agent_paraphraser
+        self.db_info = db_info
+    
+    def __call__(self, question: str):
+        question = f"Given these tables and respective columns: {db_info}; {question}"
+        info_format = f"The input is SQL query output to the question {question}."
+        sql=self.agent_db_viewer(question)
+        raw_response = db.execute_fetchall(sql)
+        return self.agent_paraphraser(input=raw_response, format=info_format)
+
+llm = ChatOpenAI(
+    model="ai/gpt-oss:latest",
+    temperature=0,
+    base_url="http://localhost:12434/engines/v1",
+    api_key="docker",
+)
+
+db_name = HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
+do_setup = False
+
+if do_setup and os.path.exists(db_name):
+    os.remove(db_name)
+
+db = MySqlite3Db(db_name=db_name)
+db_type = db.get_db_type()
+
+agent_db_creator = AgentSqlDeveloper(llm, db_type, enable_history=True)
+
+if do_setup:
+    sql = agent_db_creator("""
+        Create a table named 'departments' with the following columns: id, name.
+        'id' is the primary key, it is an autoincrementing integer.
+        'name' is a string and cannot be null.
+    """)
+    print(f"sql:\n{sql}\n")
+    db.execute_commit(sql)
+
+    sql = agent_db_creator("""
+        Create another table named 'employees' with the following columns: id, department_id, name, salary.
+        'id' is the primary key, it is an autoincrementing integer.
+        'department_id' is an integer, it is a foreign key for table 'departments' column 'id'.
+        'name' is a string and it cannot be null.
+        'salary' is a floating point number.
+    """)
+    print(f"sql:\n{sql}\n")
+    db.execute_commit(sql)
+
+    sql = agent_db_creator("""
+        Create another table named 'contacts' with the following columns: id, employee_id, phone, email, address.
+        'id' is the primary key, it is an autoincrementing integer.
+        'employee_id' is an integer, it is a foreign key for table 'employees' column 'id'.
+        'phone' is a string.
+        'email' is a string.
+        'address' is a string.
+    """)
+    print(f"sql:\n{sql}\n")
+    db.execute_commit(sql)
+
+    sql = agent_db_creator.generate("Add the following departments: IT, HR, Marketing, Finance.")
+    print(f"sql:\n{sql}\n")
+    db.execute_commit(sql)
+
+    sql = agent_db_creator("""
+        Add the following employees:
+        Lex from the IT department, with a 10000 salary.
+        John from the IT department, with a 9000 salary.
+        Mary from the IT department, with a 9500 salary.
+        Joseph from the IT department, with a 9700 salary.
+        Jane from the IT department, with a 9200 salary.
+        Monique from the HR department, with a 8000 salary.
+        Owen from the HR department, with a 8100 salary.
+        Fred from the Marketing department, with a 7200 salary.
+        Michelle from the Marketing department, with a 8100 salary.
+        Janice from the Marketing department, with a 9800 salary.
+    """)
+    print(f"sql:\n{sql}\n")
+    db.execute_commit(sql)
+
+    sql = agent_db_creator("""
+        Add contacts for the following employees:
+        John: phone: 1234-5678, email: john@email.com, address: 'binondo, manila'
+        Fred: phone: 1111-2222, email: fred@email.com, address: 'ermita, manila'
+        Janice: phone: 3456-1234, email: janice@email.com, address: 'ayala, makati'
+        Owen: email: owen@email.com
+    """)
+    print(f"sql:\n{sql}\n")
+    db.execute_commit(sql)
+
+agent_db_viewer = AgentSqlDeveloper(llm, db_type)
+agent_paraphraser = AgentParaphraser(llm, )
+
+sql = agent_db_viewer("Get all available tables and respective columns.")
+print(f"sql:\n{sql}\n")
+response = db.execute_fetchall(sql)
+print(f"response:\n{response}\n")
+
+info_format = "[table1, (column1, column2, ...), table2, (column1, column2, ...), ...]"
+db_info = agent_paraphraser(input=response, format=info_format)
+print(f"db_info:\n{db_info}\n")
+
+agent_db_expert = AgentDbExpert(db, agent_db_viewer, agent_paraphraser, db_info)
+
+question = "Who are the top three highest earning employees, and what are their salaries?"
+answer = agent_db_expert(question)
+print(f"question:\n{question}\n")
+print(f"answer:\n{answer}\n")
+
+question = "Who are the top three highest earning employees, and what are their salaries?"
+answer = agent_db_expert(question)
+print(f"question:\n{question}\n")
+print(f"answer:\n{answer}\n")
+
+question = "Among the employees with contact information, who has the highest salary and where does he or she lives?"
+answer = agent_db_expert(question)
+print(f"question:\n{question}\n")
+print(f"answer:\n{answer}\n")
