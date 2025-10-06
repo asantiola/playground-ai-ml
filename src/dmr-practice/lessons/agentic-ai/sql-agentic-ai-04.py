@@ -3,9 +3,15 @@ import sqlite3
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
+from langchain_openai.embeddings import OpenAIEmbeddings
+from langchain_community.document_loaders import TextLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+# from langchain_core.vectorstores import VectorStoreRetriever
+from langchain_core.tools import tool
 
 # practice code agentic ai
-# OOP approach 3 of sql-agentic-ai-01.py
+# OOP alternative of sql-agentic-ai-03.py and rag-routing-03.py
 
 HOME=os.environ["HOME"]
 
@@ -117,7 +123,7 @@ class AgentSqlDeveloper:
         self.enable_history = enable_history
         self.chat_history = []
 
-    def __call__(self, description: str):
+    def run(self, description: str):
         system_msg =  """You are a helpful assistant expert in {db_type} database.
             You can use unions and joins if required.
             No need to enclose the SQL in quotes.
@@ -167,7 +173,7 @@ class AgentParaphraser:
         )
         self.chain = (prompt | llm)
     
-    def __call__(self, input, format):
+    def run(self, input, format):
         response = self.chain.invoke({
             "input": input,
             "format": format,
@@ -181,18 +187,147 @@ class AgentDbExpert:
         self.agent_paraphraser = agent_paraphraser
         self.db_info = db_info
     
-    def __call__(self, question: str):
+    def run(self, question: str):
+        """
+        Calls underlying SQL query based on the question.
+
+        Args:
+            kwargs (dict[str, Any]): The question used as basis for the SQL to run.
+        """
         question = f"Given these tables and respective columns: {db_info}; {question}"
         info_format = f"The input is SQL query output to the question {question}."
-        sql=self.agent_db_viewer(question)
+        sql=self.agent_db_viewer.run(question)
         raw_response = db.execute_fetchall(sql)
-        return self.agent_paraphraser(input=raw_response, format=info_format)
+        return self.agent_paraphraser.run(input=raw_response, format=info_format)
+
+class AgentRetrieverSelector:
+    def __init__(self, llm, conditions, retrievers):
+        prompt = PromptTemplate(
+            template="""You are helpful assistant that analyzes questions.
+                Conditions: {conditions}
+                Question: {question}
+                """,
+            input_variables=["conditions", "question"],
+        )
+        self.conditions = conditions
+        self.retrievers = retrievers
+        self.chain = (prompt | llm)
+    
+    def run(self, **kwargs):
+        response = self.chain.invoke({
+            "conditions": self.conditions,
+            "question": kwargs["question"],
+        })
+        return self.retrievers[int(response.content)]
+
+class AgentExpert:
+    def __init__(self, llm, db_info, agent_db_expert, agent_retriever_selector):
+        self.llm = llm
+        self.db_info = db_info
+        self.agent_retriever_selector = agent_retriever_selector
+        prompt = PromptTemplate(
+            template="""You are an assistant helping answer questions.
+                Analyze the given question and the database information.
+                If database has the needed tables and columns for the questions,
+                execute the tool with a SQL to get the answer.
+                You may use joins and unions in your SQL query if needed.
+                If the database does not have the needed tables and columns,
+                then use your training data and documents to answer the question.
+                Format your answer in setence form.
+                Question: {question}.
+                Database information: {db_info}.
+                Documents: {documents}.
+                """,
+            input_variables=["question", "db_info", "context"],
+        )
+
+        tool_agent_db_expert = tool(agent_db_expert.run)
+        tool_list = [tool_agent_db_expert]
+        self.chain = (
+            prompt |
+            llm.bind_tools(tool_list)
+        )
+        self.tool_map = {
+            "run": tool_agent_db_expert
+        }
+    
+    def run(self, **kwargs):
+        retriever = self.agent_retriever_selector.run(question=kwargs["question"])
+        response = None
+
+        if retriever == None:
+            response = self.chain.invoke({
+                "documents": "",
+                "question": kwargs["question"],
+                "db_info": self.db_info,
+            })
+        else:
+            response = self.chain.invoke({
+                "documents": retriever.invoke(kwargs["question"]),
+                "question": kwargs["question"],
+                "db_info": self.db_info,
+            })
+
+        if len(response.content) > 0:
+            return response.content
+        
+        info = ""
+        for tool_call in response.tool_calls:
+            if function_to_call := self.tool_map.get(tool_call["name"]):
+                info += " " + function_to_call.invoke(tool_call["args"])
+        return info
+
+def create_retriever(oa_embeddings: OpenAIEmbeddings, doc_path: str):
+    documents = []
+    for filename in os.listdir(doc_path):
+        if filename.endswith('.txt'):
+            file_path = os.path.join(doc_path, filename)
+            loader = TextLoader(file_path)
+            documents.extend(loader.load())
+
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=500,
+        chunk_overlap=100,
+    )
+    splits = text_splitter.split_documents(documents=documents)
+
+    vector_store = Chroma.from_documents(
+        documents=splits,
+        embedding=oa_embeddings,
+    )
+
+    return vector_store.as_retriever()
+
+embeddings_model = "ai/mxbai-embed-large"
+api_url = "http://localhost:12434/engines/v1"
+api_key = "docker"
+
+oa_embeddings = OpenAIEmbeddings(
+    model=embeddings_model,
+    base_url=api_url,
+    api_key=api_key,
+    # disable check_embedding_ctx_length if your local model has different constraints
+    check_embedding_ctx_length=False,
+)
+
+retriever_billiards = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
+retriever_guitars = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/guitars")
+retriever_technologies = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/technologies")
+retrievers = [None, retriever_billiards, retriever_guitars, retriever_technologies]
+retriever_conditions = [
+    "If question is related to billiards, return 1.",
+    "If question is related to guitars, return 2.",
+    "If question is related to software engineering or programming, return 3.",
+    "Otherwise, return 0.",
+]
+
+llm_model = "ai/gpt-oss:latest"
 
 llm = ChatOpenAI(
-    model="ai/gpt-oss:latest",
+    model=llm_model,
     temperature=0,
-    base_url="http://localhost:12434/engines/v1",
-    api_key="docker",
+    base_url=api_url,
+    api_key=api_key,
 )
 
 db_name = HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
@@ -267,30 +402,38 @@ if do_setup:
     db.execute_commit(sql)
 
 agent_db_viewer = AgentSqlDeveloper(llm, db_type)
-agent_paraphraser = AgentParaphraser(llm, )
+agent_paraphraser = AgentParaphraser(llm)
 
-sql = agent_db_viewer("Get all available tables and respective columns.")
-print(f"sql:\n{sql}\n")
+sql = agent_db_viewer.run("Get all available tables and respective columns.")
 response = db.execute_fetchall(sql)
-print(f"response:\n{response}\n")
-
 info_format = "[table1, (column1, column2, ...), table2, (column1, column2, ...), ...]"
-db_info = agent_paraphraser(input=response, format=info_format)
-print(f"db_info:\n{db_info}\n")
+db_info = agent_paraphraser.run(input=response, format=info_format)
 
 agent_db_expert = AgentDbExpert(db, agent_db_viewer, agent_paraphraser, db_info)
+agent_retriever_selector = AgentRetrieverSelector(llm, retriever_conditions, retrievers)
+agent_expert = AgentExpert(llm, db_info, agent_db_expert, agent_retriever_selector)
 
 question = "Who are the top three highest earning employees, and what are their salaries?"
-answer = agent_db_expert(question)
+answer = agent_expert.run(question=question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
 
-question = "Who are the top three highest earning employees, and what are their salaries?"
-answer = agent_db_expert(question)
+question = "What are Lex's break cues?"
+answer = agent_expert.run(question=question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
 
 question = "Among the employees with contact information, who has the highest salary and where does he or she lives?"
-answer = agent_db_expert(question)
+answer = agent_expert.run(question=question)
+print(f"question:\n{question}\n")
+print(f"answer:\n{answer}\n")
+
+question = "What is the largest bone in the human body?"
+answer = agent_expert.run(question=question)
+print(f"question:\n{question}\n")
+print(f"answer:\n{answer}\n")
+
+question = "Is Lex a programmer?"
+answer = agent_expert.run(question=question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
