@@ -7,7 +7,6 @@ from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-# from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_core.tools import tool
 
 # practice code agentic ai
