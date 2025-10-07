@@ -265,7 +265,7 @@ class AgentExpert:
                 info += " " + function_to_call.invoke(tool_call["args"])
         return info
 
-def create_retriever(oa_embeddings: OpenAIEmbeddings, doc_path: str):
+def create_retriever(oa_embeddings: OpenAIEmbeddings, doc_path: str, store_path: str):
     documents = []
     for filename in os.listdir(doc_path):
         if filename.endswith('.txt'):
@@ -279,11 +279,17 @@ def create_retriever(oa_embeddings: OpenAIEmbeddings, doc_path: str):
     )
     splits = text_splitter.split_documents(documents=documents)
 
-    vector_store = Chroma.from_documents(
+    Chroma.from_documents(
         documents=splits,
         embedding=oa_embeddings,
+        persist_directory=store_path,
     )
 
+def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
+    vector_store = Chroma(
+        embedding_function=oa_embeddings,
+        persist_directory=store_path
+    )
     return vector_store.as_retriever()
 
 embeddings_model = "ai/mxbai-embed-large"
@@ -298,16 +304,12 @@ oa_embeddings = OpenAIEmbeddings(
     check_embedding_ctx_length=False,
 )
 
-retriever_billiards = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
-retriever_guitars = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/guitars")
-retriever_technologies = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/technologies")
-retrievers = [RunnableLambda(lambda x: ""), retriever_billiards, retriever_guitars, retriever_technologies]
-retriever_conditions = [
-    "If question is related to billiards, return 1.",
-    "If question is related to guitars, return 2.",
-    "If question is related to software engineering or programming, return 3.",
-    "Otherwise, return 0.",
-]
+docs_billiards = HOME + "/repo/playground-ai-ml/data/routing-txt/billiards"
+docs_guitars = HOME + "/repo/playground-ai-ml/data/routing-txt/guitars"
+docs_technologies = HOME + "/repo/playground-ai-ml/data/routing-txt/technologies"
+db_billiards = HOME + "/repo/playground-ai-ml/data/billiards.db"
+db_guitars = HOME + "/repo/playground-ai-ml/data/guitars.db"
+db_technologies = HOME + "/repo/playground-ai-ml/data/technologies.db"
 
 llm_model = "ai/gpt-oss:latest"
 
@@ -322,7 +324,13 @@ db_name = HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
 do_setup = False
 
 if do_setup and os.path.exists(db_name):
-    os.remove(db_name)
+    try:
+        os.remove(db_name)
+        os.remove(db_billiards)
+        os.remove(db_guitars)
+        os.remove(db_technologies)
+    except FileNotFoundError:
+        pass
 
 db = MySqlite3Db(db_name=db_name)
 db_type = db.get_db_type()
@@ -330,7 +338,7 @@ db_type = db.get_db_type()
 agent_db_creator = AgentSqlDeveloper(llm, db_type, enable_history=True)
 
 if do_setup:
-    sql = agent_db_creator("""
+    sql = agent_db_creator.run("""
         Create a table named 'departments' with the following columns: id, name.
         'id' is the primary key, it is an autoincrementing integer.
         'name' is a string and cannot be null.
@@ -338,7 +346,7 @@ if do_setup:
     print(f"sql:\n{sql}\n")
     db.execute_commit(sql)
 
-    sql = agent_db_creator("""
+    sql = agent_db_creator.run("""
         Create another table named 'employees' with the following columns: id, department_id, name, salary.
         'id' is the primary key, it is an autoincrementing integer.
         'department_id' is an integer, it is a foreign key for table 'departments' column 'id'.
@@ -348,7 +356,7 @@ if do_setup:
     print(f"sql:\n{sql}\n")
     db.execute_commit(sql)
 
-    sql = agent_db_creator("""
+    sql = agent_db_creator.run("""
         Create another table named 'contacts' with the following columns: id, employee_id, phone, email, address.
         'id' is the primary key, it is an autoincrementing integer.
         'employee_id' is an integer, it is a foreign key for table 'employees' column 'id'.
@@ -359,11 +367,11 @@ if do_setup:
     print(f"sql:\n{sql}\n")
     db.execute_commit(sql)
 
-    sql = agent_db_creator.generate("Add the following departments: IT, HR, Marketing, Finance.")
+    sql = agent_db_creator.run("Add the following departments: IT, HR, Marketing, Finance.")
     print(f"sql:\n{sql}\n")
     db.execute_commit(sql)
 
-    sql = agent_db_creator("""
+    sql = agent_db_creator.run("""
         Add the following employees:
         Lex from the IT department, with a 10000 salary.
         John from the IT department, with a 9000 salary.
@@ -379,7 +387,7 @@ if do_setup:
     print(f"sql:\n{sql}\n")
     db.execute_commit(sql)
 
-    sql = agent_db_creator("""
+    sql = agent_db_creator.run("""
         Add contacts for the following employees:
         John: phone: 1234-5678, email: john@email.com, address: 'binondo, manila'
         Fred: phone: 1111-2222, email: fred@email.com, address: 'ermita, manila'
@@ -388,6 +396,21 @@ if do_setup:
     """)
     print(f"sql:\n{sql}\n")
     db.execute_commit(sql)
+
+    create_retriever(oa_embeddings, docs_billiards, db_billiards)
+    create_retriever(oa_embeddings, docs_guitars, db_guitars)
+    create_retriever(oa_embeddings, docs_technologies, db_technologies)
+
+retriever_billiards = get_retriever(oa_embeddings, db_billiards)
+retriever_guitars = get_retriever(oa_embeddings, db_guitars)
+retriever_technologies = get_retriever(oa_embeddings, db_technologies)
+retrievers = [RunnableLambda(lambda x: ""), retriever_billiards, retriever_guitars, retriever_technologies]
+retriever_conditions = [
+    "If question is related to billiards, return 1.",
+    "If question is related to guitars, return 2.",
+    "If question is related to software engineering or programming, return 3.",
+    "Otherwise, return 0.",
+]
 
 agent_db_viewer = AgentSqlDeveloper(llm, db_type)
 agent_paraphraser = AgentParaphraser(llm)
