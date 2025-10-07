@@ -8,7 +8,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 
 # practice code agentic ai
 # OOP alternative of sql-agentic-ai-03.py and rag-routing-03.py
@@ -255,7 +255,7 @@ class AgentExpert:
             llm.bind_tools(self.tool_list)
         )
         response = chain.invoke(question)
-        
+
         if len(response.content) > 0:
             return response.content
         
@@ -301,7 +301,7 @@ oa_embeddings = OpenAIEmbeddings(
 retriever_billiards = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
 retriever_guitars = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/guitars")
 retriever_technologies = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/technologies")
-retrievers = [lambda x: "", retriever_billiards, retriever_guitars, retriever_technologies]
+retrievers = [RunnableLambda(lambda x: ""), retriever_billiards, retriever_guitars, retriever_technologies]
 retriever_conditions = [
     "If question is related to billiards, return 1.",
     "If question is related to guitars, return 2.",
