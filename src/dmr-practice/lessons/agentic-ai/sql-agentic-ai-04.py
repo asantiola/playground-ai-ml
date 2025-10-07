@@ -8,6 +8,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
+from langchain_core.runnables import RunnablePassthrough
 
 # practice code agentic ai
 # OOP alternative of sql-agentic-ai-03.py and rag-routing-03.py
@@ -191,7 +192,7 @@ class AgentDbExpert:
         Calls underlying SQL query based on the question.
 
         Args:
-            kwargs (dict[str, Any]): The question used as basis for the SQL to run.
+            question (str): The question used as basis for the SQL to run.
         """
         question = f"Given these tables and respective columns: {db_info}; {question}"
         info_format = f"The input is SQL query output to the question {question}."
@@ -212,10 +213,10 @@ class AgentRetrieverSelector:
         self.retrievers = retrievers
         self.chain = (prompt | llm)
     
-    def run(self, **kwargs):
+    def run(self, question: str):
         response = self.chain.invoke({
             "conditions": self.conditions,
-            "question": kwargs["question"],
+            "question": question,
         })
         return self.retrievers[int(response.content)]
 
@@ -224,7 +225,7 @@ class AgentExpert:
         self.llm = llm
         self.db_info = db_info
         self.agent_retriever_selector = agent_retriever_selector
-        prompt = PromptTemplate(
+        self.prompt = PromptTemplate(
             template="""You are an assistant helping answer questions.
                 Analyze the given question and the database information.
                 If database has the needed tables and columns for the questions,
@@ -241,32 +242,20 @@ class AgentExpert:
         )
 
         tool_agent_db_expert = tool(agent_db_expert.run)
-        tool_list = [tool_agent_db_expert]
-        self.chain = (
-            prompt |
-            llm.bind_tools(tool_list)
-        )
+        self.tool_list = [tool_agent_db_expert]
         self.tool_map = {
             "run": tool_agent_db_expert
         }
     
-    def run(self, **kwargs):
-        retriever = self.agent_retriever_selector.run(question=kwargs["question"])
-        response = None
-
-        if retriever == None:
-            response = self.chain.invoke({
-                "documents": "",
-                "question": kwargs["question"],
-                "db_info": self.db_info,
-            })
-        else:
-            response = self.chain.invoke({
-                "documents": retriever.invoke(kwargs["question"]),
-                "question": kwargs["question"],
-                "db_info": self.db_info,
-            })
-
+    def run(self, question: str):
+        retriever = self.agent_retriever_selector.run(question)
+        chain = (
+            { "documents": retriever, "question": RunnablePassthrough(), "db_info": lambda x: self.db_info } | 
+            self.prompt |
+            llm.bind_tools(self.tool_list)
+        )
+        response = chain.invoke(question)
+        
         if len(response.content) > 0:
             return response.content
         
@@ -312,7 +301,7 @@ oa_embeddings = OpenAIEmbeddings(
 retriever_billiards = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
 retriever_guitars = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/guitars")
 retriever_technologies = create_retriever(oa_embeddings, HOME + "/repo/playground-ai-ml/data/routing-txt/technologies")
-retrievers = [None, retriever_billiards, retriever_guitars, retriever_technologies]
+retrievers = [lambda x: "", retriever_billiards, retriever_guitars, retriever_technologies]
 retriever_conditions = [
     "If question is related to billiards, return 1.",
     "If question is related to guitars, return 2.",
@@ -413,26 +402,26 @@ agent_retriever_selector = AgentRetrieverSelector(llm, retriever_conditions, ret
 agent_expert = AgentExpert(llm, db_info, agent_db_expert, agent_retriever_selector)
 
 question = "Who are the top three highest earning employees, and what are their salaries?"
-answer = agent_expert.run(question=question)
+answer = agent_expert.run(question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
 
 question = "What are Lex's break cues?"
-answer = agent_expert.run(question=question)
+answer = agent_expert.run(question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
 
 question = "Among the employees with contact information, who has the highest salary and where does he or she lives?"
-answer = agent_expert.run(question=question)
+answer = agent_expert.run(question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
 
 question = "What is the largest bone in the human body?"
-answer = agent_expert.run(question=question)
+answer = agent_expert.run(question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
 
 question = "Is Lex a programmer?"
-answer = agent_expert.run(question=question)
+answer = agent_expert.run(question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
