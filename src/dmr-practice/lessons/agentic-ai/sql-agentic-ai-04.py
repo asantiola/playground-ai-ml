@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import time
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
@@ -8,7 +9,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_core.runnables import RunnablePassthrough, RunnableLambda, Runnable
 
 # practice code agentic ai
 # OOP alternative of sql-agentic-ai-03.py and rag-routing-03.py
@@ -116,6 +117,16 @@ class MySqlite3Db:
         self.conn = sqlite3.connect(self.db_name)
         self.cursor = self.conn.cursor()
 
+def measure_tps(what, runnable: Runnable, *args, **kwargs):
+    start_time = time.time()
+    response = runnable.invoke(*args, **kwargs)
+    end_time = time.time()
+    time_taken = end_time - start_time
+    total_tokens = response.response_metadata.get("token_usage", {}).get("total_tokens")
+    tokens_per_second = total_tokens / time_taken
+    print(f"{what}: {total_tokens} total tokens @ {tokens_per_second:.2f} tokens / second.")
+    return response
+
 class AgentSqlDeveloper:
     def __init__(self, llm, db_type, enable_history=False):
         self.llm = llm
@@ -138,12 +149,13 @@ class AgentSqlDeveloper:
                 ("human", human_msg),
             ])
             chain = (prompt | llm)
-            response = chain.invoke({
+
+            response = measure_tps(__class__.__name__, chain, {
                 "db_type": self.db_type,
                 "description": description,
                 "chat_history": self.chat_history,
             })
-
+            
             self.chat_history.append(HumanMessage(content=human_msg.format(description=description)))
             self.chat_history.append(AIMessage(content=response.content))
 
@@ -154,7 +166,8 @@ class AgentSqlDeveloper:
             ("human", human_msg),
         ])
         chain = (prompt | llm)
-        response = chain.invoke({
+
+        response = measure_tps(__class__.__name__, chain, {
             "db_type": self.db_type,
             "description": description,
         })
@@ -174,7 +187,7 @@ class AgentParaphraser:
         self.chain = (prompt | llm)
     
     def run(self, input, format):
-        response = self.chain.invoke({
+        response = measure_tps(__class__.__name__, self.chain, {
             "input": input,
             "format": format,
         })
@@ -214,7 +227,7 @@ class AgentRetrieverSelector:
         self.chain = (prompt | llm)
     
     def run(self, question: str):
-        response = self.chain.invoke({
+        response = measure_tps(__class__.__name__, self.chain, {
             "conditions": self.conditions,
             "question": question,
         })
@@ -233,7 +246,7 @@ class AgentExpert:
                 You may use joins and unions in your SQL query if needed.
                 If the database does not have the needed tables and columns,
                 then use your training data and documents to answer the question.
-                Format your answer in setence form.
+                Format your answer in sentence form.
                 Question: {question}.
                 Database information: {db_info}.
                 Documents: {documents}.
@@ -254,7 +267,7 @@ class AgentExpert:
             self.prompt |
             llm.bind_tools(self.tool_list)
         )
-        response = chain.invoke(question)
+        response = measure_tps(__class__.__name__, chain, question)
 
         if len(response.content) > 0:
             return response.content
