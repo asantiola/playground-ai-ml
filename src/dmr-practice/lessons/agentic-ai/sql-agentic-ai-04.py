@@ -463,3 +463,58 @@ question = "Is Lex a programmer?"
 answer = agent_expert.run(question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
+
+# # results:
+# AgentSqlDeveloper: 684 total tokens @ 80.43 tokens / second.
+# AgentParaphraser: 637 total tokens @ 90.57 tokens / second.
+# db_info:
+# The database schema includes three tables: a **departments** table with columns **id** and **name**; an **employees** table with columns **id**, **department_id**, **name**, and **salary**; and a **contacts** table with columns **id**, **employee_id**, **phone**, **email**, and **address**.
+
+# AgentRetrieverSelector: 259 total tokens @ 100.67 tokens / second.
+# AgentExpert: 435 total tokens @ 164.54 tokens / second.
+# AgentSqlDeveloper: 378 total tokens @ 116.02 tokens / second.
+# AgentParaphraser: 528 total tokens @ 102.44 tokens / second.
+# question:
+# Who are the top three highest earning employees, and what are their salaries?
+
+# answer:
+#  The query returned the names and salaries of the three highest‑paid employees: Lex earned 10,000.0, Janice earned 9,800.0, and Joseph earned 9,700.0.
+
+# AgentRetrieverSelector: 247 total tokens @ 98.53 tokens / second.
+# AgentExpert: 1068 total tokens @ 246.57 tokens / second.
+# question:
+# What are Lex's break cues?
+
+# answer:
+# Lex’s break cues are:
+
+# - **Action ACT 56 Break** – a break and jump cue made by Action Cues.  
+# - **Mezz Power Break Kai** – a break cue made by Mezz Cues.  
+# - **Predator Air 2** – a jump cue made by Predator Cues.
+
+# AgentRetrieverSelector: 216 total tokens @ 109.12 tokens / second.
+# AgentExpert: 532 total tokens @ 136.94 tokens / second.
+# AgentSqlDeveloper: 560 total tokens @ 100.52 tokens / second.
+# AgentParaphraser: 567 total tokens @ 99.38 tokens / second.
+# question:
+# Among the employees with contact information, who has the highest salary and where does he or she lives?
+
+# answer:
+#  The employee with the highest salary is Janice, whose address is ayala, makati.
+
+# AgentRetrieverSelector: 191 total tokens @ 111.97 tokens / second.
+# AgentExpert: 411 total tokens @ 174.65 tokens / second.
+# question:
+# What is the largest bone in the human body?
+
+# answer:
+# The largest bone in the human body is the **femur** (thigh bone).
+
+# AgentRetrieverSelector: 209 total tokens @ 103.02 tokens / second.
+# AgentExpert: 715 total tokens @ 200.59 tokens / second.
+# question:
+# Is Lex a programmer?
+
+# answer:
+# Yes, Lex is a programmer. The document lists a wide range of programming languages (C++, Python, Golang, Java, C, C#, Perl, SQL, Visual Basic, JavaScript, Angular) and frameworks (Spring, Spring Boot, REST API, Microservices, etc.) that Lex has used in his software engineering career.
+
