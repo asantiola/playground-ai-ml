@@ -117,15 +117,25 @@ class MySqlite3Db:
         self.conn = sqlite3.connect(self.db_name)
         self.cursor = self.conn.cursor()
 
-def measure_tps(what, runnable: Runnable, *args, **kwargs):
-    start_time = time.time()
-    response = runnable.invoke(*args, **kwargs)
-    end_time = time.time()
-    time_taken = end_time - start_time
-    total_tokens = response.response_metadata.get("token_usage", {}).get("total_tokens")
-    tokens_per_second = total_tokens / time_taken
-    print(f"{what}: {total_tokens} total tokens @ {tokens_per_second:.2f} tokens / second.")
-    return response
+class TokenManager:
+    def __init__(self):
+        self.total_tokens = 0
+
+    def measure_tps(self, what, runnable: Runnable, *args, **kwargs):
+        start_time = time.time()
+        response = runnable.invoke(*args, **kwargs)
+        end_time = time.time()
+        time_taken = end_time - start_time
+        total_tokens = response.response_metadata.get("token_usage", {}).get("total_tokens")
+        self.total_tokens += total_tokens
+        tokens_per_second = total_tokens / time_taken
+        print(f"{what}: {total_tokens} total tokens @ {tokens_per_second:.2f} tokens / second.")
+        return response
+    
+    def get_total_tokens(self):
+        return self.total_tokens
+
+token_manager = TokenManager()
 
 class AgentSqlDeveloper:
     def __init__(self, llm, db_type, enable_history=False):
@@ -150,7 +160,7 @@ class AgentSqlDeveloper:
             ])
             chain = (prompt | llm)
 
-            response = measure_tps(__class__.__name__, chain, {
+            response = token_manager.measure_tps(__class__.__name__, chain, {
                 "db_type": self.db_type,
                 "description": description,
                 "chat_history": self.chat_history,
@@ -167,7 +177,7 @@ class AgentSqlDeveloper:
         ])
         chain = (prompt | llm)
 
-        response = measure_tps(__class__.__name__, chain, {
+        response = token_manager.measure_tps(__class__.__name__, chain, {
             "db_type": self.db_type,
             "description": description,
         })
@@ -187,7 +197,7 @@ class AgentParaphraser:
         self.chain = (prompt | llm)
     
     def run(self, input, format):
-        response = measure_tps(__class__.__name__, self.chain, {
+        response = token_manager.measure_tps(__class__.__name__, self.chain, {
             "input": input,
             "format": format,
         })
@@ -227,7 +237,7 @@ class AgentRetrieverSelector:
         self.chain = (prompt | llm)
     
     def run(self, question: str):
-        response = measure_tps(__class__.__name__, self.chain, {
+        response = token_manager.measure_tps(__class__.__name__, self.chain, {
             "conditions": self.conditions,
             "question": question,
         })
@@ -267,7 +277,7 @@ class AgentExpert:
             self.prompt |
             llm.bind_tools(self.tool_list)
         )
-        response = measure_tps(__class__.__name__, chain, question)
+        response = token_manager.measure_tps(__class__.__name__, chain, question)
 
         if len(response.content) > 0:
             return response.content
@@ -464,24 +474,26 @@ answer = agent_expert.run(question)
 print(f"question:\n{question}\n")
 print(f"answer:\n{answer}\n")
 
+print(f"Total tokens: {token_manager.get_total_tokens()}\n")
+
 # # results:
-# AgentSqlDeveloper: 684 total tokens @ 80.43 tokens / second.
-# AgentParaphraser: 637 total tokens @ 90.57 tokens / second.
+# AgentSqlDeveloper: 684 total tokens @ 55.83 tokens / second.
+# AgentParaphraser: 637 total tokens @ 90.41 tokens / second.
 # db_info:
 # The database schema includes three tables: a **departments** table with columns **id** and **name**; an **employees** table with columns **id**, **department_id**, **name**, and **salary**; and a **contacts** table with columns **id**, **employee_id**, **phone**, **email**, and **address**.
 
-# AgentRetrieverSelector: 259 total tokens @ 100.67 tokens / second.
-# AgentExpert: 435 total tokens @ 164.54 tokens / second.
-# AgentSqlDeveloper: 378 total tokens @ 116.02 tokens / second.
-# AgentParaphraser: 528 total tokens @ 102.44 tokens / second.
+# AgentRetrieverSelector: 259 total tokens @ 104.21 tokens / second.
+# AgentExpert: 435 total tokens @ 165.97 tokens / second.
+# AgentSqlDeveloper: 378 total tokens @ 116.17 tokens / second.
+# AgentParaphraser: 528 total tokens @ 102.52 tokens / second.
 # question:
 # Who are the top three highest earning employees, and what are their salaries?
 
 # answer:
 #  The query returned the names and salaries of the three highest‑paid employees: Lex earned 10,000.0, Janice earned 9,800.0, and Joseph earned 9,700.0.
 
-# AgentRetrieverSelector: 247 total tokens @ 98.53 tokens / second.
-# AgentExpert: 1068 total tokens @ 246.57 tokens / second.
+# AgentRetrieverSelector: 247 total tokens @ 98.46 tokens / second.
+# AgentExpert: 1068 total tokens @ 219.41 tokens / second.
 # question:
 # What are Lex's break cues?
 
@@ -492,29 +504,31 @@ print(f"answer:\n{answer}\n")
 # - **Mezz Power Break Kai** – a break cue made by Mezz Cues.  
 # - **Predator Air 2** – a jump cue made by Predator Cues.
 
-# AgentRetrieverSelector: 216 total tokens @ 109.12 tokens / second.
-# AgentExpert: 532 total tokens @ 136.94 tokens / second.
-# AgentSqlDeveloper: 560 total tokens @ 100.52 tokens / second.
-# AgentParaphraser: 567 total tokens @ 99.38 tokens / second.
+# AgentRetrieverSelector: 216 total tokens @ 109.00 tokens / second.
+# AgentExpert: 532 total tokens @ 136.76 tokens / second.
+# AgentSqlDeveloper: 560 total tokens @ 100.84 tokens / second.
+# AgentParaphraser: 567 total tokens @ 99.25 tokens / second.
 # question:
 # Among the employees with contact information, who has the highest salary and where does he or she lives?
 
 # answer:
 #  The employee with the highest salary is Janice, whose address is ayala, makati.
 
-# AgentRetrieverSelector: 191 total tokens @ 111.97 tokens / second.
-# AgentExpert: 411 total tokens @ 174.65 tokens / second.
+# AgentRetrieverSelector: 191 total tokens @ 111.24 tokens / second.
+# AgentExpert: 411 total tokens @ 174.20 tokens / second.
 # question:
 # What is the largest bone in the human body?
 
 # answer:
 # The largest bone in the human body is the **femur** (thigh bone).
 
-# AgentRetrieverSelector: 209 total tokens @ 103.02 tokens / second.
-# AgentExpert: 715 total tokens @ 200.59 tokens / second.
+# AgentRetrieverSelector: 209 total tokens @ 103.10 tokens / second.
+# AgentExpert: 715 total tokens @ 199.85 tokens / second.
 # question:
 # Is Lex a programmer?
 
 # answer:
 # Yes, Lex is a programmer. The document lists a wide range of programming languages (C++, Python, Golang, Java, C, C#, Perl, SQL, Visual Basic, JavaScript, Angular) and frameworks (Spring, Spring Boot, REST API, Microservices, etc.) that Lex has used in his software engineering career.
 
+# Total tokens: 7637
+# Note as of this test, gpt-oss:20b price is $0.000030 / 1K tokens
