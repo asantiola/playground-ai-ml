@@ -429,9 +429,11 @@ agent_db_viewer = AgentSqlDeveloper(llm, db_type)
 agent_paraphraser = AgentParaphraser(llm)
 
 sql = agent_db_viewer.run("Get all available tables and respective columns.")
-response = db.execute_fetchall(sql)
+db_info = db.execute_fetchall(sql)
+
 info_format = "[table1, (column1, column2, ...), table2, (column1, column2, ...), ...]"
-db_info = agent_paraphraser.run(input=response, format=info_format)
+db_info_phrase = agent_paraphraser.run(input=db_info, format=info_format)
+print(f"db_info:\n{db_info_phrase}\n")
 
 agent_db_expert = AgentDbExpert(db, agent_db_viewer, agent_paraphraser, db_info)
 agent_retriever_selector = AgentRetrieverSelector(llm, retriever_conditions, retrievers)
