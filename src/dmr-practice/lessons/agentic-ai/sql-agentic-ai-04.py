@@ -11,7 +11,7 @@ from langchain_chroma import Chroma
 from langchain_core.tools import tool
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda, Runnable
 
-# practice code agentic ai
+# practice code agentic RAG
 # OOP alternative of sql-agentic-ai-03.py and rag-routing-03.py
 
 HOME=os.environ["HOME"]
