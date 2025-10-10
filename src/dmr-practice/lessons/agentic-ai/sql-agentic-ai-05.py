@@ -71,11 +71,9 @@ def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
 
 db_billiards = HOME + "/repo/playground-ai-ml/data/billiards.db"
 db_guitars = HOME + "/repo/playground-ai-ml/data/guitars.db"
-db_technologies = HOME + "/repo/playground-ai-ml/data/technologies.db"
 
 retriever_billiards = get_retriever(oa_embeddings, db_billiards)
 retriever_guitars = get_retriever(oa_embeddings, db_guitars)
-retriever_technologies = get_retriever(oa_embeddings, db_technologies)
 
 rag_system = "You are a helpful assistant that answers question. Use the documents and your training to answer the input question." 
 rag_prompt = ChatPromptTemplate.from_messages(
@@ -85,15 +83,13 @@ rag_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-def query_billiards_rag(input: dict[str, any]):
-    input_copy = input.copy()
-    input_copy["documents"] = retriever_billiards.invoke(input["input"])
+def query_billiards_rag(input: str):
     rag_chain = (rag_prompt | llm)
-    response = rag_chain.invoke(input_copy)
+    response = rag_chain.invoke({
+        "input": input,
+        "documents": retriever_billiards.invoke(input),
+    })
     return response.content
-
-# answer = query_billiards_rag({ "input": "What are Lex's break cues?"})
-# print(f"answer: {answer}\n")
 
 billiards_query_tool = Tool(
     name="billiards_rag_llm_agent",
@@ -101,11 +97,12 @@ billiards_query_tool = Tool(
     func=query_billiards_rag,
 )
 
-def query_guitars_rag(input: dict[str, any]):
-    input_copy = input.copy()
-    input_copy["documents"] = retriever_guitars.invoke(input["input"])
+def query_guitars_rag(input: str):
     rag_chain = (rag_prompt | llm)
-    response = rag_chain.invoke(input_copy)
+    response = rag_chain.invoke({
+        "input": input,
+        "documents": retriever_guitars.invoke(input),
+    })
     return response.content
 
 guitars_query_tool = Tool(
@@ -148,16 +145,22 @@ def expert_agent(input: str):
         "input": input,
         "db_info": db.get_table_info(),
     })
-    return response
 
-    # if len(response.content) > 0:
-    #     return  response.content
+    if len(response.content) > 0:
+        return  response.content
     
-    # info = ""
-    # for tool_call in response.tool_calls:
-    #     if function_to_call := expert_tools_map.get(tool_call["name"]):
-    #         info += " " + function_to_call.invoke(tool_call["args"])
-    # return info
+    info = ""
+    for tool_call in response.tool_calls:
+        # print(f"tool_call:\n{tool_call}\n")
+        if function_to_call := expert_tools_map.get(tool_call["name"]):
+            tool_response = function_to_call.invoke(tool_call["args"])
+            # print(f"tool_response:\n{tool_response}\n")
+            
+            if (tool_call["name"] != "sql_agent"):
+                info += " " + tool_response
+            else:
+                info += " " + tool_response["output"]
+    return info
 
 question = "How many break cues does Lex have?"
 answer = expert_agent(question)
