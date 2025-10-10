@@ -56,10 +56,14 @@ sql_agent = create_sql_agent(llm=llm, db=db, agent_type="tool-calling", verbose=
 # answer = sql_agent.invoke({ "input": "How many departments are there?" })
 # print(f"answer: {answer}\n")
 
+def sql_agent_wrapper(input: dict[str, any]):
+    response = sql_agent.invoke(input)
+    return response["output"]
+
 sql_query_tool = Tool(
     name="sql_agent",
     description="This tool is an agent that queries the Albatross company database for a given input.",
-    func=sql_agent.invoke,
+    func=sql_agent_wrapper,
 )
 
 def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
@@ -155,11 +159,8 @@ def expert_agent(input: str):
         if function_to_call := expert_tools_map.get(tool_call["name"]):
             tool_response = function_to_call.invoke(tool_call["args"])
             # print(f"tool_response:\n{tool_response}\n")
+            info += " " + tool_response
             
-            if (tool_call["name"] != "sql_agent"):
-                info += " " + tool_response
-            else:
-                info += " " + tool_response["output"]
     return info
 
 question = "How many break cues does Lex have?"
