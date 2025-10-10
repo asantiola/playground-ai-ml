@@ -3,6 +3,11 @@ from langchain_community.utilities import SQLDatabase
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 from langchain_community.agent_toolkits import create_sql_agent
+from langchain.tools import Tool
+from langchain_openai.embeddings import OpenAIEmbeddings
+from langchain_chroma import Chroma
+from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 
 HOME=os.environ["HOME"]
 db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
@@ -11,12 +16,21 @@ db = SQLDatabase.from_uri(db_uri)
 api_url = "http://localhost:12434/engines/v1"
 api_key = "docker"
 llm_model = "ai/gpt-oss:latest"
+embeddings_model = "ai/mxbai-embed-large"
 
 llm = ChatOpenAI(
     model=llm_model,
     temperature=0,
     base_url=api_url,
     api_key=api_key,
+)
+
+oa_embeddings = OpenAIEmbeddings(
+    model=embeddings_model,
+    base_url=api_url,
+    api_key=api_key,
+    # disable check_embedding_ctx_length if your local model has different constraints
+    check_embedding_ctx_length=False,
 )
 
 # from langchain_community.agent_toolkits.sql.prompt import SQL_FUNCTIONS_SUFFIX
@@ -35,7 +49,129 @@ llm = ChatOpenAI(
 #         SystemMessagePromptTemplate.from_template(SQL_FUNCTIONS_SUFFIX),
 #     ]
 # )
+# sql_agent = create_sql_agent(llm=llm, db=db, agent_type="tool-calling", prompt=prompt, verbose=False)
 
 sql_agent = create_sql_agent(llm=llm, db=db, agent_type="tool-calling", verbose=False)
-response = sql_agent.invoke({ "input": "How many departments are there?" })
-print(f"response:\n{response}\n")
+
+# answer = sql_agent.invoke({ "input": "How many departments are there?" })
+# print(f"answer: {answer}\n")
+
+sql_query_tool = Tool(
+    name="sql_agent",
+    description="This tool is an agent that queries the Albatross company database for a given input.",
+    func=sql_agent.invoke,
+)
+
+def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
+    vector_store = Chroma(
+        embedding_function=oa_embeddings,
+        persist_directory=store_path
+    )
+    return vector_store.as_retriever()
+
+db_billiards = HOME + "/repo/playground-ai-ml/data/billiards.db"
+db_guitars = HOME + "/repo/playground-ai-ml/data/guitars.db"
+db_technologies = HOME + "/repo/playground-ai-ml/data/technologies.db"
+
+retriever_billiards = get_retriever(oa_embeddings, db_billiards)
+retriever_guitars = get_retriever(oa_embeddings, db_guitars)
+retriever_technologies = get_retriever(oa_embeddings, db_technologies)
+
+rag_system = "You are a helpful assistant that answers question. Use the documents and your training to answer the input question." 
+rag_prompt = ChatPromptTemplate.from_messages(
+    [
+        SystemMessagePromptTemplate.from_template(rag_system),
+        HumanMessagePromptTemplate.from_template("Documents: {documents}. Input: {input}"),
+    ]
+)
+
+def query_billiards_rag(input: dict[str, any]):
+    input_copy = input.copy()
+    input_copy["documents"] = retriever_billiards.invoke(input["input"])
+    rag_chain = (rag_prompt | llm)
+    response = rag_chain.invoke(input_copy)
+    return response.content
+
+# answer = query_billiards_rag({ "input": "What are Lex's break cues?"})
+# print(f"answer: {answer}\n")
+
+billiards_query_tool = Tool(
+    name="billiards_rag_llm_agent",
+    description="This tool is an agent that does RAG llm query the database for a given input related to Lex's billiards.",
+    func=query_billiards_rag,
+)
+
+def query_guitars_rag(input: dict[str, any]):
+    input_copy = input.copy()
+    input_copy["documents"] = retriever_guitars.invoke(input["input"])
+    rag_chain = (rag_prompt | llm)
+    response = rag_chain.invoke(input_copy)
+    return response.content
+
+guitars_query_tool = Tool(
+    name="guitars_rag_llm_agent",
+    description="This tool is an agent that does RAG llm query the database for a given input related to Lex's guitars.",
+    func=query_guitars_rag,
+)
+
+expert_tools = [sql_query_tool, billiards_query_tool, guitars_query_tool]
+expert_tools_map = {
+    "sql_agent": sql_query_tool,
+    "billiards_rag_llm_agent": billiards_query_tool,
+    "guitars_rag_llm_agent": guitars_query_tool,
+}
+
+expert_system = """
+You are an intelligent AI assistant that calls tools depending on the input.
+If input is related to Lex's billiards, call the billiards RAG query tool.
+If input is related to Lex's guitars, call the guitars RAG query tool.
+If input is related to Albatross company and could be answered by the database information, call the SQL agent tool.
+Otherwise, answer the question based on your training data.
+"""
+
+expert_human = """
+Input: {input}
+Database information: {db_info}
+"""
+
+expert_prompt = ChatPromptTemplate.from_messages(
+    [
+        SystemMessagePromptTemplate.from_template(expert_system),
+        HumanMessagePromptTemplate.from_template(expert_human),
+    ]
+)
+
+expert_chain = (expert_prompt | llm.bind_tools(expert_tools))
+
+def expert_agent(input: str):
+    response = expert_chain.invoke({
+        "input": input,
+        "db_info": db.get_table_info(),
+    })
+    return response
+
+    # if len(response.content) > 0:
+    #     return  response.content
+    
+    # info = ""
+    # for tool_call in response.tool_calls:
+    #     if function_to_call := expert_tools_map.get(tool_call["name"]):
+    #         info += " " + function_to_call.invoke(tool_call["args"])
+    # return info
+
+question = "How many break cues does Lex have?"
+answer = expert_agent(question)
+print(f"question:\n{question}\nanswer:\n{answer}\n")
+
+question = "Does Lex play the guitar?"
+answer = expert_agent(question)
+print(f"question:\n{question}\nanswer:\n{answer}\n")
+
+question = "What is the largest bone in the human body?"
+answer = expert_agent(question)
+print(f"question:\n{question}\nanswer:\n{answer}\n")
+
+question = "How many departments are there in Albatross company?"
+answer = expert_agent(question)
+print(f"question:\n{question}\nanswer:\n{answer}\n")
+
