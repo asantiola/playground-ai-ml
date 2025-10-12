@@ -7,7 +7,8 @@ from langchain.tools import Tool
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+
+# practice code agentic RAG
 
 HOME=os.environ["HOME"]
 db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
