@@ -147,6 +147,7 @@ class AgentSqlDeveloper:
     def run(self, description: str):
         system_msg =  """You are a helpful assistant expert in {db_type} database.
             You can use unions and joins if required.
+            If preparing a DML, prepare a single statement.
             No need to enclose the SQL in quotes.
             No need to provide an explanation for your answer.
             """
@@ -396,7 +397,7 @@ if do_setup:
 
     sql = agent_db_creator.run("""
         Add the following employees:
-        Lex from the IT department, with a 10000 salary.
+        Kristoff from the IT department, with a 10000 salary.
         John from the IT department, with a 9000 salary.
         Mary from the IT department, with a 9500 salary.
         Joseph from the IT department, with a 9700 salary.
