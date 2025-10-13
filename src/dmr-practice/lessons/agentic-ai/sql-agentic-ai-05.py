@@ -76,9 +76,11 @@ def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
 
 db_billiards = HOME + "/repo/playground-ai-ml/data/billiards.db"
 db_guitars = HOME + "/repo/playground-ai-ml/data/guitars.db"
+db_technologies = HOME + "/repo/playground-ai-ml/data/technologies.db"
 
 retriever_billiards = get_retriever(oa_embeddings, db_billiards)
 retriever_guitars = get_retriever(oa_embeddings, db_guitars)
+retriever_technologies = get_retriever(oa_embeddings, db_technologies)
 
 rag_system = "You are a helpful assistant that answers question. Use the documents and your training to answer the input question." 
 rag_prompt = ChatPromptTemplate.from_messages(
@@ -98,7 +100,7 @@ def query_billiards_rag(input: str):
 
 billiards_query_tool = Tool(
     name="billiards_rag_llm_agent",
-    description="This tool is an agent that does RAG llm query the database for a given input related to Lex's billiards.",
+    description="This tool is an agent that does RAG llm query for a given input related to Lex's billiards.",
     func=query_billiards_rag,
 )
 
@@ -112,23 +114,42 @@ def query_guitars_rag(input: str):
 
 guitars_query_tool = Tool(
     name="guitars_rag_llm_agent",
-    description="This tool is an agent that does RAG llm query the database for a given input related to Lex's guitars.",
+    description="This tool is an agent that does RAG llm query for a given input related to Lex's guitars.",
     func=query_guitars_rag,
 )
 
-expert_tools = [sql_query_tool, billiards_query_tool, guitars_query_tool]
+def query_technologies_rag(input: str):
+    rag_chain = (rag_prompt | llm)
+    response = rag_chain.invoke({
+        "input": input,
+        "documents": retriever_technologies.invoke(input),
+    })
+    return response.content
+
+technologies_query_tool = Tool(
+    name="technologies_rag_llm_agent",
+    description="This tool is an agent that does RAG llm query for a given input related to Lex's technical skills.",
+    func=query_technologies_rag,
+)
+
+expert_tools = [sql_query_tool, billiards_query_tool, guitars_query_tool, technologies_query_tool]
 expert_tools_map = {
     "sql_agent": sql_query_tool,
     "billiards_rag_llm_agent": billiards_query_tool,
     "guitars_rag_llm_agent": guitars_query_tool,
+    "technologies_rag_llm_agent": technologies_query_tool,
 }
 
 expert_system = """
 You are an intelligent AI assistant that calls tools depending on the input.
-If input is related to Lex's billiards, call the billiards RAG query tool.
-If input is related to Lex's guitars, call the guitars RAG query tool.
-If input is related to Albatross company and could be answered by the database information, call the SQL agent tool.
-Otherwise, answer the question based on your training data.
+Use the appropriate tool based on the input. 
+Available tools:
+* ***billiards_rag_llm_agent:*** For questions related Lex and his billiards hobby.
+* ***guitars_rag_llm_agent:*** For questions related Lex and his guitars.
+* ***technologies_rag_llm_agent:*** For questions related Lex and his technical skills.
+* ***sql_agent:*** For questions related to Albatross company's departments and employees. 
+You can use the Database information to assess if the ***sql_agent*** can be called.
+If the tools do not contain the answer, answer the question based on your training data.
 """
 
 expert_human = """
@@ -164,7 +185,7 @@ def expert_agent(input: str):
             
     return info
 
-question = "How many break cues does Lex have?"
+question = "What break cues does Lex use?"
 answer = expert_agent(question)
 print(f"question:\n{question}\nanswer:\n{answer}\n")
 
@@ -172,11 +193,14 @@ question = "Does Lex play the guitar?"
 answer = expert_agent(question)
 print(f"question:\n{question}\nanswer:\n{answer}\n")
 
+question = "How many departments are there in Albatross?"
+answer = expert_agent(question)
+print(f"question:\n{question}\nanswer:\n{answer}\n")
+
+question = "Does Lex know application programming?"
+answer = expert_agent(question)
+print(f"question:\n{question}\nanswer:\n{answer}\n")
+
 question = "What is the largest bone in the human body?"
 answer = expert_agent(question)
 print(f"question:\n{question}\nanswer:\n{answer}\n")
-
-question = "How many departments are there in Albatross company?"
-answer = expert_agent(question)
-print(f"question:\n{question}\nanswer:\n{answer}\n")
-
