@@ -5,7 +5,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langgraph.checkpoint.memory import MemorySaver
 import operator
 
-# variations for simple01, with memory!
+# variations for simple_chat01, with memory!
 
 class State(TypedDict):
     messages: Annotated[List[BaseMessage], operator.add]
