@@ -212,7 +212,7 @@ question = "Is Lex an application programmer?"
 answer = app.invoke({ "input": question }, config=config)
 print(f"question: {question}\nanswer:\n{answer["output"]}\n")
 
-question = "Among the employees of Albatross that have contact information, who has the highest salary and where does he lives?"
+question = "Among Albatross employees with contact information, who has the highest salary and what is the email address?"
 answer = app.invoke({ "input": question }, config=config)
 print(f"question: {question}\nanswer:\n{answer["output"]}\n")
 
