@@ -1,0 +1,6 @@
+```mermaid
+graph TD;
+    A[Start] --> B(Process);
+    B --> C{Decision?};
+    C -- Yes --> D[End];
+    C -- No --> B;
