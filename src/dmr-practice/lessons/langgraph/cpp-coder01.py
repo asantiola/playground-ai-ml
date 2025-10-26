@@ -94,6 +94,29 @@ def generate_unittest(state: State):
     unittest = chain.invoke({ "files": files })
     return { "unittest_code": unittest }
 
+# # TODO
+# def generate_cmakelist(state: State):
+#     prompt = PromptTemplate.from_template(
+#         """
+#         You are a coding assistant expert in creating cmake build files for C++.
+#         Use C++14 as minimum standard.
+#         Create a CMakelists.txt for the provided files and build type.
+#         The files are pairs of filenames and their contents.
+#         Just provide the CMakelists.txt contents, no need for explanations or quotes.
+#         Build type: {build}
+#         Files: {files}
+#         """
+#     )
+
+#     chain = prompt | llm | StrOutputParser()
+#     files = [
+#         (state["cpp_code"].hpp_filename, state["cpp_code"].declarations),
+#         (state["cpp_code"].cpp_filename, state["cpp_code"].definitions),
+#         (state["unittest_code"].filename, state["unittest_code"].unittest),
+#     ]
+#     cmakelists = chain.invoke({ "build": BuildTypes.DLL, "files": files })
+    
+
 graph_builder = StateGraph(State)
 graph_builder.add_node("generate_code", generate_code)
 graph_builder.add_node("generate_unittest", generate_unittest)
@@ -112,23 +135,3 @@ code = app.invoke({ "description": description }, config=config)
 print(f"codes:\n{code["cpp_code"].hpp_filename}\n{code["cpp_code"].declarations}\n")
 print(f"codes:\n{code["cpp_code"].cpp_filename}\n{code["cpp_code"].definitions}\n")
 print(f"codes:\n{code["unittest_code"].filename}\n{code["unittest_code"].unittest}\n")
-
-# prompt = PromptTemplate.from_template(
-#     """
-#     You are a coding assistant expert in creating cmake build files for C++.
-#     Use C++14 as minimum standard.
-#     Create a CMakelists.txt for the provided files and build type.
-#     The files are pairs of filenames and their contents.
-#     Just provide the CMakelists.txt contents, no need for explanations or quotes.
-#     Build type: {build}
-#     Files: {files}
-#     """
-# )
-
-# chain = prompt | llm | StrOutputParser()
-# files = [
-#     (response.hpp_filename, response.declarations),
-#     (response.cpp_filename, response.definitions),
-# ]
-# cmakelists = chain.invoke({ "build": BuildTypes.DLL, "files": files })
-# print(f"cmakelists.txt\n:{cmakelists}\n")
