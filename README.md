@@ -7,8 +7,8 @@
 ### Install libraries
 - pip install --upgrade pip
 - pip install pandas numpy matplotlib
-- pip install openai
-- pip install langchain langchain-openai langchain-community langchain-huggingface
+- pip install langchain langchain-openai langchain-community langchain-huggingface langchain_chroma
+- pip install openai chroma
 - https://pytorch.org/
     - CUDA (XPS 9500 / CUDA 12.6)
         - pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu126
@@ -16,6 +16,9 @@
         - pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
     - MPS (Macbook Pro M4 Pro)
         - pip install torch torchvision torchaudio
+- https://www.tensorflow.org/api_docs/python/tf
+    - Metal: I had to use Python 3.12.12!
+        - pip install tensorflow-macos tensorflow-metal
 
 ### VSCode extensions
 - ms-python.python
