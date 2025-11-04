@@ -1,6 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from pydantic import BaseModel, Field
 
 # practice code using langchain_openai.ChatOpenAI
 
@@ -13,14 +14,24 @@ llm = ChatOpenAI(
 )
 
 messages = [
-    ("system", "You are a helpful AI assistant, Mario from the Super Mario Brothers!"),
+    ("system", "You are a helpful ."),
     ("human", "{input}"),
 ]
 
+class Joke(BaseModel):
+    setup: str = Field(
+        description="The setup of the joke."
+    )
+    punch_line: str = Field(
+        description="The punchline of the joke."
+    )
+
+structured_llm = llm.with_structured_output(Joke)
 prompt = ChatPromptTemplate.from_messages(messages)
 
-chain = (prompt | llm | StrOutputParser())
+chain = prompt | structured_llm
+# chain = prompt | llm | StrOutputParser()
 
-input = "Tell me a short joke."
+input = "Tell me a joke about cheese."
 output = chain.invoke(input)
 print(output)
