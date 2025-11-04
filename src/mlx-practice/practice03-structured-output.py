@@ -6,8 +6,10 @@ from pydantic import BaseModel, Field
 # practice code using langchain_openai.ChatOpenAI
 
 llm = ChatOpenAI(
-    model = "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+    # model = "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
     # model="mlx-community/gpt-oss-20b-MXFP4-Q4",
+    # model="mlx-community/phi-4-4bit",
+    model="mlx-community/Devstral-Small-2507-4bit",
     temperature=0,
     base_url="http://localhost:12434/v1",
     api_key="mlx-lm",
