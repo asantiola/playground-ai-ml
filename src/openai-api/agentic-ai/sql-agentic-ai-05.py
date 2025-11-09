@@ -1,7 +1,7 @@
 import os
 from langchain_community.utilities import SQLDatabase
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain.tools import Tool
 from langchain_openai.embeddings import OpenAIEmbeddings

@@ -2,7 +2,7 @@ import os
 import sqlite3
 import time
 from langchain_openai import ChatOpenAI
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder, PromptTemplate
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_community.document_loaders import TextLoader
