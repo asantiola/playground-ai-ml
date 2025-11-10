@@ -11,8 +11,8 @@ llm = ChatOpenAI(
 )
 
 messages = [
-    ("system", "You are a helpful AI assistant."),
-    ("human", "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."),
+    ("system", "You are a helpful AI assistant. Show me your thinking process."),
+    ("human", "Tell me a joke."),
 ]
 
 ai_msg = llm.invoke(messages)
