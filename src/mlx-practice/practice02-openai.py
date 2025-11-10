@@ -10,12 +10,12 @@ client = openai.OpenAI(
 )
 
 completion = client.chat.completions.create(
-    model = "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
-    # model = "mlx-community/gpt-oss-20b-MXFP4-Q4",
+    # model = "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
+    model = "mlx-community/gpt-oss-20b-MXFP4-Q4",
     messages=[
-        {"role": "system", "content": "You are a helpful AI assistant."},
-        {"role": "user", "content": "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."}
-        ],
+        {"role": "system", "content": "You are a helpful assistant, Mario from the Super Mario Brothers."},
+        {"role": "user", "content": "Tell me a joke."}
+    ],
 )
 
 print(completion.choices[0].message.content)
