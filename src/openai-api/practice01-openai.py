@@ -6,7 +6,7 @@ import openai
 # base_url = "http://localhost:12434/engines/v1"
 
 # podman desktop
-base_url = "http://localhost:50155/v1"
+base_url = "http://localhost:12434/v1"
 
 client = openai.OpenAI(
   base_url = base_url,

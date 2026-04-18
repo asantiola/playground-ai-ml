@@ -16,7 +16,7 @@ llm = ChatOpenAI(
     # model="ai/llama3.1",
     model="openai/gpt-oss-20b:latest", 
     temperature=0,
-    base_url="http://localhost:50155/v1",
+    base_url="http://localhost:12434/v1",
     api_key="podman",
 )
 
