@@ -3,7 +3,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 import os
 
 embeddings_model = "ai/mxbai-embed-large"

@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from pymongo.operations import SearchIndexModel
 from langchain_mongodb import MongoDBAtlasVectorSearch
 from langchain_openai import ChatOpenAI
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 import os
 
 HOME=os.environ["HOME"]
