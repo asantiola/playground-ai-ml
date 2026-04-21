@@ -3,6 +3,7 @@ from typing_extensions import TypedDict
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
 from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.memory import MemorySaver
 
 #  https://www.datacamp.com/tutorial/langgraph-tutorial
 
@@ -14,7 +15,7 @@ class State(TypedDict):
 graph_builder = StateGraph(State)
 
 llm = ChatOpenAI(
-    model="ai/gpt-oss:latest", 
+    model="ai/gpt-oss:20B", 
     temperature=0,
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
@@ -30,7 +31,9 @@ graph_builder.add_node("chatbot", chatbot)
 graph_builder.set_entry_point("chatbot")
 graph_builder.set_finish_point("chatbot")
 
-graph = graph_builder.compile()
+memory = MemorySaver()
+app = graph_builder.compile(checkpointer=memory)
+config = {"configurable": {"thread_id": "my_conversation_1"}}
 
 while True:
     user_input = input("User: ")
@@ -38,6 +41,6 @@ while True:
         print("Bye")
         break
 
-    for event in graph.stream({ "messages": [("user", user_input)]}):
+    for event in app.stream({ "messages": [("user", user_input)]}, config=config):
         for value in event.values():
             print("Assistant:", value["messages"][-1].content)
