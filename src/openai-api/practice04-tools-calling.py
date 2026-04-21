@@ -34,6 +34,7 @@ def invoke(question: str):
     answer = llm_with_tools.invoke([
         HumanMessage(content=question)
     ])
-    print(f"question: {question}\nanswer: {answer.tool_calls}\n\n")
+    print(f"question: {question}\nanswer: {answer}\n\n")
 
 invoke("What is the weather in Manila?")
+invoke("What is the capital of New Zealand?")
