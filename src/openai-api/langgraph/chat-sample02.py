@@ -90,3 +90,5 @@ if __name__ == "__main__":
 
     # Demo query that uses both tools.
     chat("What date will it be tomorrow?", THREAD)
+
+    chat("What was the date 2 days ago?", THREAD)
