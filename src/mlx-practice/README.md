@@ -16,5 +16,5 @@ mlx_lm.generate --model mlx-community/gpt-oss-20b-MXFP4-Q4 --prompt "What is the
 ```
 mlx_lm.server --help
 mlx_lm.server --max-tokens 4096 --port 12434
-mlx_lm.server --model mlx-community/gpt-oss-20b-MXFP4-Q4 --port 12434
+mlx_lm.server --port 12434 --model mlx-community/gemma-4-26B-A4B-it-OptiQ-4bit
 ```
