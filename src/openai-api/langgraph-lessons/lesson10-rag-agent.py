@@ -9,7 +9,7 @@ import os
 
 HOME = os.environ["HOME"]
 embeddings = OpenAIEmbeddings(
-    model="ai/mxbai-embed-large:335M-F16",
+    model="ai/embeddinggemma:300M-Q8_0",
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
     # disable check_embedding_ctx_length if your local model has different constraints
