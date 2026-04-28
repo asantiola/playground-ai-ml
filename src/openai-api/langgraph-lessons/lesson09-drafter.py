@@ -48,7 +48,7 @@ def save(filename: str) -> str:
 tools = [update, save]
 
 llm = ChatOpenAI(
-    model="ai/gpt-oss:20B",
+    model="ai/gemma4:4B",
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
 )
