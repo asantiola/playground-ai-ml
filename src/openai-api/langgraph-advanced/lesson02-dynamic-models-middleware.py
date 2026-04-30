@@ -153,6 +153,15 @@ def tool_middleWare(request: ToolCallRequest, handler):
     print(f"\n===== TOOL RESPONSE =====\n{response}\n")
     return response
 
+def asker_node(state: AgentState) -> AgentState:
+    user_input = input("\nWhat is your question: ")
+    return {"messages": [HumanMessage(content=user_input)]}
+
+def should_continue(state: AgentState) -> bool:
+    user_msg = state["messages"][-1].content.lower()
+    print(f"\n ==== USER MSG ====\n{user_msg}\n")
+    return not any(word in user_msg for word in ["exit", "quit"])
+
 agent = create_agent(
     model=None,
     tools=tools_all,
@@ -161,20 +170,21 @@ agent = create_agent(
 )
 
 graph = StateGraph(AgentState)
+graph.add_node("asker_node", asker_node)
 graph.add_node("financial_agent", agent)
-graph.add_edge(START, "financial_agent")
-graph.add_edge("financial_agent", END)
+graph.add_edge(START, "asker_node")
+graph.add_conditional_edges(
+    "asker_node",
+    should_continue,
+    {
+        True: "financial_agent",
+        False: END,
+    }
+)
+graph.add_edge("financial_agent", "asker_node")
 
 app = graph.compile(checkpointer=memory)
 
 thread_id = "session_001"
-
-while True:
-    user_input = input("\nWhat is your question: ")
-    if user_input.lower() in ['exit', 'quit']:
-        break
-
-    config = {"configurable": {"thread_id": thread_id}}
-    messages = [HumanMessage(content=user_input)] 
-    response = app.invoke({"messages": messages}, config=config)
-    print(response["messages"][-1].content)
+config = {"configurable": {"thread_id": thread_id}}
+app.invoke({}, config=config)
