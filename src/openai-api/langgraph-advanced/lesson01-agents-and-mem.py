@@ -18,6 +18,11 @@ def get_current_date_time() -> str:
     return datetime.now().strftime("%Y-%B-%d %H:%M:%S")
 
 @tool
+def get_weather(city: str):
+    """Returns the current weather for a specific city."""
+    return f"The weather in {city} is sunny, 25C."
+
+@tool
 def lookup_stock_symbol(company_name: str) -> str:
     """
     Returns the stock symbol for a given company name.
@@ -125,7 +130,21 @@ def post_model_hook(state: AgentState, config: RunnableConfig) -> AgentState:
     print(f"\n===== AFTER LLM CALL =====\n{state}\n")
     return state
 
-financial_agent = create_agent(
+def asker_node(state: AgentState) -> AgentState:
+    user_input = input("\nWhat is your question: ")
+    return {"messages": [HumanMessage(content=user_input)]}
+
+def responder_node(state: AgentState) -> AgentState:
+    response = state["messages"][-1].content
+    print(f"AI: {response}")
+    return state
+
+def should_continue(state: AgentState) -> bool:
+    user_msg = state["messages"][-1].content.lower()
+    print(f"\n ==== USER MSG ====\n{user_msg}\n")
+    return not any(word in user_msg for word in ["exit", "quit"])
+
+agent = create_agent(
     model=llm_with_tools,
     tools=tools,
     system_prompt="You are a helpful assistant expert in Stocks. Use only the provided tools.",
@@ -133,20 +152,23 @@ financial_agent = create_agent(
 )
 
 graph = StateGraph(AgentState)
-graph.add_node("financial_agent", financial_agent)
-graph.add_edge(START, "financial_agent")
-graph.add_edge("financial_agent", END)
+graph.add_node("asker_node", asker_node)
+graph.add_node("responder_node", responder_node)
+graph.add_node("agent", agent)
+graph.add_edge(START, "asker_node")
+graph.add_conditional_edges(
+    "asker_node",
+    should_continue,
+    {
+        True: "agent",
+        False: END
+    }
+)
+graph.add_edge("agent", "responder_node")
+graph.add_edge("responder_node", "asker_node")
 
 app = graph.compile(checkpointer=memory)
 
 thread_id = "session_001"
-
-while True:
-    user_input = input("\nWhat is your question: ")
-    if user_input.lower() in ['exit', 'quit']:
-        break
-
-    config = {"configurable": {"thread_id": thread_id}}
-    messages = [HumanMessage(content=user_input)] 
-    response = app.invoke({"messages": messages}, config=config)
-    print(response["messages"][-1].content)
+config = {"configurable": {"thread_id": thread_id}}
+app.invoke({}, config=config)
