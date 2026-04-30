@@ -128,7 +128,7 @@ def post_model_hook(state: AgentState, config: RunnableConfig) -> AgentState:
 financial_agent = create_agent(
     model=llm_with_tools,
     tools=tools,
-    system_prompt="You are a helpful assistant expert in Stocks. You have access to tools.",
+    system_prompt="You are a helpful assistant expert in Stocks. Use only the provided tools.",
     middleware=[pre_model_hook, post_model_hook]
 )
 
