@@ -33,13 +33,20 @@ The Blend smoker has a neighbor who drinks water.
 Who owns the fish?
 """
 
-puzzle_prompt_drunk = puzzle_prompt = """
+puzzle_prompt_drunk = """
 The Drunk Passenger Problem (Expected Value): A plane has 50 seats, and 50 passengers are boarding. 
 The first 10 passengers are drunk and sit in random unoccupied seats.
 Every subsequent passenger sits in their assigned seat if it's available; otherwise, they choose a random seat.
 What is the expected number of passengers who sit in their assigned seats?
 """
 
-messages = [SystemMessage(content=system_prompt), HumanMessage(content=puzzle_prompt_drunk)]
+puzzle_prompt_floors = """
+A building has 10 floors above the basement.
+If 12 people get into an elevator at the basement, and each chooses a floor at random to get out, 
+independently of the others,
+at how many floors do you expect the elevator to make a stop to let out one or more of these 12 people?
+"""
+
+messages = [SystemMessage(content=system_prompt), HumanMessage(content=puzzle_prompt_floors)]
 for chunk in llm.stream(messages):
     print(chunk.content, end="", flush=True)
