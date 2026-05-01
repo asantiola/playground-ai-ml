@@ -8,7 +8,8 @@ llm = ChatOpenAI(
 )
 
 system_prompt = "You are an expert assistant good in solving logic problems."
-puzzle_prompt = """
+
+puzzle_prompt_einstein = """
 There are five houses of different colors adjacent to one another on a road. 
 In each house lives a man of different nationality. 
 Each man has a favorite drink, a favorite brand of cigarettes, and keeps a different kind of pet.
@@ -32,6 +33,13 @@ The Blend smoker has a neighbor who drinks water.
 Who owns the fish?
 """
 
-messages = [SystemMessage(content=system_prompt), HumanMessage(content=puzzle_prompt)]
+puzzle_prompt_drunk = puzzle_prompt = """
+The Drunk Passenger Problem (Expected Value): A plane has 50 seats, and 50 passengers are boarding. 
+The first 10 passengers are drunk and sit in random unoccupied seats.
+Every subsequent passenger sits in their assigned seat if it's available; otherwise, they choose a random seat.
+What is the expected number of passengers who sit in their assigned seats?
+"""
+
+messages = [SystemMessage(content=system_prompt), HumanMessage(content=puzzle_prompt_drunk)]
 for chunk in llm.stream(messages):
     print(chunk.content, end="", flush=True)
