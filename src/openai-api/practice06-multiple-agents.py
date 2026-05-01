@@ -145,7 +145,6 @@ def general_agent(state: AgentState) -> AgentState:
 def print_last_node(state: AgentState) -> AgentState:
     if "date_time" in state and state["date_time"] is not None:
         print(f"===== AI response =====\n{state["date_time"]}\n")
-        state["date_time"] = None
     else:
         print(f"===== AI response =====\n{state["messages"][-1].content}")
     return state
@@ -155,7 +154,7 @@ def asker_node(state: AgentState) -> Command:
     Analyze the input and classify it.
     If input is about Stock Market Performance 2024, return 'stock2024'
     If input is about retrieving date/time, return 'datetime'
-    if input is either 'exit' or 'quit', return 'exit'
+    if input is one of the following: 'exit', 'quit', or 'bye', return 'exit'
     Otherwise, return 'general'
     """
     prompt = input("\nWhat is your question: ")
@@ -167,12 +166,12 @@ def asker_node(state: AgentState) -> Command:
 
     if classification == "stock2024":
         return Command(
-            update={ "messages": [state["messages"], human_message]},
+            update={ "messages": state["messages"] + [human_message], "date_time": None},
             goto="retriever_agent",
         )
     elif classification == "datetime":
         return Command(
-            update={ "messages": [state["messages"], human_message]},
+            update={ "messages": state["messages"] + [human_message], "date_time": None},
             goto="date_time_agent",
         )
     elif classification == "exit":
@@ -181,7 +180,7 @@ def asker_node(state: AgentState) -> Command:
         )
     else:
         return Command(
-            update={ "messages": [state["messages"], human_message]},
+            update={ "messages": state["messages"] + [human_message], "date_time": None},
             goto="general_agent",
         )
 
