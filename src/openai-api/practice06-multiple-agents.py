@@ -268,22 +268,25 @@ def responder_node(state: AgentState) -> AgentState:
 
     return None
 
-graph = StateGraph(AgentState)
-graph.add_node("query_node", query_node)
-graph.add_node("financial_node", financial_node)
-graph.add_node("general_node", general_node)
-graph.add_node("responder_node", responder_node)
-graph.add_node("datetime_node", datetime_node)
+def build_and_compile():
+    graph = StateGraph(AgentState)
+    graph.add_node("query_node", query_node)
+    graph.add_node("financial_node", financial_node)
+    graph.add_node("general_node", general_node)
+    graph.add_node("responder_node", responder_node)
+    graph.add_node("datetime_node", datetime_node)
 
-graph.add_edge(START, "query_node")
-graph.add_edge("financial_node", "responder_node")
-graph.add_edge("general_node", "responder_node")
+    graph.add_edge(START, "query_node")
+    graph.add_edge("financial_node", "responder_node")
+    graph.add_edge("general_node", "responder_node")
+    graph.add_edge("datetime_node", "query_node")
+    graph.add_edge("responder_node", "query_node")
 
-graph.add_edge("datetime_node", "query_node")
-graph.add_edge("responder_node", "query_node")
+    memory = MemorySaver()
+    app = graph.compile(checkpointer=memory)
+    return app
 
-memory = MemorySaver()
-app = graph.compile(checkpointer=memory)
-config = {"configurable": {"thread_id": "session01"}}
-
-app.invoke({}, config=config)
+if __name__ == "__main__":
+    config = {"configurable": {"thread_id": "session01"}}
+    app = build_and_compile()
+    app.invoke({}, config=config)
