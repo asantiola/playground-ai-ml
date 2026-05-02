@@ -3,17 +3,15 @@ from langchain_chroma import Chroma
 from langchain.tools import tool
 from langchain.agents import create_agent
 from langchain.agents.middleware import before_model, after_model
-from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
+from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
 from langgraph.types import Command
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
-from typing import TypedDict, Annotated, Sequence
+from typing import TypedDict, Annotated, Sequence, Union
 from pydantic import BaseModel, Field
 from datetime import datetime
 import os
 import operator
-
-# TODO: buggy memory!
 
 llm = ChatOpenAI(
     model="ai/gemma4:4B-128k",
@@ -31,13 +29,107 @@ embeddings = OpenAIEmbeddings(
 
 @before_model
 def pre_model_hook(state: dict, config: any) -> dict:
-    print(f"\n===== BEFORE LLM CALL =====\n{state}\n")
+    print("\n===== BEFORE LLM CALL =====\n")
+    for message in state["messages"]:
+        print(f"\nTYPE: {message.type}: {message.content}")
     return state
 
 @after_model
 def post_model_hook(state: dict, config: dict) -> dict:
-    print(f"\n===== AFTER LLM CALL =====\n{state}\n")
+    print(f"\n===== AFTER LLM CALL =====\n")
+    for message in state["messages"]:
+        print(f"\nTYPE: {message.type}: {message.content}")
     return state
+
+@tool
+def get_current_date_time() -> str:
+    """Returns the current date time"""
+
+    return datetime.now()
+
+@tool
+def lookup_stock_symbol(company_name: str) -> str:
+    """
+    Returns the stock symbol for a given company name.
+
+    Args:
+        company_name (str): The company name (e.g. 'Visa')
+    
+    Returns:
+        str: The stock symbol (e.g. 'V') or an error message.
+    """
+
+    # Hard-coded mapping of company names to their NYSE symbols
+    nyse_top_20 = {
+        "Berkshire Hathaway": "BRK.B",
+        "Walmart": "WMT",
+        "JPMorgan Chase": "JPM",
+        "Eli Lilly": "LLY",
+        "Visa": "V",
+        "Exxon Mobil": "XOM",
+        "Johnson & Johnson": "JNJ",
+        "Mastercard": "MA",
+        "Chevron": "CVX",
+        "Bank of America": "BAC",
+        "UnitedHealth Group": "UNH",
+        "The Home Depot": "HD",
+        "Oracle": "ORCL",
+        "Caterpillar": "CAT",
+        "AbbVie": "ABBV",
+        "Procter & Gamble": "PG",
+        "Coca-Cola": "KO",
+        "Morgan Stanley": "MS",
+        "Goldman Sachs": "GS",
+        "Salesforce": "CRM"
+    }
+    
+    if company_name not in nyse_top_20:
+        return f"Symbol not found for {company_name}"
+    
+    return nyse_top_20[company_name]
+
+class StockQuote(TypedDict):
+    sell_bid: float = Field(description="The Sell Bid price of a particular stock")
+    buy_ask: float = Field(description="The Buy Ask price of a particular stock")
+
+@tool
+def get_stock_quotes(symbol: str) -> Union[StockQuote, str]:
+    """
+    Returns the quote for a given symbol.
+
+    Args:
+        symbol (str): The company symbol (e.g. 'V')
+    
+    Returns:
+        a StockQuote on success or an error message.
+    """
+
+    nyse_top_19_less_oracle = {
+        "BRK.B": {"sell_bid": 475.15, "buy_ask": 475.61},
+        "WMT": {"sell_bid": 127.50, "buy_ask": 128.37},
+        "JPM": {"sell_bid": 309.20, "buy_ask": 309.40},
+        "LLY": {"sell_bid": 851.87, "buy_ask": 858.05},
+        "V": {"sell_bid": 336.92, "buy_ask": 338.50},
+        "XOM": {"sell_bid": 152.03, "buy_ask": 154.00},
+        "JNJ": {"sell_bid": 224.90, "buy_ask": 227.60},
+        "MA": {"sell_bid": 526.35, "buy_ask": 529.52},
+        "CVX": {"sell_bid": 190.07, "buy_ask": 191.36},
+        "BAC": {"sell_bid": 52.51, "buy_ask": 52.73},
+        "UNH": {"sell_bid": 368.44, "buy_ask": 369.10},
+        "HD": {"sell_bid": 320.83, "buy_ask": 321.45},
+        "CAT": {"sell_bid": 812.07, "buy_ask": 818.68},
+        "ABBV": {"sell_bid": 198.05, "buy_ask": 204.50},
+        "PG": {"sell_bid": 146.28, "buy_ask": 146.38},
+        "KO": {"sell_bid": 78.86, "buy_ask": 79.12},
+        "MS": {"sell_bid": 186.09, "buy_ask": 187.25},
+        "GS": {"sell_bid": 903.25, "buy_ask": 905.50},
+        "CRM": {"sell_bid": 148.30, "buy_ask": 149.10}
+    }
+
+    if symbol not in nyse_top_19_less_oracle:
+        return f"Quotes not found for symbol {symbol}"
+    
+    return nyse_top_19_less_oracle[symbol]
 
 HOME = os.environ["HOME"]
 persist_directory = HOME + "/repo/playground-ai-ml/.chromadb"
@@ -74,45 +166,43 @@ def retriever_tool(query: str) -> str:
     
     return "\n\n".join(results)
 
-rag_tools = [retriever_tool]
-llm_rag = llm.bind_tools(rag_tools)
+financial_tools = [lookup_stock_symbol, get_stock_quotes, retriever_tool]
 
-rag_system_prompt = """
-You are an intelligent AI assistant who answers questions about Stock Market Performance in 2024 based on the PDF document loaded into your knowledge base.
-Use the retriever tool available to answer questions about the stock market performance data. You can make multiple calls if needed.
+financial_system_prompt = """
+You are an intelligent AI assistant who answers questions about Stock Market Performance in 2024,
+based on the PDF document loaded into your knowledge base.
+Use the retriever tool available to answer questions about the stock market performance data in 2024.
+You also have access to other tools related to stocks.
+You can make multiple calls if needed.
 If you need to look up some information before asking a follow up question, you are allowed to do that!
-Please always cite the specific parts of the documents you use in your answers.
-"""
+# Please always cite the specific parts of the documents you use in your answers.
+# """
 
-retriever_agent = create_agent(
-    model=llm_rag,
-    tools=rag_tools,
-    system_prompt=rag_system_prompt,
+financial_agent = create_agent(
+    model=llm.bind_tools(financial_tools),
+    tools=financial_tools,
+    system_prompt=financial_system_prompt,
     # middleware=[pre_model_hook, post_model_hook],
 )
-# response = retriever_agent.invoke({"messages": [HumanMessage(content="How did Meta perform in 2024?")]})
-# print(f"===== AI RESPONSE =====\n{response["messages"][-1].content}\n")
 
-@tool
-def get_current_date_time() -> str:
-    """Returns the current date time"""
-
-    return datetime.now()
-
-date_time_tools = [get_current_date_time]
-llm_date_time = llm.bind_tools(date_time_tools)
-date_time_system_prompt="""
+datetime_system_prompt="""
 You are a helpful AI assistant that gets date and time. 
 Use only the provided tools.
 Always respond with both date and time information.
 """
-
-date_time_agent = create_agent(
-    model=llm_date_time,
-    tools=date_time_tools,
-    system_prompt=date_time_system_prompt,
+datetime_agent = create_agent(
+    model=llm.bind_tools([get_current_date_time]),
+    tools=[get_current_date_time],
+    system_prompt=datetime_system_prompt,
     # middleware=[pre_model_hook, post_model_hook],
 )
+
+class AgentState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+
+def financial_node(state: AgentState) -> AgentState:
+    response = financial_agent.invoke(state)
+    return {"messages": [response["messages"][-1]]}
 
 class DateTimeResponse(BaseModel):
     year: int = Field(description="The year")
@@ -122,59 +212,40 @@ class DateTimeResponse(BaseModel):
     min: int = Field(description="The minute")
     sec: int = Field(description="The second")
 
-class AgentState(TypedDict):
-    messages: Annotated[Sequence[BaseMessage], operator.add]
-    date_time: DateTimeResponse
-
 llm_formatter = llm.with_structured_output(schema=DateTimeResponse)
-def formatter_agent(state: AgentState) -> AgentState:
-    human_message = HumanMessage(content=state["messages"][-1].content)
-    messages = [SystemMessage(content="Extract the DateTimeResponse"), human_message]
-    state["date_time"] = llm_formatter.invoke(messages)
-    return state
+def datetime_node(state: AgentState) -> AgentState:
+    unformatted_response = datetime_agent.invoke(state)
+    messages = [SystemMessage(content="Extract the DateTimeResponse"), unformatted_response["messages"][-1].content]
+    formatted_response = llm_formatter.invoke(messages)
+    print(f"===== AI RESPONSE =====\nDateTimeResponse: {formatted_response}\n")
+    return {"messages": [unformatted_response["messages"][-1]]}
 
-# unformatted_state = date_time_agent.invoke({"messages": [HumanMessage(content="What date is it today?")]})
-# print(f"===== AI RESPONSE =====\n{unformatted_state["messages"][-1].content}\n")
-# formatted_state = formatter_agent(unformatted_state)
-# print(f"===== AI RESPONSE =====\n{formatted_state["date_time"]}\n")
-
-def general_agent(state: AgentState) -> AgentState:
-    system_prompt="You are a helpful assistant. Answer the question to the best of your ability."
-    messages = [SystemMessage(content=system_prompt), state["messages"][-1]]
-    response = llm.invoke(messages)
+def general_node(state: AgentState) -> AgentState:
+    response = llm.invoke(state["messages"])
     return {"messages": [response]}
 
-def print_last_node(state: AgentState) -> AgentState:
-    if "date_time" in state and state["date_time"] is not None:
-        print(f"===== AI response =====\n{state["date_time"]}\n")
-    else:
-        print(f"===== AI response =====\n{state["messages"][-1].content}")
-    return state
-
-def asker_node(state: AgentState) -> Command:
+def query_node(state: AgentState) -> AgentState:
     system_prompt="""
-    Analyze the input and classify it.
-    If input is about Stock Market Performance 2024, return 'stock2024'
+    Analyze the input in context of previous inputs, then classify the current input.
+    If input is about financial information or performance, return 'financial_agent'
     If input is about retrieving date/time, return 'datetime'
     if input is one of the following: 'exit', 'quit', or 'bye', return 'exit'
     Otherwise, return 'general'
     """
     prompt = input("\nWhat is your question: ")
     human_message = HumanMessage(content=prompt)
-    messages = [SystemMessage(content=system_prompt), human_message]
-    response = llm.invoke(messages)
+    response = llm.invoke([SystemMessage(content=system_prompt), human_message])
     classification = response.content
-    # print(f"===== CLASSIFICATION =====\n{classification}\n")
 
-    if classification == "stock2024":
+    if classification == "financial_agent":
         return Command(
-            update={ "messages": state["messages"] + [human_message], "date_time": None},
-            goto="retriever_agent",
+            update={"messages": [human_message]},
+            goto="financial_node",
         )
     elif classification == "datetime":
         return Command(
-            update={ "messages": state["messages"] + [human_message], "date_time": None},
-            goto="date_time_agent",
+            update={"messages": [human_message]},
+            goto="datetime_node"
         )
     elif classification == "exit":
         return Command(
@@ -182,31 +253,37 @@ def asker_node(state: AgentState) -> Command:
         )
     else:
         return Command(
-            update={ "messages": state["messages"] + [human_message], "date_time": None},
-            goto="general_agent",
+            update={"messages": [human_message]},
+            goto="general_node",
         )
 
+def responder_node(state: AgentState) -> AgentState:
+    last_message = state["messages"][-1]
+    if isinstance(last_message, AIMessage):
+        print(f"===== AI RESPONSE =====\n{last_message.content}\n")
+    
+    # print("\n===== RESPONDER NODE =====")
+    # for message in state["messages"]:
+    #     print(f"\nTYPE: {message.type}: {message.content}")
+
+    return None
+
 graph = StateGraph(AgentState)
+graph.add_node("query_node", query_node)
+graph.add_node("financial_node", financial_node)
+graph.add_node("general_node", general_node)
+graph.add_node("responder_node", responder_node)
+graph.add_node("datetime_node", datetime_node)
 
-graph.add_node("asker_node", asker_node)
-graph.add_node("retriever_agent", retriever_agent)
-graph.add_node("date_time_agent", date_time_agent)
-graph.add_node("formatter_agent", formatter_agent)
-graph.add_node("general_agent", general_agent)
-graph.add_node("print_last_node", print_last_node)
+graph.add_edge(START, "query_node")
+graph.add_edge("financial_node", "responder_node")
+graph.add_edge("general_node", "responder_node")
 
-graph.add_edge(START, "asker_node")
-
-graph.add_edge("date_time_agent", "formatter_agent")
-graph.add_edge("formatter_agent", "print_last_node")
-
-graph.add_edge("retriever_agent", "print_last_node")
-
-graph.add_edge("general_agent", "print_last_node")
-
-graph.add_edge("print_last_node", "asker_node")
+graph.add_edge("datetime_node", "query_node")
+graph.add_edge("responder_node", "query_node")
 
 memory = MemorySaver()
 app = graph.compile(checkpointer=memory)
 config = {"configurable": {"thread_id": "session01"}}
+
 app.invoke({}, config=config)
