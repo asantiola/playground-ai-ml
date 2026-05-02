@@ -8,7 +8,7 @@ import os
 
 HOME = os.environ["HOME"]
 command_path = HOME + "/repo/playground-ai-ml/.venv/bin/python"
-mcp_path = HOME + "/repo/playground-ai-ml/src/openai-api/practice07-mcp-server.py"
+mcp_path = HOME + "/repo/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
 
 async def run_client():
     client = MultiServerMCPClient(
