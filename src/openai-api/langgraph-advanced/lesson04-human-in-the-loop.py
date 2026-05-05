@@ -176,11 +176,10 @@ agent = create_agent(
     checkpointer=memory,
 )
 
-bdata = agent.get_graph().draw_mermaid_png()
-with open("diagram.png", "wb") as f:
-    f.write(bdata)
+# bdata = agent.get_graph().draw_mermaid_png()
+# with open("diagram.png", "wb") as f:
+#     f.write(bdata)
 
-# agent.get_graph().print_ascii()
 config = {"configurable": {"thread_id": "session_1"}}
 response = agent.invoke({"messages": HumanMessage("Buy $1000 of Visa stock at the current price.")}, config=config)
 for message in response["messages"]:
