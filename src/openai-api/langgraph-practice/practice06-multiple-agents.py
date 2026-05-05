@@ -14,7 +14,7 @@ import os
 import operator
 
 llm = ChatOpenAI(
-    model="ai/gemma4:4B-128k",
+    model="ai/gemma4:E4B",
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
 )

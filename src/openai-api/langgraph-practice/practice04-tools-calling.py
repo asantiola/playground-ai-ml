@@ -24,7 +24,7 @@ base_url = "http://localhost:12434/engines/v1"
 llm = ChatOpenAI(
     base_url=base_url,
     api_key = "docker",
-    model="ai/gpt-oss:20B",
+    model="ai/gemma4:E4B",
     temperature=0,
 )
 

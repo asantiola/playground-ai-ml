@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 # docker desktop
 llm = ChatOpenAI(
-    model="ai/gpt-oss:20B", 
+    model="ai/gemma4:E4B", 
     temperature=0,
     base_url="http://localhost:12434/engines/v1",
     api_key="docker",
