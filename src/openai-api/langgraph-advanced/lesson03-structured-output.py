@@ -135,6 +135,10 @@ agent = create_agent(
     response_format=FinancialInfo
 )
 
+bdata = agent.get_graph().draw_mermaid_png()
+with open("diagram.png", "wb") as f:
+    f.write(bdata)
+
 response = agent.invoke({"messages": [HumanMessage(content="Give me the financial info for Visa.")]})
 structured_response : FinancialInfo = response["structured_response"]
 print(structured_response)
