@@ -8,7 +8,6 @@ from langchain.agents.middleware import after_model
 from langgraph.types import interrupt, Command
 from langgraph_supervisor import create_supervisor
 from langgraph.checkpoint.memory import MemorySaver
-import random
 
 @tool
 def lookup_stock_symbol(company_name: str) -> str:
@@ -192,21 +191,6 @@ financial_agent = create_agent(
     name="financial_agent",
 )
 
-@tool
-def get_country_weather(country: str):
-    """
-    Gets the weather for a given country.
-
-    Args:
-        country (str): The country
-    
-    Returns:
-        str: The weather for the given country
-    """
-
-    delta = random.randint(0, 5) - 5
-    return f"The weather in {country} is sunny, {25 + delta}C."
-
 # Local dummy database
 location_db = {
     "france": {"capital": "Paris", "landmark": "Eiffel Tower"},
@@ -260,7 +244,7 @@ You are a country information assistant. Use the provided tools provide your ans
 
 country_agent = create_agent(
     model=llm,
-    tools=[get_country_weather, get_country_capital, get_country_landmark],
+    tools=[get_country_capital, get_country_landmark],
     system_prompt=country_agent_prompt,
     middleware=[],
     name="country_agent",
@@ -270,7 +254,7 @@ supervisor_prompt = """
 You are a helpful supervisor that manages 2 agents: 'financial_agent' and a 'country_agent'.
 
 Delegate to the 'financial_agent' for queries regarding finances.
-Delegate to the 'country_agent' country information on capital, landmark or weather.
+Delegate to the 'country_agent' queries on capital or landmark of countries.
 You can query the agents any number of times as needed.
 
 After you collect the responses from the agents, you can answer the question to the best of your ability.
