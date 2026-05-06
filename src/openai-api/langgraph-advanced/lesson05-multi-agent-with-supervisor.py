@@ -44,12 +44,14 @@ critic = create_agent(
 
 supervisor_prompt = """
 You are a world creator supervisor.
-You are managing a geographer, historian, critic.
+You are managing several agents.
+
 Delegate to the 'geographer' to create current climate, layout, and architecture.
 Delegate to the 'historian' to create timeline of events that led to the city's current state.
 Delegate to the 'critic' to describe different factions and power structures.
 
-After you collect their inputs, create the world requested.
+After you collect all responses from agents, create the world.
+Just respond the final world created.
 """
 supervisor = create_supervisor(
     agents=[geographer, historian, critic],
