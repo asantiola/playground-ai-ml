@@ -154,7 +154,7 @@ def post_model_hook(state, _):
     return {}
 
 system_message = """
-You are a financial advissor assistant. Use the provided tools to ground your answers in an up-to-date market data.
+You are a financial advisor assistant. Use the provided tools to ground your answers in an up-to-date market data.
 Be concise, factual, and risk-aware.
 
 Be decisive: when you have sufficient information to act, proceed with tool calls without asking for confirmation.

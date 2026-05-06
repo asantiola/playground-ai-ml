@@ -53,6 +53,7 @@ Delegate to the 'critic' to describe different factions and power structures.
 After you collect all responses from agents, create the world.
 Just respond the final world created.
 """
+
 supervisor = create_supervisor(
     agents=[geographer, historian, critic],
     model=llm,
