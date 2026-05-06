@@ -58,6 +58,9 @@ supervisor = create_supervisor(
 )
 
 app = supervisor.compile()
+# bdata = app.get_graph().draw_mermaid_png()
+# with open("diagram.png", "wb") as f:
+#     f.write(bdata)
 
 messages = [HumanMessage(content="Build a deep-sea underwater city called 'Aqualon'.")] 
 result = app.invoke({"messages": messages})
