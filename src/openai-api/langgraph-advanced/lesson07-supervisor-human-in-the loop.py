@@ -8,6 +8,8 @@ from langchain.agents.middleware import after_model
 from langgraph.types import interrupt, Command
 from langgraph_supervisor import create_supervisor
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import StateGraph, START, END, MessagesState
+from langgraph.types import Command
 
 @tool
 def lookup_stock_symbol(company_name: str) -> str:
@@ -174,6 +176,8 @@ financial_agent_prompt = """
 You are a financial advisor assistant. Use the provided tools to ground your answers in an up-to-date market data.
 Be concise, factual, and risk-aware.
 
+Do not handle questions not related to financial matters.
+
 Be decisive: when you have sufficient information to act, proceed with tool calls without asking for confirmation.
 Only if information is mising or uncertain, ask a concise clarifying question.
 
@@ -212,6 +216,8 @@ def get_country_capital(country: str) -> str:
         str: The capital of the given country, or an error message.
     """
 
+    # print(f"\n----- TOOL CALL -----\nget_country_capital({country})")
+
     key = country.lower().strip()
     if key in location_db:
         found = location_db[key]
@@ -231,6 +237,8 @@ def get_country_landmark(country: str) -> str:
         str: The landmark of the given country, or an error message.
     """
 
+    # print(f"\n----- TOOL CALL -----\nget_country_landmark({country})")
+
     key = country.lower().strip()
     if key in location_db:
         found = location_db[key]
@@ -240,6 +248,7 @@ def get_country_landmark(country: str) -> str:
 
 country_agent_prompt = """
 You are a country information assistant. Use the provided tools provide your answer.
+Do not answer questions not related to country capital or landmark.
 """
 
 country_agent = create_agent(
@@ -253,11 +262,14 @@ country_agent = create_agent(
 supervisor_prompt = """
 You are a helpful supervisor that manages 2 agents: 'financial_agent' and a 'country_agent'.
 
-Delegate to the 'financial_agent' for queries regarding finances.
+Analyze the input. Do not pass the whole input to agents, just pass relevant info as described below.
+
+Delegate to the 'financial_agent' regarding financial operations.
 Delegate to the 'country_agent' queries on capital or landmark of countries.
 You can query the agents any number of times as needed.
 
-After you collect the responses from the agents, you can answer the question to the best of your ability.
+If the 'financial_agent' or 'country_agent' do not have an answer, do not add any info any more.
+Respond with all info returned by the agents.
 """
 
 supervisor = create_supervisor(
@@ -266,19 +278,54 @@ supervisor = create_supervisor(
     prompt=supervisor_prompt,
 )
 
+supervisor_node = supervisor.compile()
+
+def asker_node(state: MessagesState):
+    if state["messages"]:
+        # for message in state["messages"]:
+        #     print(f"\nType: {message.type}:\n{message}")
+        print(f"\n===== Response =====\n{state["messages"][-1].content}")
+    
+    user_input = input("\nHow can I help you? ")
+    return {"messages": [HumanMessage(content=user_input)]}
+
+def decide_next(state: MessagesState):
+    human_input = state["messages"][-1].content
+    normalized_input = human_input.lower().strip()
+
+    if not normalized_input:
+        return "asker_node"
+    elif any(word in normalized_input for word in ["exit", "quit", "bye"]):
+        return "end"
+    else:
+        return "supervisor"
+
+graph = StateGraph(MessagesState)
+
+graph.add_node("asker_node", asker_node)
+graph.add_node("supervisor", supervisor_node)
+
+graph.add_edge(START, "asker_node")
+graph.add_conditional_edges(
+    "asker_node",
+    decide_next,
+    {
+        "asker_node": "asker_node",
+        "supervisor": "supervisor",
+        "end": END,
+    }
+)
+graph.add_edge("supervisor", "asker_node")
+
 memory = MemorySaver()
 config = {"configurable": {"thread_id": "session_1"}}
 
-app = supervisor.compile(checkpointer=memory)
+app = graph.compile(checkpointer=memory)
 # bdata = app.get_graph().draw_mermaid_png()
 # with open("diagram.png", "wb") as f:
 #     f.write(bdata)
 
-user_input = input("How can I help you? ")
-response = app.invoke({"messages": HumanMessage(user_input)}, config=config)
-
-# for message in response["messages"]:
-#     print(f"\nType: {message.type}:\n{message}")
+response = app.invoke({}, config=config)
 
 if "__interrupt__" in response:
     interrupts = response["__interrupt__"]
@@ -290,11 +337,9 @@ if "__interrupt__" in response:
     user_input = input("Do I proceed (Y/N)? ")
     approved = user_input.lower() == "y"
 
-    final_state = app.get_state(config=config)
-    if final_state.next:
+    state = app.get_state(config=config)
+    if state.next:
         print("===== Resuming the Graph =====")
         response = app.invoke(Command(resume={"approved": approved}), config=config)
         # for message in response["messages"]:
         #     print(f"\nType: {message.type}:\n{message}")
-
-print(f"\n===== Final Response =====\n{response["messages"][-1].content}")
