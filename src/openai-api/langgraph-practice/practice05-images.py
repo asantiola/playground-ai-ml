@@ -19,7 +19,7 @@ def describe(image_path):
         content=[
             {
                 "type": "text",
-                "text": "Describe this image.",
+                "text": "Describe this image. If you see text, print what you read.",
             },
             {
                 "type": "image_url",
@@ -36,6 +36,8 @@ def describe(image_path):
 HOME=os.environ["HOME"]
 path_armadillo = HOME + "/repo/playground-ai-ml/data/images/armadillo.jpg"
 path_vulture = HOME + "/repo/playground-ai-ml/data/images/vulture.jpg"
+path_screenshot = HOME + "/repo/playground-ai-ml/data/images/screenshot-sample.png"
 
 describe(path_armadillo)
 describe(path_vulture)
+describe(path_screenshot)
