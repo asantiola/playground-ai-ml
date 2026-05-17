@@ -19,8 +19,6 @@ except json.JSONDecodeError:
     exit
 
 df = pd.DataFrame(financial_data["market_data"])
-df["div_val"] = df["dividend_yield"].str.replace("%", "").astype(float)
-
 print(df)
 
 found = df.query("company.str.contains('inc', case=False)")
@@ -31,7 +29,7 @@ print(f"FOUND: {found}")
 df['pe_score'] = 1 - (df['pe_ratio'] - df['pe_ratio'].min()) / (df['pe_ratio'].max() - df['pe_ratio'].min())
 df['debt_score'] = 1 - (df['debt_to_equity'] - df['debt_to_equity'].min()) / (df['debt_to_equity'].max() - df['debt_to_equity'].min())
 df['eps_score'] = (df['eps'] - df['eps'].min()) / (df['eps'].max() - df['eps'].min())
-df['yield_score'] = (df['div_val'] - df['div_val'].min()) / (df['div_val'].max() - df['div_val'].min())
+df['yield_score'] = (df['dividend_yield'] - df['dividend_yield'].min()) / (df['dividend_yield'].max() - df['dividend_yield'].min())
 
 # 3. Calculate Final Weighted Score (Equal 25% weights)
 df['final_score'] = (df['pe_score'] + df['debt_score'] + df['eps_score'] + df['yield_score']) / 4 * 100
