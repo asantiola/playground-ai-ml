@@ -34,13 +34,12 @@ def describe(image_path):
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
 HOME=os.environ["HOME"]
-path_armadillo = HOME + "/repo/playground-ai-ml/data/images/armadillo.jpg"
+
 path_vulture = HOME + "/repo/playground-ai-ml/data/images/vulture.jpg"
 path_screenshot = HOME + "/repo/playground-ai-ml/data/images/screenshot-sample.png"
 path_handwriting = HOME + "/repo/playground-ai-ml/data/images/handwriting.jpg"
 path_meme = HOME + "/repo/playground-ai-ml/data/images/meme.jpg"
 
-describe(path_armadillo)
 describe(path_vulture)
 describe(path_screenshot)
 describe(path_handwriting)
