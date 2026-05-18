@@ -3,7 +3,12 @@
 
 ### Install
 ```
-pip install mlx-lm
+pip install --upgrade mlx-vlm mlx-lm mlx
+```
+
+### Uninstall
+```
+pip uninstall mlx-vlm mlx-lm mlx
 ```
 
 ### sample CLI
@@ -15,6 +20,6 @@ mlx_lm.generate --model mlx-community/gpt-oss-20b-MXFP4-Q4 --prompt "What is the
 ### starting the server
 ```
 mlx_lm.server --help
-mlx_lm.server --max-tokens 4096 --port 12434
-mlx_lm.server --port 12434 --model mlx-community/gemma-4-26B-A4B-it-OptiQ-4bit
+mlx_lm.server --port 12434 --model mlx-community/gpt-oss-20b-MXFP4-Q4
+mlx_vlm.server --port 12434 --model mlx-community/gemma-4-e4b-it-4bit
 ```
