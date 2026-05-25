@@ -110,21 +110,24 @@ tools_financial = [lookup_stock_symbol, get_stock_quotes]
 tools_general = [get_current_date_time, get_weather]
 tools_all = [get_current_date_time, get_weather, lookup_stock_symbol, get_stock_quotes]
 
+model = "ai/gemma4:E4B"
+base_url = "http://localhost:12434/engines/v1"
+
 llm_general = ChatOpenAI(
-    model="ai/gemma4:E4B",
-    base_url="http://localhost:12434/engines/v1",
+    model=model,
+    base_url=base_url,
     api_key="docker",
 ).bind_tools(tools_general)
 
 llm_financial = ChatOpenAI(
-    model="ai/gemma4:E4B",
-    base_url="http://localhost:12434/engines/v1",
+    model=model,
+    base_url=base_url,
     api_key="docker",
 ).bind_tools(tools_financial)
 
 llm_default = ChatOpenAI(
-    model="ai/gemma4:E4B",
-    base_url="http://localhost:12434/engines/v1",
+    model=model,
+    base_url=base_url,
     api_key="docker",
 ).bind_tools(tools_all)
 
