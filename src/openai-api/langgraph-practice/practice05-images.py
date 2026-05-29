@@ -35,10 +35,10 @@ def describe(image_path):
 
 HOME=os.environ["HOME"]
 
-path_vulture = HOME + "/repo/playground-ai-ml/data/images/vulture.jpg"
-path_screenshot = HOME + "/repo/playground-ai-ml/data/images/screenshot-sample.png"
-path_handwriting = HOME + "/repo/playground-ai-ml/data/images/handwriting.jpg"
-path_meme = HOME + "/repo/playground-ai-ml/data/images/meme.jpg"
+path_vulture = HOME + "/playground-ai-ml/data/images/vulture.jpg"
+path_screenshot = HOME + "/playground-ai-ml/data/images/screenshot-sample.png"
+path_handwriting = HOME + "/playground-ai-ml/data/images/handwriting.jpg"
+path_meme = HOME + "/playground-ai-ml/data/images/meme.jpg"
 
 describe(path_vulture)
 describe(path_screenshot)

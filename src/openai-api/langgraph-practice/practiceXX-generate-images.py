@@ -20,7 +20,7 @@ image_b64 = response.data[0].b64_json
 images_bytes = base64.b64decode(image_b64)
 
 HOME=os.environ["HOME"]
-output_name = HOME + "/repo/playground-ai-ml/data/images/generated.png"
+output_name = HOME + "/playground-ai-ml/data/images/generated.png"
 with open(output_name, "wb") as f:
     f.write(images_bytes)
 

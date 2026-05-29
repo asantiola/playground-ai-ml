@@ -57,6 +57,6 @@ def describe(video_path):
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
 HOME=os.environ["HOME"]
-path_plants = HOME + "/repo/playground-ai-ml/data/videos/plants.mp4"
+path_plants = HOME + "/playground-ai-ml/data/videos/plants.mp4"
 
 describe(path_plants)

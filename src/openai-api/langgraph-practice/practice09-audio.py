@@ -35,6 +35,6 @@ def describe(audio_path):
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
 HOME=os.environ["HOME"]
-path_quickbrownfox = HOME + "/repo/playground-ai-ml/data/audios/QuickBrownFox.mp3"
+path_quickbrownfox = HOME + "/playground-ai-ml/data/audios/QuickBrownFox.mp3"
 
 describe(path_quickbrownfox)
