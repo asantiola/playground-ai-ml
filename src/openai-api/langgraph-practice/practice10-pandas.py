@@ -36,10 +36,9 @@ except json.JSONDecodeError:
     exit
 
 df = pd.DataFrame(financial_data["market_data"])
-df_metadata = f"Columns: {list(df.columns)}\nData Types:\n{df.dtypes.to_string()}"
 
-system_prompt = f"You are an expert assistant good at analyzing pandas dataframes. Metadata is {df_metadata}"
-human_prompt = f"Given the dataset {df}, give the top 3 performing companies, and explain."
+system_prompt = "You are an expert assistant good at analyzing Pandas dataframes converted to CSV"
+human_prompt = f"Given the dataset {df.to_csv()}, give the top 3 performing companies, and explain why."
 
 messages = [SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)]
 response = llm.invoke(messages)
