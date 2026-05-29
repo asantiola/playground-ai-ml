@@ -3,3 +3,4 @@ data/
 .chromadb/
 .vscode/
 .DS_Store
+shared-data
