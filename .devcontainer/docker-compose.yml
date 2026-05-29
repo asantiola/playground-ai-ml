@@ -1,0 +1,10 @@
+services: 
+    server:
+        build: .
+        image: dev-image-ai-ml
+        user: ubuntu
+        environment: 
+            - TZ=Asia/Singapore
+        volumes:
+            - ..:/home/ubuntu/playground-ai-ml:delegated
+        working_dir: /home/ubuntu/playground-ai-ml
