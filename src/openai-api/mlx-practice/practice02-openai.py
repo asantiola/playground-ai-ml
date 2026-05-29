@@ -1,12 +1,21 @@
 import openai 
+import os
 
 # practice code using openai.OpenAi.chat.completions
 
-base_url = "http://model-runner.docker.internal/v1"
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
 
 client = openai.OpenAI(
-  base_url = base_url,
-  api_key = "mlx-lm"
+    base_url=openai_base_url,
+    api_key=api_key,
 )
 
 completion = client.chat.completions.create(

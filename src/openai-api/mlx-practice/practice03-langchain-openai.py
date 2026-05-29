@@ -1,14 +1,25 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
+import os
 
 # practice code using langchain_openai.ChatOpenAI
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
 
 llm = ChatOpenAI(
     # model = "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
     model="mlx-community/gpt-oss-20b-MXFP4-Q4",
     temperature=0,
-    base_url="http://model-runner.docker.internal/v1",
-    api_key="mlx-lm",
+    base_url=openai_base_url,
+    api_key=api_key,
 )
 
 messages = [
