@@ -8,6 +8,7 @@
 - pip install --upgrade pip
 - pip install pandas numpy matplotlib
 - pip install langchain langchain-openai langchain-community langchain-huggingface langchain_chroma
+- pip install langgraph langgraph_supervisor
 - pip install openai chroma
 - https://pytorch.org/
     - CUDA (XPS 9500 / CUDA 12.6)
