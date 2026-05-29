@@ -4,16 +4,21 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_chroma import Chroma
 import os
 
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
 embeddings = OpenAIEmbeddings(
     model="ai/embeddinggemma:300M-Q8_0",
-    base_url="http://model-runner.docker.internal/engines/v1",
+    base_url=openai_base_url,
     api_key="docker",
     # disable check_embedding_ctx_length if your local model has different constraints
     check_embedding_ctx_length=False,
 )
 
 HOME = os.environ["HOME"]
-pdf_path = HOME + "/repo/playground-ai-ml/data/Stock_Market_Performance_2024.pdf"
+pdf_path = HOME + "/playground-ai-ml/data/Stock_Market_Performance_2024.pdf"
 
 if not os.path.exists(pdf_path):
     raise FileNotFoundError(f"PDF file not found: {pdf_path}")

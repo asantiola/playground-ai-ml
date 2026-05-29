@@ -5,11 +5,17 @@ from langchain_core.tools import tool
 from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
+import os
 
 # This is the global variable to store document state
 # This is odd. Global var is here to pass a state in tools
 # The correct way to do this in langgraph is through injected state which is beyond the scope for now.
 document_content = ""
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
 
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
@@ -49,7 +55,7 @@ tools = [update, save]
 
 llm = ChatOpenAI(
     model="ai/gemma4:E4B",
-    base_url="http://model-runner.docker.internal/engines/v1",
+    base_url=openai_base_url,
     api_key="docker",
 )
 
