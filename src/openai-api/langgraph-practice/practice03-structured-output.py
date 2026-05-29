@@ -2,12 +2,18 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from pydantic import BaseModel, Field
+import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
 
 # docker desktop
 llm = ChatOpenAI(
     model="ai/gemma4:E4B", 
     temperature=0,
-    base_url="http://model-runner.docker.internal/engines/v1",
+    base_url=openai_base_url,
     api_key="docker",
 )
 

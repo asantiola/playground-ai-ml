@@ -1,12 +1,15 @@
 import openai 
+import os
 
 # practice code using openai.OpenAi.chat.completions
 
-# docker desktop
-base_url = "http://model-runner.docker.internal/engines/v1"
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
 
 client = openai.OpenAI(
-  base_url = base_url,
+  base_url = openai_base_url,
   api_key = "docker"
 )
 

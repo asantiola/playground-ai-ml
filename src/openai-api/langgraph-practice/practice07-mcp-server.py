@@ -11,9 +11,14 @@ import os
 
 mcp = FastMCP("ToolsServer")
 
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
 embeddings = OpenAIEmbeddings(
     model="ai/embeddinggemma:300M-Q8_0",
-    base_url="http://model-runner.docker.internal/engines/v1",
+    base_url=openai_base_url,
     api_key="docker",
     # disable check_embedding_ctx_length if your local model has different constraints
     check_embedding_ctx_length=False,

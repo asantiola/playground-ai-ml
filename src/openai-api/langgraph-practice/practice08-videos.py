@@ -4,9 +4,14 @@ import base64
 import os
 import cv2
 
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
 llm = ChatOpenAI(
     model="ai/gemma4:E4B",
-    base_url="http://model-runner.docker.internal/engines/v1",
+    base_url=openai_base_url,
     api_key="docker",
 )
 

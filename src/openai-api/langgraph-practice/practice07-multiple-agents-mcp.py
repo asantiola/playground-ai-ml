@@ -10,6 +10,11 @@ HOME = os.environ["HOME"]
 command_path = HOME + "/playground-ai-ml/.venv/bin/python"
 mcp_path = HOME + "/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
 
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
 async def run_client():
     client = MultiServerMCPClient(
         {
@@ -25,7 +30,7 @@ async def run_client():
     tools = await client.get_tools()
     llm = ChatOpenAI(
         model="ai/gemma4:E4B",
-        base_url="http://model-runner.docker.internal/engines/v1",
+        base_url=openai_base_url,
         api_key="docker",
     )
     llm_with_tools = llm.bind_tools(tools)

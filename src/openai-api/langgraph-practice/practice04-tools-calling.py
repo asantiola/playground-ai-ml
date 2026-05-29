@@ -1,6 +1,12 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from langchain_core.messages import HumanMessage
+import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
 
 @tool
 def get_weather(location: str):
@@ -18,11 +24,8 @@ def get_stock_price(ticker: str):
 # Create a list of tools
 tools = [get_weather, get_stock_price]
 
-# docker desktop
-base_url = "http://model-runner.docker.internal/engines/v1"
-
 llm = ChatOpenAI(
-    base_url=base_url,
+    base_url=openai_base_url,
     api_key = "docker",
     model="ai/gemma4:E4B",
     temperature=0,
