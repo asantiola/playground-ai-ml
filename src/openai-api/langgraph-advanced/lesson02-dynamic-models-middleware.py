@@ -10,6 +10,17 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from datetime import datetime
 import operator
+import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
 
 @tool
 def get_current_date_time() -> str:
@@ -111,24 +122,23 @@ tools_general = [get_current_date_time, get_weather]
 tools_all = [get_current_date_time, get_weather, lookup_stock_symbol, get_stock_quotes]
 
 model = "ai/gemma4:E4B"
-base_url = "http://model-runner.docker.internal/engines/v1"
 
 llm_general = ChatOpenAI(
     model=model,
-    base_url=base_url,
-    api_key="docker",
+    base_url=openai_base_url,
+    api_key=api_key,
 ).bind_tools(tools_general)
 
 llm_financial = ChatOpenAI(
     model=model,
-    base_url=base_url,
-    api_key="docker",
+    base_url=openai_base_url,
+    api_key=api_key,
 ).bind_tools(tools_financial)
 
 llm_default = ChatOpenAI(
     model=model,
-    base_url=base_url,
-    api_key="docker",
+    base_url=openai_base_url,
+    api_key=api_key,
 ).bind_tools(tools_all)
 
 class AgentState(TypedDict):

@@ -5,6 +5,17 @@ from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from datetime import datetime
 from typing import TypedDict, Union
+import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
 
 @tool
 def get_current_date_time() -> str:
@@ -124,8 +135,8 @@ class FinancialInfo(BaseModel):
 
 llm_with_tools = ChatOpenAI(
     model="ai/gemma4:E4B",
-    base_url="http://model-runner.docker.internal/engines/v1",
-    api_key="docker",
+    base_url=openai_base_url,
+    api_key=api_key,
 ).bind_tools(tools)
 
 agent = create_agent(

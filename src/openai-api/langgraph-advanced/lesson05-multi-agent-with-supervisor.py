@@ -5,17 +5,25 @@
 # Agent C (The Social Critic): Describes the different factions and power structures.
 
 from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage
 from langgraph_supervisor import create_supervisor
 from langchain.agents import create_agent
-from typing import Annotated, Sequence, TypedDict
-import operator
+import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
 
 llm = ChatOpenAI(
     model="ai/gemma4:E4B",
-    base_url="http://model-runner.docker.internal/engines/v1",
-    api_key="docker",
+    base_url=openai_base_url,
+    api_key=api_key,
 )
 
 geographer_prompt = "You are a Geographer. Describe climates, terrain, and city layouts."

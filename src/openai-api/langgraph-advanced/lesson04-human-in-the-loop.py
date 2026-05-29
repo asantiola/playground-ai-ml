@@ -7,6 +7,17 @@ from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from langchain.agents.middleware import after_model
 from langgraph.types import interrupt, Command
 from langgraph.checkpoint.memory import MemorySaver
+import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
 
 @tool
 def lookup_stock_symbol(company_name: str) -> str:
@@ -127,7 +138,7 @@ def place_order(symbol: str, action: str, shares: int, limit_price: float, order
 
 llm = ChatOpenAI(
     model="ai/gemma4:E4B",
-    base_url="http://model-runner.docker.internal/engines/v1",
+    base_url=openai_base_url,
     api_key="docker",
 )
 

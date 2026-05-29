@@ -10,6 +10,17 @@ from langgraph_supervisor import create_supervisor
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import StateGraph, START, END, MessagesState
 from langgraph.types import Command
+import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
 
 @tool
 def lookup_stock_symbol(company_name: str) -> str:
@@ -130,8 +141,8 @@ def place_order(symbol: str, action: str, shares: int, limit_price: float, order
 
 llm = ChatOpenAI(
     model="ai/gemma4:E4B",
-    base_url="http://model-runner.docker.internal/engines/v1",
-    api_key="docker",
+    base_url=openai_base_url,
+    api_key=api_key,
 )
 
 RISKY_TOOLS = {"place_order"}
