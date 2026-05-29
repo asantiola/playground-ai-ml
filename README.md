@@ -23,3 +23,15 @@
 ### VSCode extensions
 - ms-python.python
 - ms-toolsai.jupyter
+
+### Automatically activate venv if present
+- add in ~/.bashrc
+```
+if [ -d ".venv" ]; then
+    source .venv/bin/activate
+fi
+```
+- set vscode setting:
+```
+"python.terminal.activateEnvironment": false
+```
