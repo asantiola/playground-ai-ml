@@ -14,7 +14,7 @@ HOME=os.environ["HOME"]
 db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
 db = SQLDatabase.from_uri(db_uri)
 
-api_url = "http://localhost:12434/engines/v1"
+api_url = "http://model-runner.docker.internal/engines/v1"
 api_key = "docker"
 llm_model = "ai/gpt-oss:latest"
 embeddings_model = "ai/mxbai-embed-large"

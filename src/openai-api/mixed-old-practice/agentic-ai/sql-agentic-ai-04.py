@@ -317,7 +317,7 @@ def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
     return vector_store.as_retriever()
 
 embeddings_model = "ai/mxbai-embed-large"
-api_url = "http://localhost:12434/engines/v1"
+api_url = "http://model-runner.docker.internal/engines/v1"
 api_key = "docker"
 
 oa_embeddings = OpenAIEmbeddings(

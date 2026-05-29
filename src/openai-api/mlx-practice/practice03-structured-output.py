@@ -11,7 +11,7 @@ llm = ChatOpenAI(
     # model="mlx-community/phi-4-4bit",
     model="mlx-community/Devstral-Small-2507-4bit",
     temperature=0,
-    base_url="http://localhost:12434/v1",
+    base_url="http://model-runner.docker.internal/v1",
     api_key="mlx-lm",
 )
 

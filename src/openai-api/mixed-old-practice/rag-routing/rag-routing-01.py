@@ -14,7 +14,7 @@ HOME=os.environ["HOME"]
 
 oa_embeddings = OpenAIEmbeddings(
     model=embeddings_model,
-    base_url="http://localhost:12434/engines/v1",
+    base_url="http://model-runner.docker.internal/engines/v1",
     api_key="docker",
     # disable check_embedding_ctx_length if your local model has different constraints
     check_embedding_ctx_length=False,
@@ -65,7 +65,7 @@ def select_retriever(question: str):
 llm = ChatOpenAI(
     model="ai/gpt-oss:latest",
     temperature=0,
-    base_url="http://localhost:12434/engines/v1",
+    base_url="http://model-runner.docker.internal/engines/v1",
     api_key="docker",
 )
 

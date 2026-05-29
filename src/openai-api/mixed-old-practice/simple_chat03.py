@@ -13,7 +13,7 @@ class State(TypedDict):
 llm = ChatOpenAI(
     model="ai/gpt-oss:20B", 
     temperature=0,
-    base_url="http://localhost:12434/engines/v1",
+    base_url="http://model-runner.docker.internal/engines/v1",
     api_key="docker",
 )
 

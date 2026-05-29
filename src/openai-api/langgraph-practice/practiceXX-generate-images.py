@@ -5,7 +5,7 @@ import base64
 import os
 
 client = OpenAI(
-    base_url="http://localhost:12434/engines/diffusers/v1",
+    base_url="http://model-runner.docker.internal/engines/diffusers/v1",
     api_key = "docker"
 )
 

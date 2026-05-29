@@ -110,7 +110,7 @@ tools = [get_current_date_time, lookup_stock_symbol, get_stock_quotes]
 
 llm = ChatOpenAI(
     model="ai/gemma4:E4B",
-    base_url="http://localhost:12434/engines/v1",
+    base_url="http://model-runner.docker.internal/engines/v1",
     api_key="docker",
 )
 

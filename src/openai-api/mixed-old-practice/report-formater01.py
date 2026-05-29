@@ -10,7 +10,7 @@ HOME=os.environ["HOME"]
 db_name = HOME + "/repo/playground-ai-ml/data/sql-transactions.db"
 db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-transactions.db"
 
-api_url = "http://localhost:12434/engines/v1"
+api_url = "http://model-runner.docker.internal/engines/v1"
 api_key = "docker"
 llm_model = "ai/gpt-oss:latest"
 

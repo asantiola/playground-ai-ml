@@ -13,7 +13,7 @@ from typing import TypedDict, Literal
 
 HOME=os.environ["HOME"]
 
-api_url = "http://localhost:12434/engines/v1"
+api_url = "http://model-runner.docker.internal/engines/v1"
 api_key = "docker"
 llm_model = "ai/gpt-oss:latest"
 embeddings_model = "ai/mxbai-embed-large"

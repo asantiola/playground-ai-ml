@@ -7,7 +7,7 @@ llm = ChatOpenAI(
     # model = "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit",
     model="mlx-community/gpt-oss-20b-MXFP4-Q4",
     temperature=0,
-    base_url="http://localhost:12434/v1",
+    base_url="http://model-runner.docker.internal/v1",
     api_key="mlx-lm",
 )
 

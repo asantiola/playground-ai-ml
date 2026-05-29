@@ -20,7 +20,7 @@ tools = [get_weather, get_stock_price]
 # Point to Ollama's OpenAI-compatible port (default: 11434)
 llm = ChatOpenAI(
     model="ai/gpt-oss:20B",
-    base_url="http://localhost:12434/engines/v1",
+    base_url="http://model-runner.docker.internal/engines/v1",
     api_key="docker",
 )
 

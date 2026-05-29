@@ -2,7 +2,7 @@ import openai
 
 # practice code using openai.OpenAi.chat.completions
 
-base_url = "http://localhost:12434/v1"
+base_url = "http://model-runner.docker.internal/v1"
 
 client = openai.OpenAI(
   base_url = base_url,
