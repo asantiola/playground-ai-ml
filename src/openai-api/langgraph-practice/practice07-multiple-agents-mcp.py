@@ -15,6 +15,11 @@ openai_base_url = os.environ.get(
     "http://model-runner.docker.internal/engines/v1"
 )
 
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
+
 async def run_client():
     client = MultiServerMCPClient(
         {
@@ -31,7 +36,7 @@ async def run_client():
     llm = ChatOpenAI(
         model="ai/gemma4:E4B",
         base_url=openai_base_url,
-        api_key="docker",
+        api_key=api_key,
     )
     llm_with_tools = llm.bind_tools(tools)
     agent = create_agent(

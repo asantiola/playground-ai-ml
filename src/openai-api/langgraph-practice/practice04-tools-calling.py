@@ -8,6 +8,11 @@ openai_base_url = os.environ.get(
     "http://model-runner.docker.internal/engines/v1"
 )
 
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
+
 @tool
 def get_weather(location: str):
     """Use this to get the weather for a specific location."""
@@ -26,7 +31,7 @@ tools = [get_weather, get_stock_price]
 
 llm = ChatOpenAI(
     base_url=openai_base_url,
-    api_key = "docker",
+    api_key=api_key,
     model="ai/gemma4:E4B",
     temperature=0,
 )

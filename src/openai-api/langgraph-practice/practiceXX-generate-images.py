@@ -9,9 +9,14 @@ openai_base_url = os.environ.get(
     "http://model-runner.docker.internal/engines/diffusers/v1"
 )
 
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
+
 client = OpenAI(
     base_url=openai_base_url,
-    api_key = "docker"
+    api_key=api_key,
 )
 
 response = client.images.generate(

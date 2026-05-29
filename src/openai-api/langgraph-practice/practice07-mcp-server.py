@@ -16,10 +16,15 @@ openai_base_url = os.environ.get(
     "http://model-runner.docker.internal/engines/v1"
 )
 
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
+
 embeddings = OpenAIEmbeddings(
     model="ai/embeddinggemma:300M-Q8_0",
     base_url=openai_base_url,
-    api_key="docker",
+    api_key=api_key,
     # disable check_embedding_ctx_length if your local model has different constraints
     check_embedding_ctx_length=False,
 )

@@ -8,10 +8,15 @@ openai_base_url = os.environ.get(
     "http://model-runner.docker.internal/engines/v1"
 )
 
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
+
 llm = ChatOpenAI(
     model="ai/gemma4:E4B",
     base_url=openai_base_url,
-    api_key="docker",
+    api_key=api_key,
 )
 
 def encode_audio(audio_path):

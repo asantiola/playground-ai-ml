@@ -9,12 +9,17 @@ openai_base_url = os.environ.get(
     "http://model-runner.docker.internal/engines/v1"
 )
 
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
+
 # docker desktop
 llm = ChatOpenAI(
     model="ai/gemma4:E4B", 
     temperature=0,
     base_url=openai_base_url,
-    api_key="docker",
+    api_key=api_key,
 )
 
 class Response(BaseModel):
