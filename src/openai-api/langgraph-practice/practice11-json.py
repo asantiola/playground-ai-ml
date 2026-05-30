@@ -1,7 +1,26 @@
+from langchain_openai import ChatOpenAI
+from langchain_community.agent_toolkits import create_sql_agent
+from langchain_community.utilities import SQLDatabase
 import pandas as pd
 import sqlite3
 import json
 import os
+
+openai_base_url = os.environ.get(
+    "OPENAI_BASE_URL", 
+    "http://model-runner.docker.internal/engines/v1"
+)
+
+api_key = os.environ.get(
+    "OPENAI_API_KEY",
+    "your-default-key"
+)
+
+llm = ChatOpenAI(
+    model="ai/gemma4:E4B",
+    base_url=openai_base_url,
+    api_key=api_key,
+)
 
 def process_and_insert_financial_data(json_path, db_path, table_name="financial_data"):
     """
@@ -39,13 +58,23 @@ if __name__ == "__main__":
     db_file = 'data/financial01.db'
     table = 'financial_data'
     
-    # Execute the process
-    print("Starting financial data processing...")
-    success = process_and_insert_financial_data(json_file, db_file, table)
+    # # Execute the process
+    # print("Starting financial data processing...")
+    # success = process_and_insert_financial_data(json_file, db_file, table)
     
-    if success:
-        print("\n--- Task Execution Complete ---")
-        print(f"Data successfully read from {json_file} and inserted into {db_file}.")
-        print("To verify, you can run: sqlite3 data/financial01.db")
-    else:
-        print("\n--- Task Execution Failed ---")
+    # if success:
+    #     print("\n--- Task Execution Complete ---")
+    #     print(f"Data successfully read from {json_file} and inserted into {db_file}.")
+    #     print("To verify, you can run: sqlite3 data/financial01.db")
+    # else:
+    #     print("\n--- Task Execution Failed ---")
+
+    db = SQLDatabase.from_uri(f"sqlite:///{db_file}")
+    agent = create_sql_agent(
+        llm=llm,
+        db=db,
+        agent_type="zero-shot-react-description",
+        verbose=False,
+    )
+    response = agent.invoke({"input": "Give me the top 3 performing companies, and explain why."})
+    print(response["output"])
