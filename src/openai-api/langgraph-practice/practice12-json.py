@@ -96,8 +96,15 @@ def process_and_insert_financial_data(json_path, db_path, table_name="financial_
         return False
 
 def query_analyst(user_question: str):
+    system_prompt = """
+    You are a SQL analyst. First, list tables.
+    Then get the schema.
+    Finally, write a query to answer the user.
+    Limit results to 10.
+    """
+
     messages = [
-        SystemMessage(content="You are a SQL analyst. First, list tables. Then get the schema. Finally, write a query to answer the user. Limit results to 10."),
+        SystemMessage(content=system_prompt),
         HumanMessage(content=user_question)
     ]
     
@@ -142,8 +149,8 @@ if __name__ == "__main__":
     # else:
     #     print("\n--- Task Execution Failed ---")
 
-    # result = query_analyst("Give me the top 3 performing companies, and explain why.")
-    # print(f"\nFinal Answer:\n{result}")
+    result = query_analyst("Give me the top 3 performing companies, and explain why.")
+    print(f"\nFinal Answer:\n{result}")
 
-    result = query_analyst("How is Visa vs Mastercard performing?")
+    result = query_analyst("Based on the information in the database for Visa Inc. vs Mastercard Inc., which is better to buy?")
     print(f"\nFinal Answer:\n{result}")
