@@ -1,6 +1,8 @@
 from langchain_openai import ChatOpenAI
-from langchain_community.agent_toolkits import create_sql_agent
 from langchain_community.utilities import SQLDatabase
+from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
+from langchain.agents import create_agent
+from langchain_core.messages import HumanMessage
 import pandas as pd
 import sqlite3
 import json
@@ -70,11 +72,16 @@ if __name__ == "__main__":
     #     print("\n--- Task Execution Failed ---")
 
     db = SQLDatabase.from_uri(f"sqlite:///{db_file}")
-    agent = create_sql_agent(
-        llm=llm,
-        db=db,
-        agent_type="zero-shot-react-description",
-        verbose=False,
+    toolkit = SQLDatabaseToolkit(db=db, llm=llm)
+    tools = toolkit.get_tools()
+    agent = create_agent(
+        model=llm,
+        tools=tools,
+        system_prompt="You are a SQL data analyst. Always write clean SQL and limit your searches to the top 10 results max."
     )
-    response = agent.invoke({"input": "Give me the top 3 performing companies, and explain why."})
-    print(response["output"])
+    response = agent.invoke({
+        "messages": [
+            HumanMessage(content="Give me the top 3 performing companies, and explain why.")
+        ]
+    })
+    print(response["messages"][-1].content)
