@@ -24,6 +24,7 @@
 ### VSCode extensions
 - ms-python.python
 - ms-toolsai.jupyter
+- saoudrizwan.claude-dev
 
 ### Automatically activate venv if present
 - add in ~/.bashrc
