@@ -6,6 +6,7 @@ services:
         environment: 
             - TZ=Asia/Singapore
             - OPENAI_BASE_URL=http://model-runner.docker.internal/engines/v1
+            - OPENAI_API_KEY=your-default-key
         volumes:
             - ..:/workspaces/playground-ai-ml:delegated
             - ../../shared-data:/workspaces/shared-data:delegated
