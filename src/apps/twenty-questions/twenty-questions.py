@@ -22,11 +22,11 @@ llm = ChatOpenAI(
 )
 
 class AgentState(TypedDict):
-    question: Optional[str] = None
-    answer: Optional[str] = None
-    secret_word: Optional[str] = None
+    question: Optional[str]
+    answer: Optional[str]
+    secret_word: Optional[str]
     secret_words: Annotated[Sequence[str], operator.add]
-    guesses: int = 0
+    guesses: int
 
 def choose_word_node(state: AgentState) -> dict:    
     system_prompt = """
