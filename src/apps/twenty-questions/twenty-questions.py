@@ -1,6 +1,10 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
+from langgraph.graph import StateGraph, START, END
+from langgraph.types import Command
+from typing import TypedDict, List, Annotated, Sequence
 import os
+import operator
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
@@ -18,54 +22,96 @@ llm = ChatOpenAI(
     api_key=api_key,
 )
 
-def choose_secret_item():
-    """Chooses a random word from a predefined list of possible items."""
-    return "aardvark"
+class AgentState(TypedDict):
+    question: str
+    secret_word: str
+    secret_words: Annotated[Sequence[str], operator.add]
+    guesses: int
 
-def validate_question(question, secret_item):
-    system_prompt = f"""
-    You are validating a guess for a 20 question game, and the secret item is '{secret_item}'.
-    You can only answer 'Yes', 'No', or 'Invalid question' if question is not answerable with Yes/No.
+def choose_word_node(state: AgentState) -> AgentState:    
+    system_prompt = """
+    You are a helpful AI assistant keeping the secret word for 20 questions game.
     """
-    messages = [
-        SystemMessage(content=system_prompt),
-        HumanMessage(content=question)
-    ]
-    response = llm.invoke(messages)
-    return response.content
 
-def play_twenty_questions():
-    """Runs the 20 Questions game console application."""
-    secret_item = choose_secret_item()
-    max_guesses = 3
-    guesses_taken = 0
+    secret_words = []
+    if "secret_words" in state:
+        secret_words = state["secret_words"]
+    
+    prompt = f"""
+    Think of a random, specific noun that can be used for 20 questions game.
+    The word should not be in the previous words: {secret_words}
+    Just respond with the word.
+    """
+    
+    response = llm.invoke(prompt)
+    print(f"DEBUG: secret word is '{response.content}'")
+    return {
+        "secret_word": response.content,
+        "secret_words": [response.content],
+        "guesses": 5
+    }
 
-    print("=========================================")
-    print("        WELCOME TO TWENTY QUESTIONS     ")
-    print("=========================================")
-    print("I am thinking of something. You have 20 'Yes' or 'No' questions to guess what it is.")
-    print("Start guessing!")
+def ask_question_node(state: AgentState):
+    if "guesses" not in state or state["guesses"] == 0:
+        return Command(goto="loser_node")
+    
+    question = input("Question: ")
+    return Command(
+        goto="validate_question_node",
+        update={
+            "question": question,
+            "guesses": state["guesses"] - 1
+        }
+    )
 
-    while guesses_taken < max_guesses:
-        print(f"\n--- Guess Attempt {guesses_taken + 1} of {max_guesses} ---")
-        
-        if guesses_taken < max_guesses:
-            guess = input("Enter your guess (or type 'hint'): ").strip().lower()
+def validate_question_node(state: AgentState):
+    """"""
+    system_prompt = """
+    You are a helpful AI assistant keeping the secret word for 20 questions game.
+    """
 
-            if guess == secret_item:
-                print(f"\n*** Congratulations! You guessed it! The item was '{secret_item}' in {guesses_taken + 1} attempts. ***")
-                return True
+    human_prompt = f"""
+    Analyze the user's question: '{state["question"]}' regarding the secret word '{state["secret_word"]}'.
+    
+    You must evaluate this in strict order of priority:
+    1. FIRST, check if the user is guessing the secret word. 
+       If the question explicitly names or identifies '{{state["secret_word"]}}' (ignoring capitalization or punctuation), 
+       you MUST reply exactly with: 'Solved'.
+    2. SECOND, if it is not a guess, check if the question can be answered with a Yes or No. Reply exactly with 'Yes' or 'No'.
+    3. THIRD, if the question cannot be answered with a simple Yes or No, reply exactly with 'Invalid'.
 
-            answer = validate_question(guess, secret_item=secret_item)
-            print(f"Response to your question is: {answer}")
-        
-        guesses_taken += 1
+    Do not include any other text, punctuation, or explanation. Only return one of the four words: Solved, Yes, No, or Invalid.
+    """
+    response = llm.invoke([SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)])
+    
+    if response.content == "Solved":
+        return Command(goto="winner_node")
+    
+    print(f"Answer: {response.content}")
+    return Command(goto="ask_question_node")
 
-    print("\n=========================================")
-    print("             GAME OVER!                 ")
-    print(f"You ran out of guesses. The item I was thinking of was '{secret_item}'.")
-    print("=========================================")
-    return False
+
+def winner_node(state: AgentState) -> AgentState:
+    print(f"Congratulations! You have solved the secret word: '{state["secret_word"]}'.")
+    return {}
+
+def loser_node(state: AgentState) -> AgentState:
+    print(f"You did not guess the secret word: '{state["secret_word"]}'. Better luck next time.")
+    return {}
 
 if __name__ == "__main__":
-    play_twenty_questions()
+    graph = StateGraph(AgentState)
+    
+    graph.add_node("choose_word_node", choose_word_node)
+    graph.add_node("ask_question_node", ask_question_node)
+    graph.add_node("validate_question_node", validate_question_node)
+    graph.add_node("loser_node", loser_node)
+    graph.add_node("winner_node", winner_node)
+
+    graph.add_edge(START, "choose_word_node")
+    graph.add_edge("choose_word_node", "ask_question_node")
+    graph.add_edge("loser_node", END)
+    graph.add_edge("winner_node", END)
+
+    app = graph.compile()
+    app.invoke({})
