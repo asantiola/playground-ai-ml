@@ -141,8 +141,7 @@ def get_stock_quotes(symbol: str) -> Union[StockQuote, str]:
     
     return nyse_top_19_less_oracle[symbol]
 
-HOME = os.environ["HOME"]
-persist_directory = HOME + "/playground-ai-ml/.chromadb"
+persist_directory = "/workspaces/playground-ai-ml/.chromadb"
 collection_name = "stock_market"
 
 try:
