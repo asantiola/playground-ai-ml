@@ -1,8 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
-from langgraph.types import Command
-from typing import TypedDict, List, Annotated, Sequence
+from typing import TypedDict, Annotated, Sequence
 import os
 import operator
 
@@ -51,21 +50,18 @@ def choose_word_node(state: AgentState) -> AgentState:
         "guesses": 5
     }
 
-def ask_question_node(state: AgentState):
-    if "guesses" not in state or state["guesses"] == 0:
-        return Command(goto="loser_node")
-    
-    question = input("Question: ")
-    return Command(
-        goto="validate_question_node",
-        update={
-            "question": question,
-            "guesses": state["guesses"] - 1
-        }
-    )
+def route_have_guesses(state: AgentState) -> bool:
+    print(f"You have {state["guesses"]} guesses left.")
+    return state["guesses"] > 0
 
-def validate_question_node(state: AgentState):
-    """"""
+def ask_question_node(state: AgentState) -> AgentState:
+    question = input("Question: ")
+    return {
+        "question": question,
+        "guesses": state["guesses"] - 1,
+    }
+
+def route_answer(state: AgentState) -> str:
     system_prompt = """
     You are a helpful AI assistant keeping the secret word for 20 questions game.
     """
@@ -83,13 +79,12 @@ def validate_question_node(state: AgentState):
     Do not include any other text, punctuation, or explanation. Only return one of the four words: Solved, Yes, No, or Invalid.
     """
     response = llm.invoke([SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)])
-    
-    if response.content == "Solved":
-        return Command(goto="winner_node")
-    
-    print(f"Answer: {response.content}")
-    return Command(goto="ask_question_node")
-
+    answer = response.content
+    if answer == "Yes" or answer == "No":
+        print(f"Answer: {answer}")
+    elif answer == "Invalid":
+        print("That is not a valid question!")
+    return answer
 
 def winner_node(state: AgentState) -> AgentState:
     print(f"Congratulations! You have solved the secret word: '{state["secret_word"]}'.")
@@ -103,15 +98,37 @@ if __name__ == "__main__":
     graph = StateGraph(AgentState)
     
     graph.add_node("choose_word_node", choose_word_node)
+    graph.add_node("check_have_guesses", lambda x: x)
     graph.add_node("ask_question_node", ask_question_node)
-    graph.add_node("validate_question_node", validate_question_node)
     graph.add_node("loser_node", loser_node)
     graph.add_node("winner_node", winner_node)
-
+    
     graph.add_edge(START, "choose_word_node")
-    graph.add_edge("choose_word_node", "ask_question_node")
+    graph.add_edge("choose_word_node", "check_have_guesses")
+    graph.add_conditional_edges(
+        "check_have_guesses",
+        route_have_guesses,
+        {
+            True: "ask_question_node",
+            False: "loser_node"
+        }
+    )
+    graph.add_conditional_edges(
+        "ask_question_node",
+        route_answer,
+        {
+            "Solved": "winner_node",
+            "Yes": "check_have_guesses",
+            "No": "check_have_guesses",
+            "Invalid": "check_have_guesses",
+        }
+    )
     graph.add_edge("loser_node", END)
     graph.add_edge("winner_node", END)
 
     app = graph.compile()
+
+    drawing_filename = "/workspaces/playground-ai-ml/data/drawing.png"
+    app.get_graph().draw_mermaid_png(output_file_path=drawing_filename)
+
     app.invoke({})
