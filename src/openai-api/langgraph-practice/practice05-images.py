@@ -43,12 +43,10 @@ def describe(image_path):
     response = llm.invoke([message])
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
-HOME=os.environ["HOME"]
-
-path_vulture = HOME + "/playground-ai-ml/data/images/vulture.jpg"
-path_screenshot = HOME + "/playground-ai-ml/data/images/screenshot-sample.png"
-path_handwriting = HOME + "/playground-ai-ml/data/images/handwriting.jpg"
-path_meme = HOME + "/playground-ai-ml/data/images/meme.jpg"
+path_vulture = "/workspaces/playground-ai-ml/data/images/vulture.jpg"
+path_screenshot = "/workspaces/playground-ai-ml/data/images/screenshot-sample.png"
+path_handwriting = "/workspaces/playground-ai-ml/data/images/handwriting.jpg"
+path_meme = "/workspaces/playground-ai-ml/data/images/meme.jpg"
 
 describe(path_vulture)
 describe(path_screenshot)

@@ -21,9 +21,7 @@ llm = ChatOpenAI(
     api_key=api_key,
 )
 
-
-HOME = os.environ["HOME"]
-financial_file = HOME + "/playground-ai-ml/data/financial01.json"
+financial_file = "/workspaces/playground-ai-ml/data/financial01.json"
 
 try:
     with open(financial_file, "r") as f:

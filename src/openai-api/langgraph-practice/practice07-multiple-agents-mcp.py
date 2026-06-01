@@ -6,9 +6,8 @@ from langchain_core.messages import HumanMessage
 import asyncio
 import os
 
-HOME = os.environ["HOME"]
-command_path = HOME + "/playground-ai-ml/.venv/bin/python"
-mcp_path = HOME + "/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
+command_path = "/workspaces/playground-ai-ml/.venv/bin/python"
+mcp_path = "/workspaces/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
