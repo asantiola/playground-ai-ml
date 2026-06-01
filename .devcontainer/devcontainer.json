@@ -2,7 +2,7 @@
     "name": "dev-container-ai-ml",
     "dockerComposeFile": ["docker-compose.yml"],
     "service": "server",
-    "workspaceFolder": "/home/ubuntu/playground-ai-ml",
+    "workspaceFolder": "/workspaces/playground-ai-ml",
     "shutdownAction": "stopCompose",
     "customizations": {
         "vscode": 

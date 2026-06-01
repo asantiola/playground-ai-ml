@@ -6,6 +6,6 @@ services:
         environment: 
             - TZ=Asia/Singapore
         volumes:
-            - ..:/home/ubuntu/playground-ai-ml:delegated
-            - ../../shared-data:/home/ubuntu/shared-data:delegated
-        working_dir: /home/ubuntu/playground-ai-ml
+            - ..:/workspaces/playground-ai-ml:delegated
+            - ../../shared-data:/workspaces/shared-data:delegated
+        working_dir: /workspaces/playground-ai-ml
