@@ -92,10 +92,11 @@ def evaluate_answer_node(state: AgentState) -> dict:
 def game_router(state: AgentState) -> str:
     answer = state.get("answer", "Invalid")
     guesses = state.get("guesses", 0)
-    if guesses == 0:
-        return "loser"
-    elif answer == "Solved":
+
+    if answer == "Solved":
         return "winner" 
+    elif guesses <= 0:
+        return "loser"
     return "continue"
     
 
