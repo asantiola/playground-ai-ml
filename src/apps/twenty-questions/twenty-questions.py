@@ -1,7 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
-from typing import TypedDict, Annotated, Sequence
+from typing import TypedDict, Annotated, Sequence, Optional
 import os
 import operator
 
@@ -22,19 +22,18 @@ llm = ChatOpenAI(
 )
 
 class AgentState(TypedDict):
-    question: str
-    secret_word: str
+    question: Optional[str]
+    answer: Optional[str]
+    secret_word: Optional[str]
     secret_words: Annotated[Sequence[str], operator.add]
     guesses: int
 
-def choose_word_node(state: AgentState) -> AgentState:    
+def choose_word_node(state: AgentState) -> dict:    
     system_prompt = """
     You are a helpful AI assistant keeping the secret word for 20 questions game.
     """
 
-    secret_words = []
-    if "secret_words" in state:
-        secret_words = state["secret_words"]
+    secret_words = state.get("secret_words", [])
     
     prompt = f"""
     Think of a random, specific noun that can be used for 20 questions game.
@@ -43,35 +42,41 @@ def choose_word_node(state: AgentState) -> AgentState:
     """
     
     response = llm.invoke(prompt)
-    print(f"DEBUG: secret word is '{response.content}'")
+    chosen_word = response.content.strip().lower()
+
+    print(f"DEBUG: secret word is '{chosen_word}'")
     return {
-        "secret_word": response.content,
-        "secret_words": [response.content],
+        "secret_word": chosen_word,
+        "secret_words": [chosen_word],
         "guesses": 5
     }
 
 def route_have_guesses(state: AgentState) -> bool:
-    print(f"You have {state["guesses"]} guesses left.")
-    return state["guesses"] > 0
+    print(f"You have {state['guesses']} guesses left.")
+    if state["guesses"] > 0:
+        return "continue"
+    return "game_over"
 
-def ask_question_node(state: AgentState) -> AgentState:
+def ask_question_node(state: AgentState) -> dict:
     question = input("Question: ")
     return {
         "question": question,
         "guesses": state["guesses"] - 1,
     }
 
-def route_answer(state: AgentState) -> str:
+def evaluate_answer_node(state: AgentState) -> dict:
     system_prompt = """
     You are a helpful AI assistant keeping the secret word for 20 questions game.
     """
 
+    question = state.get("question", "")
+    secret_word = state.get("secret_word", "")
     human_prompt = f"""
-    Analyze the user's question: '{state["question"]}' regarding the secret word '{state["secret_word"]}'.
+    Analyze the user's question: '{question}' regarding the secret word '{secret_word}'.
     
     You must evaluate this in strict order of priority:
     1. FIRST, check if the user is guessing the secret word. 
-       If the question explicitly names or identifies '{{state["secret_word"]}}' (ignoring capitalization or punctuation), 
+       If the question explicitly names or identifies '{secret_word}' (ignoring capitalization or punctuation), 
        you MUST reply exactly with: 'Solved'.
     2. SECOND, if it is not a guess, check if the question can be answered with a Yes or No. Reply exactly with 'Yes' or 'No'.
     3. THIRD, if the question cannot be answered with a simple Yes or No, reply exactly with 'Invalid'.
@@ -79,19 +84,28 @@ def route_answer(state: AgentState) -> str:
     Do not include any other text, punctuation, or explanation. Only return one of the four words: Solved, Yes, No, or Invalid.
     """
     response = llm.invoke([SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)])
-    answer = response.content
+    answer = response.content.strip().capitalize()
     if answer == "Yes" or answer == "No":
         print(f"Answer: {answer}")
     elif answer == "Invalid":
         print("That is not a valid question!")
-    return answer
+    return {
+        "answer": answer
+    }
 
-def winner_node(state: AgentState) -> AgentState:
-    print(f"Congratulations! You have solved the secret word: '{state["secret_word"]}'.")
+def route_answer(state: AgentState) -> str:
+    answer = state.get("answer", "Invalid")
+    if answer in ["Yes", "No", "Invalid"]:
+        return "continue"
+    elif answer == "Solved":
+        return "game_over" 
+
+def winner_node(state: AgentState) -> dict:
+    print(f"Congratulations! You have solved the secret word: '{state['secret_word']}'.")
     return {}
 
-def loser_node(state: AgentState) -> AgentState:
-    print(f"You did not guess the secret word: '{state["secret_word"]}'. Better luck next time.")
+def loser_node(state: AgentState) -> dict:
+    print(f"You did not guess the secret word: '{state['secret_word']}'. Better luck next time.")
     return {}
 
 if __name__ == "__main__":
@@ -100,6 +114,7 @@ if __name__ == "__main__":
     graph.add_node("choose_word_node", choose_word_node)
     graph.add_node("check_have_guesses", lambda x: x)
     graph.add_node("ask_question_node", ask_question_node)
+    graph.add_node("evaluate_answer_node", evaluate_answer_node)
     graph.add_node("loser_node", loser_node)
     graph.add_node("winner_node", winner_node)
     
@@ -109,18 +124,17 @@ if __name__ == "__main__":
         "check_have_guesses",
         route_have_guesses,
         {
-            True: "ask_question_node",
-            False: "loser_node"
+            "continue": "ask_question_node",
+            "game_over": "loser_node"
         }
     )
+    graph.add_edge("ask_question_node", "evaluate_answer_node")
     graph.add_conditional_edges(
-        "ask_question_node",
+        "evaluate_answer_node",
         route_answer,
         {
-            "Solved": "winner_node",
-            "Yes": "check_have_guesses",
-            "No": "check_have_guesses",
-            "Invalid": "check_have_guesses",
+            "continue": "check_have_guesses",
+            "game_over": "winner_node",
         }
     )
     graph.add_edge("loser_node", END)
