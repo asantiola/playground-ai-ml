@@ -61,3 +61,4 @@ at how many floors do you expect the elevator to make a stop to let out one or m
 messages = [SystemMessage(content=system_prompt), HumanMessage(content=puzzle_prompt_floors)]
 for chunk in llm.stream(messages):
     print(chunk.content, end="", flush=True)
+print("")
