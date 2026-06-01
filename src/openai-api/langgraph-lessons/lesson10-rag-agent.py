@@ -17,7 +17,6 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-HOME = os.environ["HOME"]
 embeddings = OpenAIEmbeddings(
     model="ai/embeddinggemma:300M-Q8_0",
     base_url=openai_base_url,
@@ -26,7 +25,7 @@ embeddings = OpenAIEmbeddings(
     check_embedding_ctx_length=False,
 )
 
-persist_directory = HOME + "/repo/playground-ai-ml/.chromadb"
+persist_directory = "/workspaces/playground-ai-ml/.chromadb"
 collection_name = "stock_market"
 
 try:
