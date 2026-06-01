@@ -22,11 +22,11 @@ llm = ChatOpenAI(
 )
 
 class AgentState(TypedDict):
-    question: Optional[str]
-    answer: Optional[str]
-    secret_word: Optional[str]
+    question: Optional[str] = None
+    answer: Optional[str] = None
+    secret_word: Optional[str] = None
     secret_words: Annotated[Sequence[str], operator.add]
-    guesses: int
+    guesses: int = 0
 
 def choose_word_node(state: AgentState) -> dict:    
     system_prompt = """
@@ -51,17 +51,13 @@ def choose_word_node(state: AgentState) -> dict:
         "guesses": 5
     }
 
-def route_have_guesses(state: AgentState) -> bool:
-    print(f"You have {state['guesses']} guesses left.")
-    if state["guesses"] > 0:
-        return "continue"
-    return "game_over"
-
 def ask_question_node(state: AgentState) -> dict:
+    print(f"You have {state['guesses']} guesses left.")
     question = input("Question: ")
+    new_guesses = state["guesses"] - 1
     return {
         "question": question,
-        "guesses": state["guesses"] - 1,
+        "guesses": new_guesses,
     }
 
 def evaluate_answer_node(state: AgentState) -> dict:
@@ -93,12 +89,15 @@ def evaluate_answer_node(state: AgentState) -> dict:
         "answer": answer
     }
 
-def route_answer(state: AgentState) -> str:
+def game_router(state: AgentState) -> str:
     answer = state.get("answer", "Invalid")
-    if answer in ["Yes", "No", "Invalid"]:
-        return "continue"
+    guesses = state.get("guesses", 0)
+    if guesses == 0:
+        return "loser"
     elif answer == "Solved":
-        return "game_over" 
+        return "winner" 
+    return "continue"
+    
 
 def winner_node(state: AgentState) -> dict:
     print(f"Congratulations! You have solved the secret word: '{state['secret_word']}'.")
@@ -112,29 +111,21 @@ if __name__ == "__main__":
     graph = StateGraph(AgentState)
     
     graph.add_node("choose_word_node", choose_word_node)
-    graph.add_node("check_have_guesses", lambda x: x)
     graph.add_node("ask_question_node", ask_question_node)
     graph.add_node("evaluate_answer_node", evaluate_answer_node)
     graph.add_node("loser_node", loser_node)
     graph.add_node("winner_node", winner_node)
     
     graph.add_edge(START, "choose_word_node")
-    graph.add_edge("choose_word_node", "check_have_guesses")
-    graph.add_conditional_edges(
-        "check_have_guesses",
-        route_have_guesses,
-        {
-            "continue": "ask_question_node",
-            "game_over": "loser_node"
-        }
-    )
+    graph.add_edge("choose_word_node", "ask_question_node")
     graph.add_edge("ask_question_node", "evaluate_answer_node")
     graph.add_conditional_edges(
         "evaluate_answer_node",
-        route_answer,
+        game_router,
         {
-            "continue": "check_have_guesses",
-            "game_over": "winner_node",
+            "continue": "ask_question_node",
+            "winner": "winner_node",
+            "loser": "loser_node",
         }
     )
     graph.add_edge("loser_node", END)
