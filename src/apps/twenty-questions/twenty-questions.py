@@ -35,13 +35,13 @@ def choose_word_node(state: AgentState) -> dict:
 
     secret_words = state.get("secret_words", [])
     
-    prompt = f"""
+    human_prompt = f"""
     Think of a random, specific noun that can be used for 20 questions game.
     The word should not be in the previous words: {secret_words}
     Just respond with the word.
     """
     
-    response = llm.invoke(prompt)
+    response = llm.invoke([SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)])
     chosen_word = response.content.strip().lower()
 
     print(f"DEBUG: secret word is '{chosen_word}'")
