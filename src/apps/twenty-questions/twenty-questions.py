@@ -32,6 +32,7 @@ class AgentState(TypedDict):
     secret_word: Optional[str]
     secret_words: Annotated[list[str], safe_append_words]
     guesses: int
+    play_again: Optional[bool]
 
 def choose_word_node(state: AgentState) -> dict:    
     system_prompt = """
@@ -133,6 +134,17 @@ def loser_node(state: AgentState) -> dict:
     print(f"You did not guess the secret word: '{state['secret_word']}'. Better luck next time.")
     return {}
 
+def play_again_node(state: AgentState) -> dict:
+    choice = input("\nDo you want to play again? (yes/no): ").strip().lower()
+    return {
+        "play_again": choice in ["y", "yes"]
+    }
+
+def replay_router(state: AgentState) -> str:
+    if state.get("play_again", False):
+        return "replay"
+    return "exit"
+
 if __name__ == "__main__":
     graph = StateGraph(AgentState)
     
@@ -141,6 +153,7 @@ if __name__ == "__main__":
     graph.add_node("evaluate_answer", evaluate_answer_node)
     graph.add_node("loser", loser_node)
     graph.add_node("winner", winner_node)
+    graph.add_node("play_again", play_again_node)
     
     graph.add_edge(START, "choose_word")
     graph.add_edge("choose_word", "ask_question")
@@ -154,8 +167,16 @@ if __name__ == "__main__":
             "loser": "loser",
         }
     )
-    graph.add_edge("loser", END)
-    graph.add_edge("winner", END)
+    graph.add_edge("loser", "play_again")
+    graph.add_edge("winner", "play_again")
+    graph.add_conditional_edges(
+        "play_again",
+        replay_router,
+        {
+            "replay": "choose_word",
+            "exit": END
+        }
+    )
 
     app = graph.compile()
 
