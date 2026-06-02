@@ -3,6 +3,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated, Optional, Literal
 from pydantic import BaseModel, Field
+from wonderwords import RandomWord
 import os
 
 openai_base_url = os.environ.get(
@@ -22,6 +23,7 @@ llm = ChatOpenAI(
 )
 
 max_guesses = 5
+rw = RandomWord()
 
 def safe_append_words(old: Optional[list[str]], new: list[str]) -> list[str]:
     return (old or []) + list(new)
@@ -35,22 +37,24 @@ class AgentState(TypedDict):
     play_again: Optional[bool]
 
 def choose_word_node(state: AgentState) -> dict:    
-    system_prompt = """
-    You are a helpful AI assistant keeping the secret word for 20 questions game.
-    """
-
     secret_words = state.get("secret_words", [])
-    
-    human_prompt = f"""
-    Think of a random, specific noun that can be used for 20 questions game.
-    The word should not be in the previous words: {secret_words}
-    Just respond with the word.
-    """
-    
-    response = llm.invoke([SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)])
-    chosen_word = response.content.strip().lower()
 
+    chosen_word = rw.word(
+        include_parts_of_speech=["nouns"],
+        word_min_length=3,
+        word_max_length=10
+    ).lower()
+
+    while chosen_word in secret_words:
+        chosen_word = rw.word(
+            include_parts_of_speech=["nouns"],
+            word_min_length=3,
+            word_max_length=10
+        ).lower()
+    
+    print(f"\n--- NEW GAME STARTED ---")
     print(f"DEBUG: secret word is '{chosen_word}'")
+    
     return {
         "secret_word": chosen_word,
         "secret_words": [chosen_word],
