@@ -1,10 +1,9 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
-from typing import TypedDict, Annotated, Sequence, Optional, Literal
+from typing import TypedDict, Annotated, Optional, Literal
 from pydantic import BaseModel, Field
 import os
-import operator
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
@@ -22,11 +21,16 @@ llm = ChatOpenAI(
     api_key=api_key,
 )
 
+max_guesses = 5
+
+def safe_append_words(old: Optional[list[str]], new: list[str]) -> list[str]:
+    return (old or []) + list(new)
+
 class AgentState(TypedDict):
     question: Optional[str]
     answer: Optional[str]
     secret_word: Optional[str]
-    secret_words: Annotated[Sequence[str], operator.add]
+    secret_words: Annotated[list[str], safe_append_words]
     guesses: int
 
 def choose_word_node(state: AgentState) -> dict:    
@@ -49,16 +53,16 @@ def choose_word_node(state: AgentState) -> dict:
     return {
         "secret_word": chosen_word,
         "secret_words": [chosen_word],
-        "guesses": 5
+        "guesses": max_guesses,
     }
 
 def ask_question_node(state: AgentState) -> dict:
-    print(f"You have {state['guesses']} guesses left.")
+    guesses = state.get("guesses", max_guesses)
+
+    print(f"You have {guesses} guesses left.")
     question = input("Question: ")
-    new_guesses = state["guesses"] - 1
     return {
         "question": question,
-        "guesses": new_guesses,
     }
 
 class EvaluatedAnswer(BaseModel):
@@ -75,9 +79,13 @@ def evaluate_answer_node(state: AgentState) -> dict:
 
     question = state.get("question", "")
     secret_word = state.get("secret_word", "")
+    guesses = state.get("guesses", max_guesses)
 
     if not question or not secret_word:
-        return {"answer": "Invalid"}
+        return {
+            "answer": "Invalid",
+            "guesses": guesses,
+        }
     
     human_prompt = f"""
     Analyze the user's question: '{question}' regarding the secret word '{secret_word}'.
@@ -94,12 +102,16 @@ Evaluate this in strict order of priority:
     ])
 
     answer = response.answer
+    new_guesses = guesses - 1 if answer in ["Yes", "No", "Solved"] else guesses
+
     if answer == "Yes" or answer == "No":
         print(f"Answer: {answer}")
     elif answer == "Invalid":
         print("That is not a valid question!")
+    
     return {
-        "answer": answer
+        "answer": answer,
+        "guesses": new_guesses
     }
 
 def game_router(state: AgentState) -> str:
@@ -124,30 +136,32 @@ def loser_node(state: AgentState) -> dict:
 if __name__ == "__main__":
     graph = StateGraph(AgentState)
     
-    graph.add_node("choose_word_node", choose_word_node)
-    graph.add_node("ask_question_node", ask_question_node)
-    graph.add_node("evaluate_answer_node", evaluate_answer_node)
-    graph.add_node("loser_node", loser_node)
-    graph.add_node("winner_node", winner_node)
+    graph.add_node("choose_word", choose_word_node)
+    graph.add_node("ask_question", ask_question_node)
+    graph.add_node("evaluate_answer", evaluate_answer_node)
+    graph.add_node("loser", loser_node)
+    graph.add_node("winner", winner_node)
     
-    graph.add_edge(START, "choose_word_node")
-    graph.add_edge("choose_word_node", "ask_question_node")
-    graph.add_edge("ask_question_node", "evaluate_answer_node")
+    graph.add_edge(START, "choose_word")
+    graph.add_edge("choose_word", "ask_question")
+    graph.add_edge("ask_question", "evaluate_answer")
     graph.add_conditional_edges(
-        "evaluate_answer_node",
+        "evaluate_answer",
         game_router,
         {
-            "continue": "ask_question_node",
-            "winner": "winner_node",
-            "loser": "loser_node",
+            "continue": "ask_question",
+            "winner": "winner",
+            "loser": "loser",
         }
     )
-    graph.add_edge("loser_node", END)
-    graph.add_edge("winner_node", END)
+    graph.add_edge("loser", END)
+    graph.add_edge("winner", END)
 
     app = graph.compile()
 
-    drawing_filename = "/workspaces/playground-ai-ml/data/drawing.png"
-    app.get_graph().draw_mermaid_png(output_file_path=drawing_filename)
+    # drawing_filename = "/workspaces/playground-ai-ml/data/drawing.png"
+    # app.get_graph().draw_mermaid_png(output_file_path=drawing_filename)
 
-    app.invoke({})
+    app.invoke({
+        "secret_words": []
+    })
