@@ -1,7 +1,8 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
-from typing import TypedDict, Annotated, Sequence, Optional
+from typing import TypedDict, Annotated, Sequence, Optional, Literal
+from pydantic import BaseModel, Field
 import os
 import operator
 
@@ -60,6 +61,13 @@ def ask_question_node(state: AgentState) -> dict:
         "guesses": new_guesses,
     }
 
+class EvaluatedAnswer(BaseModel):
+    answer: Literal["Yes", "No", "Solved", "Invalid"] = Field(
+        description="The evaluation of the user's question. Must be 'Yes', 'No', 'Solved', or 'Invalid'."
+    )
+
+llm_evaluated_answer = llm.with_structured_output(schema=EvaluatedAnswer, method="json_schema")
+
 def evaluate_answer_node(state: AgentState) -> dict:
     system_prompt = """
     You are a helpful AI assistant keeping the secret word for 20 questions game.
@@ -67,20 +75,25 @@ def evaluate_answer_node(state: AgentState) -> dict:
 
     question = state.get("question", "")
     secret_word = state.get("secret_word", "")
+
+    if not question or not secret_word:
+        return {"answer": "Invalid"}
+    
     human_prompt = f"""
     Analyze the user's question: '{question}' regarding the secret word '{secret_word}'.
+Evaluate this in strict order of priority:
+1. FIRST, check if the user is guessing the secret word. 
+   If the question explicitly names or identifies '{secret_word}' (ignoring capitalization or punctuation), 
+   you MUST reply exactly with: 'Solved'.
+2. SECOND, if it is not a guess, check if the question can be answered with a Yes or No. Reply exactly with 'Yes' or 'No'.
+3. THIRD, if the question cannot be answered with a simple Yes or No, reply exactly with 'Invalid'."""
     
-    You must evaluate this in strict order of priority:
-    1. FIRST, check if the user is guessing the secret word. 
-       If the question explicitly names or identifies '{secret_word}' (ignoring capitalization or punctuation), 
-       you MUST reply exactly with: 'Solved'.
-    2. SECOND, if it is not a guess, check if the question can be answered with a Yes or No. Reply exactly with 'Yes' or 'No'.
-    3. THIRD, if the question cannot be answered with a simple Yes or No, reply exactly with 'Invalid'.
+    response = llm_evaluated_answer.invoke([
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=human_prompt)
+    ])
 
-    Do not include any other text, punctuation, or explanation. Only return one of the four words: Solved, Yes, No, or Invalid.
-    """
-    response = llm.invoke([SystemMessage(content=system_prompt), HumanMessage(content=human_prompt)])
-    answer = response.content.strip().capitalize()
+    answer = response.answer
     if answer == "Yes" or answer == "No":
         print(f"Answer: {answer}")
     elif answer == "Invalid":
