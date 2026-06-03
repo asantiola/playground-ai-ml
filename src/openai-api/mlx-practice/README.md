@@ -24,6 +24,7 @@ mlx_vlm.generate --model --model mlx-community/gemma-4-e4b-it-8bit --prompt "Wha
 ```
 mlx_lm.server --help
 mlx_lm.server  --host localhost --port 12434 --model mlx-community/gpt-oss-20b-MXFP4-Q4
+mlx_lm.server  --host localhost --port 12434 --model mlx-community/phi-4-6bit
 mlx_vlm.server --host localhost --port 12434 --model mlx-community/gemma-4-e4b-it-8bit
 ```
 
