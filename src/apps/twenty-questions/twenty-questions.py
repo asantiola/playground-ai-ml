@@ -1,6 +1,8 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
+from langgraph.types import interrupt, Command
+from langgraph.checkpoint.memory import MemorySaver
 from typing import TypedDict, Annotated, Optional, Literal
 from pydantic import BaseModel, Field
 from wonderwords import RandomWord
@@ -69,10 +71,10 @@ def choose_word_node(state: AgentState) -> dict:
 def ask_question_node(state: AgentState) -> dict:
     guesses = state.get("guesses", max_guesses)
 
-    print(f"You have {guesses} guesses left.")
-    question = input("Question: ")
+    user_input = interrupt({"action": "get_question"})
+
     return {
-        "question": question,
+        "question": user_input,
     }
 
 class EvaluatedAnswer(BaseModel):
@@ -144,7 +146,8 @@ def loser_node(state: AgentState) -> dict:
     return {}
 
 def play_again_node(state: AgentState) -> dict:
-    choice = input("\nDo you want to play again? (yes/no): ").strip().lower()
+    user_input = interrupt({"action": "get_replay_choice"})
+    choice = str(user_input).strip().lower()
     return {
         "play_again": choice in ["y", "yes"]
     }
@@ -187,11 +190,42 @@ if __name__ == "__main__":
         }
     )
 
-    app = graph.compile()
+    checkpointer = MemorySaver()
+    app = graph.compile(checkpointer=checkpointer)
 
     # drawing_filename = workspaces + "/playground-ai-ml/data/drawing.png"
     # app.get_graph().draw_mermaid_png(output_file_path=drawing_filename)
 
-    app.invoke({
-        "secret_words": []
-    })
+    config = {"configurable": {"thread_id": "session_abc123"}}
+    state = {"secret_words": []}
+    events = app.stream(input=state, config=config)
+
+    # Standard runtime execution runner
+    active_state = None
+    for event in events:
+        active_state = event
+    
+    # Continue running as long as the state is paused on an interrupt
+    while True:
+        state_snapshot = app.get_state(config)
+
+        # if there are tasks waiting, means we hit an interrupt
+        if (state_snapshot.tasks):
+            current_interrupt = state_snapshot.tasks[0].interrupts[0]
+            action_needed = current_interrupt.value.get("action")
+
+            # User inputs external from the engine core
+            if action_needed == "get_question":
+                user_response = input("Question: ")
+            elif action_needed == "get_replay_choice":
+                user_response = input("\nDo you want to play again? (yes/no): ")
+            else:
+                user_response = None
+        
+            # Resume graph using Command by passing user response
+            events = app.stream(Command(resume=user_response), config=config, stream_mode="values")
+            for event in events:
+                active_state = event
+        else:
+            # No tasks, graph reached END safely
+            break
