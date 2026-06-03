@@ -29,7 +29,7 @@ response = client.images.generate(
 image_b64 = response.data[0].b64_json
 images_bytes = base64.b64decode(image_b64)
 
-output_name = "/workspaces/playground-ai-ml/data/images/generated.png"
+output_name = workspaces + "/playground-ai-ml/data/images/generated.png"
 with open(output_name, "wb") as f:
     f.write(images_bytes)
 

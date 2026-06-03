@@ -27,9 +27,14 @@ import os
 # update = {"messages": ["Nice to meet you!"]}
 # new_state = {"messages": ["Hi!", "Nice to meet you!"]}
 
+workspaces = os.environ.get(
+    "WORKSPACES",
+    "/workspaces"
+)
+
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://model-runner.docker.internal/engines/v1"
+    "http://localhost:12434/engines/v1"
 )
 
 api_key = os.environ.get(

@@ -3,9 +3,14 @@ from langchain_core.messages import HumanMessage
 import base64
 import os
 
+workspaces = os.environ.get(
+    "WORKSPACES",
+    "/workspaces"
+)
+
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://model-runner.docker.internal/engines/v1"
+    "http://localhost:12434/engines/v1"
 )
 
 api_key = os.environ.get(
@@ -44,6 +49,6 @@ def describe(audio_path):
     response = llm.invoke([message])
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
-path_quickbrownfox = "/workspaces/playground-ai-ml/data/audios/QuickBrownFox.mp3"
+path_quickbrownfox = workspaces + "/playground-ai-ml/data/audios/QuickBrownFox.mp3"
 
 describe(path_quickbrownfox)

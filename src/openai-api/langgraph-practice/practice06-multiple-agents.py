@@ -13,9 +13,14 @@ from datetime import datetime
 import os
 import operator
 
+workspaces = os.environ.get(
+    "WORKSPACES",
+    "/workspaces"
+)
+
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://model-runner.docker.internal/engines/v1"
+    "http://localhost:12434/engines/v1"
 )
 
 api_key = os.environ.get(
@@ -141,7 +146,7 @@ def get_stock_quotes(symbol: str) -> Union[StockQuote, str]:
     
     return nyse_top_19_less_oracle[symbol]
 
-persist_directory = "/workspaces/playground-ai-ml/.chromadb"
+persist_directory = workspaces + "/playground-ai-ml/.chromadb"
 collection_name = "stock_market"
 
 try:

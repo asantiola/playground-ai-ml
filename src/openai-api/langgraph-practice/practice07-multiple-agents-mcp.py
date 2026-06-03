@@ -6,12 +6,17 @@ from langchain_core.messages import HumanMessage
 import asyncio
 import os
 
-command_path = "/workspaces/playground-ai-ml/.venv/bin/python"
-mcp_path = "/workspaces/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
+command_path = workspaces + "/playground-ai-ml/.venv/bin/python"
+mcp_path = workspaces + "/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
+
+workspaces = os.environ.get(
+    "WORKSPACES",
+    "/workspaces"
+)
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://model-runner.docker.internal/engines/v1"
+    "http://localhost:12434/engines/v1"
 )
 
 api_key = os.environ.get(

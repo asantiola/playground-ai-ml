@@ -4,9 +4,14 @@ import base64
 import os
 import cv2
 
+workspaces = os.environ.get(
+    "WORKSPACES",
+    "/workspaces"
+)
+
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://model-runner.docker.internal/engines/v1"
+    "http://localhost:12434/engines/v1"
 )
 
 api_key = os.environ.get(
@@ -66,6 +71,6 @@ def describe(video_path):
     response = llm.invoke([message])
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
-path_plants = "/workspaces/playground-ai-ml/data/videos/plants.mp4"
+path_plants = workspaces + "/playground-ai-ml/data/videos/plants.mp4"
 
 describe(path_plants)

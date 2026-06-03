@@ -3,9 +3,14 @@ from langchain_core.messages import HumanMessage
 import base64
 import os
 
+workspaces = os.environ.get(
+    "WORKSPACES",
+    "/workspaces"
+)
+
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://model-runner.docker.internal/engines/v1"
+    "http://localhost:12434/engines/v1"
 )
 
 api_key = os.environ.get(
@@ -43,10 +48,10 @@ def describe(image_path):
     response = llm.invoke([message])
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
-path_vulture = "/workspaces/playground-ai-ml/data/images/vulture.jpg"
-path_screenshot = "/workspaces/playground-ai-ml/data/images/screenshot-sample.png"
-path_handwriting = "/workspaces/playground-ai-ml/data/images/handwriting.jpg"
-path_meme = "/workspaces/playground-ai-ml/data/images/meme.jpg"
+path_vulture = workspaces + "/playground-ai-ml/data/images/vulture.jpg"
+path_screenshot = workspaces + "/playground-ai-ml/data/images/screenshot-sample.png"
+path_handwriting = workspaces + "/playground-ai-ml/data/images/handwriting.jpg"
+path_meme = workspaces + "/playground-ai-ml/data/images/meme.jpg"
 
 describe(path_vulture)
 describe(path_screenshot)
