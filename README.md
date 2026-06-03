@@ -1,5 +1,10 @@
 # playground-ai-ml
 
+### install python version in MacOS
+```
+brew install python@3.12
+```
+
 ### create virtual env
 - ctrl-shift-P, Python: Create Environment
 - python3 -m venv .venv; source .venv/bin/activate;
