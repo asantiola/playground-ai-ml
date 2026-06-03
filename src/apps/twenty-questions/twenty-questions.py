@@ -216,6 +216,8 @@ if __name__ == "__main__":
 
             # User inputs external from the engine core
             if action_needed == "get_question":
+                guesses_left = state_snapshot.values.get("guesses", max_guesses)
+                print(f"You have {guesses_left} guesses left.")
                 user_response = input("Question: ")
             elif action_needed == "get_replay_choice":
                 user_response = input("\nDo you want to play again? (yes/no): ")
