@@ -51,3 +51,8 @@ fi
 ```
 "python.terminal.activateEnvironment": false
 ```
+
+### For local models
+- Docker Model Runner
+    - http://localhost:12434/engines/v1
+    - http://model-runner.docker.internal/engines/v1
