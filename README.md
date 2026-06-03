@@ -13,7 +13,8 @@ pip install langchain langchain-openai langchain-community langchain-huggingface
 pip install langgraph langgraph_supervisor
 pip install openai chroma
 pip install opencv-python-headless
-pip install mcp[cli] langchain-mcp-adapters
+pip install mcp langchain-mcp-adapters
+pip install streamlit
 ```
 - https://pytorch.org/
     - CUDA (XPS 9500 / CUDA 12.6)
