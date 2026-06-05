@@ -29,7 +29,7 @@ llm = ChatOpenAI(
     api_key=api_key,
 )
 
-max_guesses = 5
+max_guesses = 20
 rw = RandomWord()
 
 def safe_append_words(old: Optional[list[str]], new: list[str]) -> list[str]:
