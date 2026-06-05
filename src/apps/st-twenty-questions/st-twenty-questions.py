@@ -17,6 +17,8 @@ st.title("🎮 The 20 Questions Game")
 openai_base_url = os.environ.get("OPENAI_BASE_URL", "http://localhost:12434/engines/v1")
 api_key = os.environ.get("OPENAI_API_KEY", "your-default-key")
 
+max_guess = 20
+
 @st.cache_resource
 def get_llm():
     return ChatOpenAI(
@@ -57,7 +59,7 @@ def choose_word_node(state: AgentState) -> dict:
     return {
         "secret_word": chosen_word,
         "secret_words": [chosen_word],
-        "guesses": 5,
+        "guesses": max_guess,
     }
 
 def ask_question_node(state: AgentState) -> dict:
@@ -77,7 +79,7 @@ def evaluate_answer_node(state: AgentState) -> dict:
     system_prompt = "You are a helpful AI assistant keeping the secret word for 20 questions game."
     question = state.get("question", "")
     secret_word = state.get("secret_word", "")
-    guesses = state.get("guesses", 5)
+    guesses = state.get("guesses", max_guess)
 
     if not question or not secret_word:
         return {"answer": "Invalid", "guesses": guesses}
@@ -156,21 +158,26 @@ def compile_graph():
 if "game_app" not in st.session_state:
     st.session_state.game_app = compile_graph()
     st.session_state.config = {"configurable": {"thread_id": "streamlit_session_001"}}
-    # Initialize game thread
-    for event in st.session_state.game_app.stream({"secret_words": []}, config=st.session_state.config, stream_mode="values"):
-        pass
+    # Added spinner for the initial session setup
+    with st.spinner("Generating game universe..."):
+        for event in st.session_state.game_app.stream({"secret_words": []}, config=st.session_state.config, stream_mode="values"):
+            pass
 
 # UI Event Callbacks to handle streaming resume commands
 def submit_question():
     if st.session_state.user_q_input.strip():
         q_text = st.session_state.user_q_input
-        for event in st.session_state.game_app.stream(Command(resume=q_text), config=st.session_state.config, stream_mode="values"):
-            pass
+        # Added spinner while the LLM processes the question evaluation
+        with st.spinner("Consulting the AI Oracle..."):
+            for event in st.session_state.game_app.stream(Command(resume=q_text), config=st.session_state.config, stream_mode="values"):
+                pass
         st.session_state.user_q_input = "" # Clear box
 
 def submit_replay(choice: str):
-    for event in st.session_state.game_app.stream(Command(resume=choice), config=st.session_state.config, stream_mode="values"):
-        pass
+    # Added spinner for setting up a brand new round
+    with st.spinner("Resetting game board..."):
+        for event in st.session_state.game_app.stream(Command(resume=choice), config=st.session_state.config, stream_mode="values"):
+            pass
 
 # --- 5. RENDER THE CURRENT INTERFACE LAYER ---
 app = st.session_state.game_app
@@ -198,7 +205,7 @@ if state_snapshot.tasks:
     
     if action_needed == "get_question":
         # Game Stats Context Card
-        st.metric(label="Guesses Remaining", value=current_state.get("guesses", 5))
+        st.metric(label="Guesses Remaining", value=current_state.get("guesses", max_guess))
         
         # Display previous response assessment validation if it exists
         last_ans = current_state.get("answer")
