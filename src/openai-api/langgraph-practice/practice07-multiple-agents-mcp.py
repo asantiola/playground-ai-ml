@@ -6,9 +6,6 @@ from langchain_core.messages import HumanMessage
 import asyncio
 import os
 
-command_path = workspaces + "/playground-ai-ml/.venv/bin/python"
-mcp_path = workspaces + "/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
-
 workspaces = os.environ.get(
     "WORKSPACES",
     "/workspaces"
@@ -23,6 +20,9 @@ api_key = os.environ.get(
     "OPENAI_API_KEY",
     "your-default-key"
 )
+
+command_path = workspaces + "/playground-ai-ml/.venv/bin/python"
+mcp_path = workspaces + "/playground-ai-ml/src/openai-api/langgraph-practice/practice07-mcp-server.py"
 
 async def run_client():
     client = MultiServerMCPClient(
