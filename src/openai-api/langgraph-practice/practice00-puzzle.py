@@ -13,14 +13,15 @@ api_key = os.environ.get(
 )
 
 llm = ChatOpenAI(
-    model="ai/phi4:14B-Q4_K_M",
-    # model="ai/gemma4:E4B",
+    # model="ai/phi4:14B-Q4_K_M",
+    model="ai/gemma4:E4B",
     base_url=openai_base_url,
     api_key=api_key,
 )
 
 system_prompt = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
-You approach problems step-by-step, verify boundary conditions, and rigorously check your assumptions before calculating the final answer.
+You approach problems step-by-step, verify boundary conditions, 
+and rigorously check your assumptions before calculating the final answer.
 """
 
 puzzle_prompt_einstein = """There are five houses of different colors adjacent to one another on a road. 
