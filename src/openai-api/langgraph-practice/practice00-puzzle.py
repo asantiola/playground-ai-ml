@@ -13,15 +13,17 @@ api_key = os.environ.get(
 )
 
 llm = ChatOpenAI(
-    model="ai/gemma4:E4B",
+    model="ai/phi4:14B-Q4_K_M",
+    # model="ai/gemma4:E4B",
     base_url=openai_base_url,
     api_key=api_key,
 )
 
-system_prompt = "You are an expert assistant good in solving logic problems."
+system_prompt = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
+You approach problems step-by-step, verify boundary conditions, and rigorously check your assumptions before calculating the final answer.
+"""
 
-puzzle_prompt_einstein = """
-There are five houses of different colors adjacent to one another on a road. 
+puzzle_prompt_einstein = """There are five houses of different colors adjacent to one another on a road. 
 In each house lives a man of different nationality. 
 Each man has a favorite drink, a favorite brand of cigarettes, and keeps a different kind of pet.
 
@@ -44,21 +46,22 @@ The Blend smoker has a neighbor who drinks water.
 Who owns the fish?
 """
 
-puzzle_prompt_drunk = """
-The Drunk Passenger Problem (Expected Value): A plane has 50 seats, and 50 passengers are boarding. 
-The first 10 passengers are drunk and sit in random unoccupied seats.
-Every subsequent passenger sits in their assigned seat if it's available; otherwise, they choose a random seat.
-What is the expected number of passengers who sit in their assigned seats?
+puzzle_prompt_drunk = """A line of 100 airline passengers are waiting to board a plane.
+They each hold a ticket to one of the 100 seats on that flight.
+For convenience, let’s say that the n-th passenger in line has a ticket for the seat number n.
+Being drunk, the first person in line picks a random seat (equally likely for each seat).
+All of the other passengers are sober, and will go to their proper seats unless it is already occupied;
+In that case, they will randomly choose a free seat. You’re person number 100.
+What is the probability that you end up in your seat (i.e., seat #100) ?
 """
 
-puzzle_prompt_floors = """
-A building has 10 floors above the basement.
+puzzle_prompt_floors = """A building has 10 floors above the basement.
 If 12 people get into an elevator at the basement, and each chooses a floor at random to get out, 
 independently of the others,
 at how many floors do you expect the elevator to make a stop to let out one or more of these 12 people?
 """
 
-messages = [SystemMessage(content=system_prompt), HumanMessage(content=puzzle_prompt_floors)]
+messages = [SystemMessage(content=system_prompt), HumanMessage(content=puzzle_prompt_drunk)]
 for chunk in llm.stream(messages):
     print(chunk.content, end="", flush=True)
 print("")
