@@ -4,11 +4,6 @@ from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessageProm
 from pydantic import BaseModel, Field
 import os
 
-workspaces = os.environ.get(
-    "WORKSPACES",
-    "/workspaces"
-)
-
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
     "http://localhost:12434/engines/v1"
