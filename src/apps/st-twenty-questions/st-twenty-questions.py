@@ -39,23 +39,38 @@ class AgentState(TypedDict):
     guesses: int
     play_again: Optional[bool]
 
-def choose_word_node(state: AgentState) -> dict:    
+class TangibleCheck(BaseModel):
+    is_tangible: bool = Field(
+        description="True if the word is a concrete, physical object you can touch. False if it is a concept, feeling, or abstract idea."
+    )
+
+def choose_word_node(state: AgentState) -> dict:
     secret_words = state.get("secret_words", [])
+
+    llm_tangible_check = get_llm().with_structured_output(schema=TangibleCheck, method="json_schema")
     rw = RandomWord()
     
-    chosen_word = rw.word(
-        include_parts_of_speech=["nouns"],
-        word_min_length=3,
-        word_max_length=10
-    ).lower()
-
-    while chosen_word in secret_words:
+    system_prompt = "You are a linguistics expert that classifies nouns as concrete/tangible or abstract."
+    while True:
         chosen_word = rw.word(
             include_parts_of_speech=["nouns"],
             word_min_length=3,
             word_max_length=10
         ).lower()
-    
+
+        if chosen_word in secret_words:
+            continue
+
+        human_prompt = f"Is the noun '{chosen_word}' a tangible, physical object that a human can see and touch? Respond with true or false."
+
+        response = llm_tangible_check.invoke([
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=human_prompt)
+        ])
+
+        if response.is_tangible:
+            break
+       
     return {
         "secret_word": chosen_word,
         "secret_words": [chosen_word],
