@@ -52,13 +52,6 @@ llm_tangible_check = llm.with_structured_output(schema=TangibleCheck, method="js
 
 def choose_word_node(state: AgentState) -> dict:    
     secret_words = state.get("secret_words", [])
-
-    chosen_word = rw.word(
-        include_parts_of_speech=["nouns"],
-        word_min_length=3,
-        word_max_length=10
-    ).lower()
-
     system_prompt = "You are a linguistics expert that classifies nouns as concrete/tangible or abstract."
 
     while True:
