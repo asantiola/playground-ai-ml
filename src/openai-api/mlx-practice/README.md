@@ -23,8 +23,6 @@ python -m mlx_vlm.generate --model --model mlx-community/gemma-4-e4b-it-8bit --p
 - These works but watch memory pressure for 20b model
 ```
 python -m mlx_lm.server --help
-python -m mlx_lm.server  --host localhost --port 12434 --model mlx-community/gpt-oss-20b-MXFP4-Q4
-python -m mlx_lm.server  --host localhost --port 12434 --model mlx-community/phi-4-6bit
 python -m mlx_vlm.server --host localhost --port 12434 --model mlx-community/gemma-4-12B-it-6bit
 ```
 
