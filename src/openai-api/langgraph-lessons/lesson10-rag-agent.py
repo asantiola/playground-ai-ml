@@ -2,9 +2,12 @@ from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated, Sequence
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, ToolMessage
 from operator import add as add_message
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
+from typing import List
+from langchain_core.embeddings import Embeddings
+from mlx_embeddings.utils import load as load_mlx_embedding
 import os
 
 workspaces = os.environ.get(
@@ -22,13 +25,30 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-embeddings = OpenAIEmbeddings(
-    model="ai/embeddinggemma:300M-Q8_0",
-    base_url=openai_base_url,
-    api_key=api_key,
-    # disable check_embedding_ctx_length if your local model has different constraints
-    check_embedding_ctx_length=False,
-)
+class MLXGemmaEmbeddings(Embeddings):
+    def __init__(self, model_id: str = "mlx-community/embeddinggemma-300m-4bit"):
+        # This handles the custom encoder layers natively on your Apple Silicon GPU
+        self.model, self.tokenizer = load_mlx_embedding(model_id)
+
+    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+        # Process the list of chunks coming from your text splitter
+        embeddings_list = []
+        for text in texts:
+            input_ids = self.tokenizer.encode(text, return_tensors="mlx")
+            outputs = self.model(input_ids)
+            
+            # Extract the mean-pooled, normalized embedding vectors
+            text_embeds = outputs.text_embeds.tolist()
+            embeddings_list.extend(text_embeds)
+            
+        return embeddings_list
+
+    def embed_query(self, text: str) -> List[float]:
+        # Process individual user search queries
+        return self.embed_documents([text])[0]
+
+# Replace your commented out block with this instantiation:
+embeddings = MLXGemmaEmbeddings()
 
 persist_directory = workspaces + "/playground-ai-ml/.chromadb"
 collection_name = "stock_market"
