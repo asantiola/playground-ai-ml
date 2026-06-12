@@ -5,7 +5,7 @@ import os
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://localhost:12434/engines/v1"
+    "http://localhost:12434/v1"
 )
 
 api_key = os.environ.get(
@@ -20,7 +20,7 @@ client = openai.OpenAI(
 
 completion = client.chat.completions.create(
     # model="ai/llama3.1:latest", 
-    model="ai/gemma4:E4B", 
+    model="mlx-community/gemma-4-12B-it-6bit", 
     messages=[
         {"role": "system", "content": "You are a helpful AI assistant."},
         {"role": "user", "content": "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."}

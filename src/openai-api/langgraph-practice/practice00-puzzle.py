@@ -4,7 +4,7 @@ import os
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    # "http://localhost:12434/engines/v1"     # Docker Model Runner
+    # "http://localhost:12434/v1"     # Docker Model Runner
     "http://localhost:12434/v1"             # MLX
 )
 
@@ -15,7 +15,7 @@ api_key = os.environ.get(
 
 llm = ChatOpenAI(
     # model="ai/phi4:14B-Q4_K_M",
-    # model="ai/gemma4:E4B",
+    # model="mlx-community/gemma-4-12B-it-6bit",
     # model="mlx-community/phi-4-6bit",
     model="mlx-community/gemma-4-12B-it-6bit",
     base_url=openai_base_url,

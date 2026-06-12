@@ -11,7 +11,7 @@ workspaces = os.environ.get(
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://localhost:12434/engines/v1"
+    "http://localhost:12434/v1"
 )
 
 api_key = os.environ.get(
@@ -20,7 +20,7 @@ api_key = os.environ.get(
 )
 
 llm = ChatOpenAI(
-    model="ai/gemma4:E4B",
+    model="mlx-community/gemma-4-12B-it-6bit",
     base_url=openai_base_url,
     api_key=api_key,
 )

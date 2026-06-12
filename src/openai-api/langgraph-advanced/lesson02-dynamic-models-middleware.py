@@ -14,7 +14,7 @@ import os
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://localhost:12434/engines/v1"
+    "http://localhost:12434/v1"
 )
 
 api_key = os.environ.get(
@@ -121,7 +121,7 @@ tools_financial = [lookup_stock_symbol, get_stock_quotes]
 tools_general = [get_current_date_time, get_weather]
 tools_all = [get_current_date_time, get_weather, lookup_stock_symbol, get_stock_quotes]
 
-model = "ai/gemma4:E4B"
+model = "mlx-community/gemma-4-12B-it-6bit"
 
 llm_general = ChatOpenAI(
     model=model,
