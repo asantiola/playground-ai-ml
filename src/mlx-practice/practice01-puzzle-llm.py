@@ -120,7 +120,6 @@ messages = [
 
 llm = MLXVLChat(model_path=model_path)
 
-# 2. Define your messages using LangChain primitives
 messages = [
     SystemMessage(content=system_prompt), 
     HumanMessage(content=puzzle_prompt_einstein)
@@ -128,7 +127,6 @@ messages = [
 
 print("Thinking...\n")
 
-# 3. Stream seamlessly!
 for chunk in llm.stream(messages):
     print(chunk.content, end="", flush=True)
 print("")
