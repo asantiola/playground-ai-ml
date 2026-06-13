@@ -1,7 +1,6 @@
-from mlx_lm import load, generate
+from mlx_vlm import load, generate
 
-model_path = "mlx-community/gpt-oss-20b-MXFP4-Q4"
-# model_path = "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"
+model_path="mlx-community/gemma-4-12B-it-6bit"
 model, tokenizer = load(model_path)
 
 print(f"tokenizer: {tokenizer}\n")
@@ -17,7 +16,7 @@ messages = [
     }
 ]
 
-prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=False)
+prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
 print(f"prompt: {prompt}\n")
 

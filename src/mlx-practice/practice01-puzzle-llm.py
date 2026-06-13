@@ -118,7 +118,7 @@ messages = [
     }
 ]
 
-llm = MLXVLChat(model_path="mlx-community/gemma-4-12B-it-6bit")
+llm = MLXVLChat(model_path=model_path)
 
 # 2. Define your messages using LangChain primitives
 messages = [
