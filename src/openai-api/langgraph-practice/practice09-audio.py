@@ -60,6 +60,6 @@ def describe(audio_path):
     response = llm.invoke(messages)
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
-path_quickbrownfox = workspaces + "/playground-ai-ml/data/audios/QuickBrownFox.wav"
+path_boses = workspaces + "/playground-ai-ml/data/audios/boses.wav"
 
-describe(path_quickbrownfox)
+describe(path_boses)
