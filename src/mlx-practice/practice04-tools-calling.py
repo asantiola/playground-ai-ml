@@ -10,7 +10,6 @@ from pydantic import BaseModel
 from mlx_vlm import load
 from mlx_vlm.generate import stream_generate
 from langchain_core.utils.function_calling import convert_to_openai_tool
-from langchain_core.messages.tool import ToolCall
 import json
 import re
 
