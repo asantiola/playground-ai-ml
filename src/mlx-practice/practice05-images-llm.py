@@ -23,7 +23,6 @@ class MLXVLChat(BaseChatModel):
 
     def __init__(self, model_path: str, **kwargs):
         super().__init__(model_path=model_path, **kwargs)
-        # mlx_vlm returns (model, processor) instead of a standard text tokenizer
         self.model, self.processor = load(self.model_path)
 
     def _convert_messages(self, messages: List[BaseMessage]) -> tuple[List[dict], List[str]]:
@@ -44,7 +43,6 @@ class MLXVLChat(BaseChatModel):
             else:
                 role = "user"
                 
-                # Check if LangChain content is structured as a complex block list
                 if isinstance(msg.content, list):
                     text_pieces = []
                     for block in msg.content:
@@ -54,16 +52,13 @@ class MLXVLChat(BaseChatModel):
                             img_url = block.get("image_url", {}).get("url", "")
                             
                             if img_url.startswith("data:image"):
-                                # Extract raw base64 contents
                                 base64_data = img_url.split(",")[1]
                                 img_bytes = base64.b64decode(base64_data)
                                 
-                                # Write to a temporary file for mlx_vlm to digest
                                 with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp_file:
                                     tmp_file.write(img_bytes)
                                     image_paths.append(tmp_file.name)
                             else:
-                                # Normal localized system paths
                                 image_paths.append(img_url)
                     
                     content = " ".join(text_pieces)
@@ -80,10 +75,8 @@ class MLXVLChat(BaseChatModel):
         stop: Optional[List[str]] = None, 
         **kwargs: Any
     ) -> ChatResult:
-        # Format conversation and extract hidden images
         mlx_messages, image_paths = self._convert_messages(messages)
         
-        # Format structural chat configurations matching mlx_vlm logic
         formatted_prompt = apply_chat_template(
             self.processor,
             self.model.config,
@@ -91,10 +84,8 @@ class MLXVLChat(BaseChatModel):
             num_images=len(image_paths)
         )
         
-        # Pick the target image if available
         active_image = image_paths[0] if image_paths else None
         
-        # Synchronous completion invocation via MLX-VLM
         output_obj = generate(
             self.model,
             self.processor,
@@ -103,8 +94,6 @@ class MLXVLChat(BaseChatModel):
             temperature=kwargs.get("temperature", 0.0)
         )
         
-        # CRITICAL FIX: Extract the text attribute from the GenerationResult object
-        # Some versions return an object with a .text attribute, fall back to string conversion if needed
         if hasattr(output_obj, "text"):
             full_text = output_obj.text
         elif isinstance(output_obj, str):
@@ -112,7 +101,6 @@ class MLXVLChat(BaseChatModel):
         else:
             full_text = str(output_obj)
         
-        # Cleanup temporary files safely if generated
         if active_image and "tmp" in active_image:
             try:
                 os.remove(active_image)
@@ -121,8 +109,7 @@ class MLXVLChat(BaseChatModel):
 
         tool_calls = []
         final_content = full_text
-
-        # Tool Parsing Logic
+        
         if kwargs.get("bound_tools"):
             json_match = re.search(r"\[\s*\{.*\}\s*\]", full_text, re.DOTALL)
             if json_match:
@@ -176,9 +163,41 @@ class MLXVLChat(BaseChatModel):
         stop: Optional[List[str]] = None,
         **kwargs: Any,
     ) -> Iterator[ChatGenerationChunk]:
-        """Fallback stream method backrouting directly to standard sync loop execution."""
-        res = self._generate(messages, stop, **kwargs)
-        yield ChatGenerationChunk(message=AIMessageChunk(content=res.generations[0].message.content))
+        """Implements actual real-time token streaming with vision support."""
+
+        mlx_messages, image_paths = self._convert_messages(messages)
+        
+        formatted_prompt = apply_chat_template(
+            self.processor,
+            self.model.config,
+            mlx_messages,
+            num_images=len(image_paths)
+        )
+        
+        active_image = image_paths[0] if image_paths else None
+        
+        for response_chunk in stream_generate(
+            self.model,
+            self.processor,
+            formatted_prompt,
+            image=active_image,
+        ):
+            # Extract text from mlx_vlm chunk structure safely
+            if hasattr(response_chunk, "text"):
+                chunk_text = response_chunk.text
+            elif isinstance(response_chunk, str):
+                chunk_text = response_chunk
+            else:
+                chunk_text = str(response_chunk)
+                
+            yield ChatGenerationChunk(message=AIMessageChunk(content=chunk_text))
+
+        # 4. Cleanup temporary image files after stream completes
+        if active_image and "tmp" in active_image:
+            try:
+                os.remove(active_image)
+            except OSError:
+                pass
 
     def bind_tools(self, tools: List[Any], **kwargs: Any) -> Runnable[Any, Any]:
         openai_tools = [convert_to_openai_tool(t) for t in tools]
@@ -263,3 +282,94 @@ describe(path_vulture)
 describe(path_screenshot)
 describe(path_handwriting)
 describe(path_meme)
+
+def puzzle():
+    system_prompt = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
+    You approach problems step-by-step, verify boundary conditions, 
+    and rigorously check your assumptions before calculating the final answer.
+    """
+
+    puzzle_prompt_floors = """A building has 10 floors above the basement.
+    If 12 people get into an elevator at the basement, and each chooses a floor at random to get out, 
+    independently of the others,
+    at how many floors do you expect the elevator to make a stop to let out one or more of these 12 people?
+    """
+
+    messages = [
+        {
+            "role": "system",
+            "content": system_prompt,
+        },
+        {
+            "role": "user",
+            "content": puzzle_prompt_floors,
+        }
+    ]
+
+    print("Thinking...\n")
+
+    for chunk in llm.stream(messages):
+        print(chunk.content, end="", flush=True)
+    print("")
+
+puzzle()
+
+from pydantic import BaseModel, Field
+class Response(BaseModel):
+    answer: str = Field(
+        description="The answer to the question"
+    )
+
+    confidence_score: float = Field(
+        description="Score on how confident you are on the answer, from 0 to 1."
+    )
+
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate
+def structured():
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessagePromptTemplate.from_template("""
+                You are a helpful assistant that answers the input.
+                Keep your answer brief.
+            """),
+            HumanMessagePromptTemplate.from_template("Input: {input}"),
+        ]
+    )
+    chain = (prompt | llm.with_structured_output(schema=Response))
+
+    response = chain.invoke({ "input": "What is the capital of France?" })
+    print(f"response:\n{response}\n")
+
+    response = chain.invoke({ "input": "How do you measure your confidence in your answer?" })
+    print(f"response:\n{response}\n")
+
+structured()
+
+from langchain_core.tools import tool
+
+@tool
+def get_weather(location: str):
+    """Use this to get the weather for a specific location."""
+    if "sf" in location.lower() or "san francisco" in location.lower():
+        return "It's sunny and 20°C in San Francisco."
+    else:
+        return "I don't know the weather there."
+
+@tool
+def get_stock_price(ticker: str):
+    """Use this to get the stock price for a company."""
+    return f"The stock price of {ticker} is $150."
+
+def tooling(question: str):
+    tools = [get_weather, get_stock_price]
+    llm_with_tools = llm.bind_tools(tools)
+
+    answer = llm_with_tools.invoke([
+        HumanMessage(content=question)
+    ])
+    print(f"question: {question}\nanswer: {answer}\n\n")
+
+tooling("What is the weather in Manila?")
+tooling("What is the capital of New Zealand?")
+
