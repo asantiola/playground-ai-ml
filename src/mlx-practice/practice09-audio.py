@@ -4,6 +4,10 @@ from mlx_vlm.prompt_utils import apply_chat_template
 model_path = "mlx-community/gemma-4-12B-it-6bit"
 model, processor = load(model_path)
 
+# recorded using MacOS Voice Memos, Settings -> Audio Quality -> Lossless
+# drag recording to data folder
+# brew install ffmpeg
+# `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.wav`
 audio_path = "./data/audios/boses.wav"
 
 messages = [
