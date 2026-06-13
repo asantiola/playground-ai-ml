@@ -31,7 +31,10 @@ async def run_client():
                 "command": command_path,
                 "args": [mcp_path],
                 "transport": "stdio",
-                "env": {"ANONYMIZED_TELEMETRY": "false"}, # to disable telemetry
+                "env": {
+                    "ANONYMIZED_TELEMETRY": "false",    # to disable telemetry
+                    "WORKSPACES": "/Users/asantiola/workspaces",
+                }, 
             }
         }
     )
