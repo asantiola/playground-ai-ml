@@ -13,8 +13,6 @@ messages = [
     }
 ]
 
-# 3. Apply the chat template
-# This ensures <|audio|> token wrappers are cleanly placed in the prompt
 formatted_prompt = apply_chat_template(
     processor, 
     model.config, 
@@ -22,8 +20,6 @@ formatted_prompt = apply_chat_template(
     num_images=1
 )
 
-# 4. Generate the transcription
-# Let mlx_vlm parse and stream the audio internally by passing the file list
 output = generate(
     model, 
     processor, 
