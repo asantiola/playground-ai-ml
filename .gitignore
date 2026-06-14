@@ -4,3 +4,6 @@ data/
 .vscode/
 .DS_Store
 shared-data
+
+mlx_vlm.log
+mlx_vlm.pid
