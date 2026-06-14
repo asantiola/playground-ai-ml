@@ -24,6 +24,7 @@ llm = ChatOpenAI(
     model="mlx-community/gemma-4-12B-it-6bit",
     base_url=openai_base_url,
     api_key=api_key,
+    temperature=0.2,
 )
 
 geographer_prompt = "You are a Geographer. Describe climates, terrain, and city layouts."
