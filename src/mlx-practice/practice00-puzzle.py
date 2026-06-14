@@ -59,6 +59,7 @@ messages = [
 
 model, tokenizer = load(model_path)
 prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+print(f"Prompt:\n{prompt}\n\n")
 
 print("Streaming:")
 for chunk in stream_generate(model, tokenizer, prompt):
