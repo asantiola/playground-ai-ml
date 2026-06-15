@@ -22,7 +22,6 @@ while cap.isOpened() and len(frames) < max_frames:
     if not ret:
         break
     
-    # Sample a frame every 30 frames (approx. 1 frame per second for a 30fps video)
     if frame_count % frame_interval == 0:
         # Convert OpenCV BGR to PIL RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
