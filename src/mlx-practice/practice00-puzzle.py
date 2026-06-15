@@ -1,8 +1,6 @@
 from mlx_vlm import load, stream_generate, generate
-# from mlx_lm import load, stream_generate, generate
 import sys
 
-# model_path="mlx-community/phi-4-6bit"
 model_path="mlx-community/gemma-4-12B-it-6bit"
 
 system_prompt = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
