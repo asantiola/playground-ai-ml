@@ -49,49 +49,112 @@ TOOLS_SCHEMA = [
     }
 ]
 
-SYSTEM_PROMPT = f"""You are a helpful assistant with access to tools. 
-If the user's request requires information from a tool, you MUST reply with a JSON object calling that tool. Do not include any conversational text or markdown formatting if a tool is needed.
+SYSTEM_PROMPT = f"""You are a helpful assistant with access to tools.
+
+You must ALWAYS respond with valid JSON.
 
 Available tools:
 {json.dumps(TOOLS_SCHEMA, indent=2)}
 
-If you need to call a tool, format your output exactly like this JSON structure:
+If no tool is needed:
+
 {{
-  "tool_call": {{
-    "name": "tool_name",
-    "arguments": {{
-      "arg1": "value1"
-    }}
-  }}
+  "content": "your response"
 }}
+
+If one or more tools are needed:
+
+{{
+  "tool_calls": [
+    {{
+      "name": "tool_name",
+      "arguments": {{
+        "arg1": "value1"
+      }}
+    }}
+  ]
+}}
+
+Rules:
+- Return either "content" OR "tool_calls", never both.
+- tool_calls must be an array.
+- Do not wrap JSON in markdown.
+- Do not output anything except the JSON object.
 """
 
-def parse_and_execute_tool(model_output: str) -> str:
-    """Parses raw text from the model, finds the tool block, and runs the local function."""
+RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "content": {
+            "type": "string"
+        },
+        "tool_calls": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "enum": [tool["name"] for tool in TOOLS_SCHEMA]
+                    },
+                    "arguments": {
+                        "type": "object"
+                    }
+                },
+                "required": ["name", "arguments"]
+            }
+        }
+    }
+}
+
+def parse_response(model_output: str):
     clean_output = model_output.strip()
-    
-    # Strip markdown code blocks if the model accidentally generates them
+
     if clean_output.startswith("```"):
         lines = clean_output.split("\n")
-        if lines[0].startswith("```json") or lines[0].startswith("```"):
-            clean_output = "\n".join(lines[1:-1]).strip()
+        clean_output = "\n".join(lines[1:-1]).strip()
 
     try:
-        data = json.loads(clean_output)
-        if "tool_call" in data:
-            tool_name = data["tool_call"]["name"]
-            arguments = data["tool_call"]["arguments"]
-            
-            if tool_name in TOOL_MAP:
-                result = TOOL_MAP[tool_name](**arguments)
-                return f"Tool Execution Result: {result}"
-            else:
-                return f"Error: Tool '{tool_name}' is not registered."
-        else:
-            return f"No tool call requested. Direct response: {model_output}"
-            
-    except json.JSONDecodeError:
-        return f"Failed to parse JSON tool call. Raw response: {model_output}"
+        return json.loads(clean_output)
+    except Exception as e:
+        return {
+            "content": f"Failed to parse model output: {e}"
+        }
+
+def execute_tool_calls(response_obj):
+    if "tool_calls" not in response_obj:
+        return response_obj
+
+    results = []
+
+    for call in response_obj["tool_calls"]:
+        tool_name = call["name"]
+        arguments = call.get("arguments", {})
+
+        if tool_name not in TOOL_MAP:
+            results.append({
+                "tool": tool_name,
+                "error": "Tool not registered"
+            })
+            continue
+
+        try:
+            result = TOOL_MAP[tool_name](**arguments)
+
+            results.append({
+                "tool": tool_name,
+                "result": json.loads(result)
+            })
+
+        except Exception as e:
+            results.append({
+                "tool": tool_name,
+                "error": str(e)
+            })
+
+    return {
+        "tool_results": results
+    }
 
 model_id = "mlx-community/gemma-4-12B-it-6bit"
 print(f"Loading model {model_id}...")
@@ -99,32 +162,49 @@ model, processor = load(model_id)
 config = model.config
 
 def run_pipeline(user_query: str):
-    print(f"\n" + "="*50)
+    print(f"\n{'='*50}")
     print(f"User Query: {user_query}")
     print("="*50)
-    
+
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": user_query}
     ]
-    
-    formatted_prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    
-    response = generate(
-        model, 
-        processor, 
-        prompt=formatted_prompt, 
-        max_tokens=4096, 
-        temperature=1.0, 
-        verbose=False,
-        extra_sampling_args={"json_schema": TOOLS_SCHEMA}
+
+    formatted_prompt = processor.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
     )
-    
-    print(f"Model Output:\n{response.text}")
-    
-    execution_result = parse_and_execute_tool(response.text)
-    print(execution_result)
 
-run_pipeline("Hey, can you check what the weather looks like in Tokyo right now?")
+    response = generate(
+        model,
+        processor,
+        prompt=formatted_prompt,
+        max_tokens=4096,
+        temperature=1.0,
+        verbose=False,
+        extra_sampling_args={
+            "json_schema": RESPONSE_SCHEMA
+        }
+    )
 
-run_pipeline("If I invest $10,000 at a 6.5% interest rate for 5 years, how much will I have?")
+    parsed = parse_response(response.text)
+
+    print("\nParsed Response:")
+    print(json.dumps(parsed, indent=2))
+
+    if "tool_calls" in parsed:
+        results = execute_tool_calls(parsed)
+
+        print("\nTool Results:")
+        print(json.dumps(results, indent=2))
+    else:
+        print("\nAssistant:")
+        print(parsed["content"])
+
+input="""Hey, can you check what the weather looks like in Tokyo right now?
+If I invest $10,000 at a 6.5% interest rate for 5 years, how much will I have?
+"""
+
+run_pipeline(input)
