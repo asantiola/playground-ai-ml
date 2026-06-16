@@ -24,7 +24,7 @@ completion = client.chat.completions.create(
     messages=[
         {"role": "system", "content": "You are a helpful AI assistant."},
         {"role": "user", "content": "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."}
-        ],
+    ],
 )
 
 print(completion.choices[0].message.content)
