@@ -36,7 +36,7 @@ def describe(audio_path):
         "background environment, and audio quality."
     )
     human_prompt = (
-        "What is being said in the audio file?"
+        "What is being said in the audio file? If not in English, translate it too."
     )
     messages = [
         SystemMessage(content=system_prompt),
@@ -60,6 +60,13 @@ def describe(audio_path):
     response = llm.invoke(messages)
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
+# recorded using MacOS Voice Memos, Settings -> Audio Quality -> Lossless
+# drag recording to data folder
+# brew install ffmpeg
+# `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.wav`
+
 path_boses = workspaces + "/playground-ai-ml/data/audios/boses.wav"
+path_bahay_kubo = workspaces + "/playground-ai-ml/data/audios/bahay_kubo.wav"
 
 describe(path_boses)
+describe(path_bahay_kubo)
