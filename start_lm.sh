@@ -2,9 +2,9 @@
 
 HOST="localhost"
 PORT="12434"
-SERVER=mlx_vlm.server
-MODEL="mlx-community/gemma-4-12B-it-6bit"
-MAX_KV_SIZE=8192
+SERVER="mlx_lm server"
+MODEL="mlx-community/phi-4-6bit"
+MAX_TOKENS=8192
 
 echo "=========================================================="
 echo " Starting $SERVER"
@@ -15,4 +15,4 @@ echo "=========================================================="
 VENV_DIR="/Users/asantiola/workspaces/playground-ai-ml/.venv"
 
 source "$VENV_DIR/bin/activate"
-python -m "$SERVER" --host "$HOST" --port "$PORT" --model "$MODEL" --max-kv-size $MAX_KV_SIZE
+python -m $SERVER --host "$HOST" --port "$PORT" --model "$MODEL" --max-tokens $MAX_TOKENS
