@@ -34,7 +34,7 @@ def describe(image_path):
         content=[
             {
                 "type": "text",
-                "text": "Describe this image. If you see text, print what you read.",
+                "text": "Describe this image. If you see text, print what you read. If it is not in English, translate it too.",
             },
             {
                 "type": "image_url",
