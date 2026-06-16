@@ -35,14 +35,14 @@ def mlx_lm_call(model_path, messages, streaming=True):
     mx.clear_cache()
 
 def mlx_vlm_call(model_path, messages, streaming=True):
-    model, tokenizer = vlm_load(model_path)
-    prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    model, processor = vlm_load(model_path)
+    prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
 
     if streaming:
         print("Streaming:")
         for chunk in vlm_stream_generate(
             model,
-            tokenizer, 
+            processor, 
             prompt,
             max_tokens=8192
         ):
@@ -51,7 +51,7 @@ def mlx_vlm_call(model_path, messages, streaming=True):
         print("\n\n")
     else:
         print("Generating:")
-        response = vlm_generate(model, tokenizer, prompt, max_tokens=8192, verbose=False)
+        response = vlm_generate(model, processor, prompt, max_tokens=8192, verbose=False)
         print(f"response.text: {response.text}")
         print("")
         print(f"response.token: {response.token}")
