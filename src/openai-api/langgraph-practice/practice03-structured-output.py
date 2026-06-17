@@ -23,6 +23,10 @@ llm = ChatOpenAI(
 )
 
 class Response(BaseModel):
+    reasoning: str = Field(
+        description="Step-by-step logical deduction analyzing each hint to solve the puzzle."
+    )
+
     answer: str = Field(
         description="The answer to the question"
     )
@@ -43,8 +47,19 @@ prompt = ChatPromptTemplate.from_messages(
 
 chain = (prompt | llm.with_structured_output(schema=Response))
 
-response = chain.invoke({ "input": "What is the capital of France?" })
+simple_question = "What is the capital of France?"
+
+response = chain.invoke({ "input": simple_question })
 print(f"response:\n{response}\n")
 
-response = chain.invoke({ "input": "How do you measure your confidence in your answer?" })
-print(f"response:\n{response}\n")
+puzzle_question = """Crack the code, solve for the 3 unique digits code.
+Hints:
+- 294: Exactly one number is correct and well placed.
+- 836: Exactly one number is correct but wrongly placed.
+- 165: Exactly one number is correct and well placed.
+- 874: Nothing is correct.
+- 473: Exactly one number is correct and well placed.
+"""
+
+response = chain.invoke({ "input": puzzle_question })
+print(f"answer: {response.answer}, confidence_score: {response.confidence_score}")
