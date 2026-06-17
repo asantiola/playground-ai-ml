@@ -24,7 +24,7 @@ llm = ChatOpenAI(
 
 class Response(BaseModel):
     reasoning: str = Field(
-        description="Step-by-step logical deduction analyzing each hint to solve the puzzle."
+        description="Step-by-step logical deduction analyzing each hint to answer the question."
     )
 
     answer: str = Field(
