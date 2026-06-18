@@ -38,6 +38,7 @@ llm = ChatOpenAI(
     model="mlx-community/gemma-4-12B-it-6bit",
     base_url=openai_base_url,
     api_key=api_key,
+    temperature=0.0,
 )
 
 def encode_audio(audio_path):
@@ -80,18 +81,19 @@ def describe(audio_path):
 # drag recording to data folder
 # brew install ffmpeg
 # `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.wav`
+# `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.mp3`
 
 path_brown_fox = workspaces + "/playground-ai-ml/data/audios/brown_fox.wav"
-path_bahay_kubo = workspaces + "/playground-ai-ml/data/audios/bahay_kubo.wav"
+path_itik = workspaces + "/playground-ai-ml/data/audios/itik.mp3"
 
 audios_names = [
     "brown fox",
-    "bahay kubo",
+    "itik",
 ]
 
 audios = [
     path_brown_fox,
-    path_bahay_kubo,
+    path_itik,
 ]
 
 what = selection("audio", audios_names, audios)
