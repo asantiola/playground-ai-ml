@@ -68,7 +68,7 @@ puzzles_names = []
 puzzles = []
 puzzle_path = workspaces + "/playground-ai-ml/data/puzzles"
 search_pattern = os.path.join(puzzle_path, "*.txt")
-for file_path in glob.glob(search_pattern):
+for file_path in sorted(glob.glob(search_pattern)):
     with open(file_path, "r") as file:
         name = file.readline().strip()
         puzzles_names.append(name)
@@ -86,6 +86,8 @@ system_prompt = option_think[2]
 messages = [SystemMessage(content=system_prompt), HumanMessage(content=selected_puzzle)]
 full_response = ""
 thinking_ended = option_think[0]
+
+print(f"Puzzle/Riddle:\n{selected_puzzle}\n")
 
 print("\nResult:")
 for chunk in llm.stream(messages):
