@@ -5,10 +5,9 @@ from operator import add as add_message
 from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
-from typing import List
-from langchain_core.embeddings import Embeddings
-from mlx_embeddings.utils import load as load_mlx_embedding
+from lesson10_common import get_embeddings
 import os
+import chromadb
 
 workspaces = os.environ.get(
     "WORKSPACES",
@@ -25,40 +24,34 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-class MLXGemmaEmbeddings(Embeddings):
-    def __init__(self, model_id: str = "mlx-community/embeddinggemma-300m-4bit"):
-        # This handles the custom encoder layers natively on your Apple Silicon GPU
-        self.model, self.tokenizer = load_mlx_embedding(model_id)
-
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        # Process the list of chunks coming from your text splitter
-        embeddings_list = []
-        for text in texts:
-            input_ids = self.tokenizer.encode(text, return_tensors="mlx")
-            outputs = self.model(input_ids)
-            
-            # Extract the mean-pooled, normalized embedding vectors
-            text_embeds = outputs.text_embeds.tolist()
-            embeddings_list.extend(text_embeds)
-            
-        return embeddings_list
-
-    def embed_query(self, text: str) -> List[float]:
-        # Process individual user search queries
-        return self.embed_documents([text])[0]
-
-# Replace your commented out block with this instantiation:
-embeddings = MLXGemmaEmbeddings()
+# # Docker Model Runner:
+# embeddings = OpenAIEmbeddings(
+#     model="ai/embeddinggemma:300M-Q8_0",
+#     base_url=openai_base_url,
+#     api_key=api_key,
+#     # disable check_embedding_ctx_length if your local model has different constraints
+#     check_embedding_ctx_length=False,
+# )
 
 persist_directory = workspaces + "/playground-ai-ml/.chromadb"
 collection_name = "stock_market"
 
-try:
-    vector_store = Chroma(
+def auto_load_vector_store(persist_directory, collection_name):
+    native_client = chromadb.PersistentClient(path=persist_directory)
+    collection = native_client.get_collection(name=collection_name)
+    model_class_name = collection.metadata.get("embedding_class")
+
+    print(f"auto-detected embeddings model: {model_class_name}")
+    embeddings = get_embeddings(model_class_name)
+
+    return Chroma(
         embedding_function=embeddings,
         persist_directory=persist_directory,
-        collection_name=collection_name,
+        collection_name=collection_name
     )
+
+try:
+    vector_store = auto_load_vector_store(persist_directory, collection_name)
 except Exception as e:
     print(f"Error setting up ChromaDB: {e}")
     raise

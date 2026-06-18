@@ -1,27 +1,9 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_chroma import Chroma
-from typing import List
-from langchain_core.embeddings import Embeddings
-from mlx_embeddings import load, generate
+from lesson10_common import selection_embeddings
 import os
 import shutil
-
-def selection(what, choices_names, choices):
-    print(f"Select a {what}:")
-    for index, option in enumerate(choices_names, start=1):
-        print(f"[{index}] {option}")
-
-    while True:
-        try:
-            choice = int(input("\nEnter the number of your choice: "))
-
-            if 1 <= choice <= len(choices):
-                return choices_names[choice - 1], choices[choice - 1]
-            else:
-                print(f"Invalid selection. Please enter a number between 1 and {len(choices)}.")
-        except ValueError:
-            print("Invalid input. Please enter a valid integer.")
 
 workspaces = os.environ.get(
     "WORKSPACES",
@@ -38,72 +20,7 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-class MLXGemmaEmbeddings(Embeddings):
-    def __init__(self, model_id: str = "mlx-community/embeddinggemma-300m-4bit"):
-        self.model, self.tokenizer = load(model_id)
-
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        formatted_texts = [f"task: retrieval-document | text: {text}" for text in texts]
-        
-        encoded = self.tokenizer.batch_encode_plus(
-            formatted_texts, 
-            return_tensors="mlx", 
-            padding=True,
-            truncation=True
-        )
-        
-        outputs = self.model(
-            encoded["input_ids"], 
-            attention_mask=encoded.get("attention_mask")
-        )
-        
-        return outputs.text_embeds.tolist()
-
-    def embed_query(self, text: str) -> List[float]:
-        formatted_query = f"task: retrieval-query | query: {text}"
-        
-        encoded = self.tokenizer.batch_encode_plus(
-            [formatted_query], 
-            return_tensors="mlx", 
-            padding=True,
-            truncation=True
-        )
-        
-        outputs = self.model(
-            encoded["input_ids"], 
-            attention_mask=encoded.get("attention_mask")
-        )
-        
-        return outputs.text_embeds.tolist()[0]
-
-class MLXCompatibleEmbeddings(Embeddings):
-    def __init__(self, model_id: str = "mlx-community/mxbai-embed-large-v1"):
-        self.model, self.tokenizer = load(model_id)
-
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        output = generate(self.model, self.tokenizer, texts=texts)
-        return output.text_embeds.tolist()
-
-    def embed_query(self, text: str) -> List[float]:
-        return self.embed_documents([text])[0]
-
-def createMLXGemmaEmbeddings(model_id: str):
-    return MLXGemmaEmbeddings(model_id)
-
-def createMLXCompatibleEmbeddings(model_id: str):
-    return MLXCompatibleEmbeddings(model_id)
-
-embeddings_model_names = [
-    "mlx-community/embeddinggemma-300m-4bit",
-    "mlx-community/mxbai-embed-large-v1",
-]
-embeddings_creators = [
-    createMLXGemmaEmbeddings,
-    createMLXCompatibleEmbeddings,
-]
-
-embeddings_model_name, embeddings_creator = selection("embeddings", embeddings_model_names, embeddings_creators)
-embeddings = embeddings_creator(embeddings_model_name)
+embeddings_model_name, embeddings = selection_embeddings()
 
 # # Docker Model Runner:
 # embeddings = OpenAIEmbeddings(
