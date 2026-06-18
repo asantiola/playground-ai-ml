@@ -40,10 +40,15 @@ llm = ChatOpenAI(
     base_url=openai_base_url,
     api_key=api_key,
     temperature=0,
-    max_completion_tokens=256
+    max_completion_tokens=4096
 )
 
-system_prompt = """You are a precise, direct calculator. 
+system_prompt_show = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
+You approach problems step-by-step, verify boundary conditions, 
+and rigorously check your assumptions before calculating the final answer.
+"""
+
+system_prompt_hide = """You are a precise, direct calculator. 
 Your task is to solve mathematical and logic puzzles. 
 
 You MUST structure your response exactly like this:
@@ -144,9 +149,14 @@ puzzles = [
 
 selected_puzzle = selection("puzzle", puzzles_names, puzzles)
 
+show_think = [True, "show thinking tokens", system_prompt_show]
+hide_think = [False, "hide thinking tokens", system_prompt_hide]
+option_think = selection("an option", [show_think[1], hide_think[1]], [show_think, hide_think]) 
+system_prompt = option_think[2]
+
 messages = [SystemMessage(content=system_prompt), HumanMessage(content=selected_puzzle)]
 full_response = ""
-thinking_ended = False
+thinking_ended = option_think[0]
 
 print("\nResult:")
 for chunk in llm.stream(messages):
