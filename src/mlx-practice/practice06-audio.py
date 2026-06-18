@@ -8,12 +8,15 @@ model, processor = load(model_path)
 # drag recording to data folder
 # brew install ffmpeg
 # `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.wav`
-audio_path = "./data/audios/boses.wav"
+# `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.mp3`
+
+# audio_path = "./data/audios/brown_fox.wav"
+audio_path = "./data/audios/itik.mp3"
 
 messages = [
     {
         "role": "user",
-        "content": "Describe what you hear in the sound file."
+        "content": "Describe what you hear in the sound file. Translate to English if needed."
     }
 ]
 
