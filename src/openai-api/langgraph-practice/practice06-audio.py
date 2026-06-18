@@ -3,6 +3,22 @@ from langchain_core.messages import HumanMessage, SystemMessage
 import base64
 import os
 
+def selection(what, choices_names, choices):
+    print(f"Select a {what}:")
+    for index, option in enumerate(choices_names, start=1):
+        print(f"[{index}] {option}")
+
+    while True:
+        try:
+            choice = int(input("\nEnter the number of your choice: "))
+
+            if 1 <= choice <= len(choices):
+                return choices[choice - 1]
+            else:
+                print(f"Invalid selection. Please enter a number between 1 and {len(choices)}.")
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
+
 workspaces = os.environ.get(
     "WORKSPACES",
     "/workspaces"
@@ -65,8 +81,18 @@ def describe(audio_path):
 # brew install ffmpeg
 # `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.wav`
 
-path_boses = workspaces + "/playground-ai-ml/data/audios/boses.wav"
+path_brown_fox = workspaces + "/playground-ai-ml/data/audios/brown_fox.wav"
 path_bahay_kubo = workspaces + "/playground-ai-ml/data/audios/bahay_kubo.wav"
 
-describe(path_boses)
-describe(path_bahay_kubo)
+audios_names = [
+    "brown fox",
+    "bahay kubo",
+]
+
+audios = [
+    path_brown_fox,
+    path_bahay_kubo,
+]
+
+what = selection("audio", audios_names, audios)
+describe(what)
