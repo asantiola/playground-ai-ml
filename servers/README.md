@@ -32,14 +32,15 @@ python -m mlx_lm server \
 ## llama-server
 ```
 brew install llama.cpp
-llama-server -p 12434 \
-    -hf google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0 \
-    -ngl -1 \
-    -t 0 -tb 0 \
-    -fa on \
+llama-server -hf microsoft/phi-4-gguf:Q4_K_S \
+    --host localhost \
+    --port 12434 \
+    --n-gpu-layers all \
+    --flash-attn on \
     --parallel 1 \
-    -c 16384 \
-    -ctk q4_0 -ctv q4_0
+    --ctx-size 16384 \
+    --cache-type-k q4_0 \
+    --cache-type-v q4_0
 ```
 - tried these models
     - google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0
