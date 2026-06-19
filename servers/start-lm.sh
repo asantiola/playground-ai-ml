@@ -7,10 +7,25 @@ MODEL="mlx-community/phi-4-6bit"
 MAX_TOKENS=8192
 
 PARMS="-m $SERVER"
-PARMS+=" --host $HOST"
-PARMS+=" --port $PORT"
-PARMS+=" --max-tokens $MAX_TOKENS"
-PARMS+=" --model $MODEL"
+if [ -n "$HOST" ]
+then
+    PARMS+=" --host $HOST"
+fi
+
+if [ -n "$PORT" ]
+then
+    PARMS+=" --port $PORT"
+fi
+
+if [ -n "$MAX_TOKENS" ]
+then
+    PARMS+=" --max-tokens $MAX_TOKENS"
+fi
+
+if [ -n "$MODEL" ]
+then
+    PARMS+=" --model $MODEL"
+fi
 
 echo "=========================================================="
 echo " Starting $SERVER"

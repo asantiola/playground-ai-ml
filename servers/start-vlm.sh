@@ -11,10 +11,26 @@ DRAFT_MODEL=""
 MTP=""
 
 PARMS="-m $SERVER"
-PARMS+=" --host $HOST"
-PARMS+=" --port $PORT"
-PARMS+=" --max-kv-size $MAX_KV_SIZE"
-PARMS+=" --model $MODEL"
+if [ -n "$HOST" ]
+then
+    PARMS+=" --host $HOST"
+fi
+
+if [ -n "$PORT" ]
+then
+    PARMS+=" --port $PORT"
+fi
+
+if [ -n "$MAX_KV_SIZE" ]
+then
+    PARMS+=" --max-kv-size $MAX_KV_SIZE"
+fi
+
+if [ -n "$MODEL" ]
+then
+    PARMS+=" --model $MODEL"
+fi
+
 if [ $ARG1 == "mtp" ]
 then
     DRAFT_MODEL="mlx-community/gemma-4-12B-it-assistant-6bit"

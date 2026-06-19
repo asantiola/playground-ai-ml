@@ -10,13 +10,32 @@ CACHE_TYPE_V=q4_0
 FLASH_ATTN=on
 
 SERVER="llama-server"
-PARMS="-hf $MODEL"
-PARMS+=" --host $HOST"
-PARMS+=" --port $PORT"
-PARMS+=" --n-gpu-layers all"
-PARMS+=" --flash-attn on"
-PARMS+=" --parallel 1"
-PARMS+=" --ctx-size $CONTEXT_SIZE"
+PARMS="--n-gpu-layers all --parallel 1"
+
+if [ -n "$MODEL" ]
+then
+    PARMS+=" -hf $MODEL"
+fi
+
+if [ -n "$HOST" ]
+then
+    PARMS+=" --host $HOST"
+fi
+
+if [ -n "$PORT" ]
+then
+    PARMS+=" --port $PORT"
+fi
+
+if [ -n "$FLASH_ATTN" ]
+then
+    PARMS+=" --flash-attn $FLASH_ATTN"
+fi
+
+if [ -n "$CONTEXT_SIZE" ]
+then
+    PARMS+=" --ctx-size $CONTEXT_SIZE"
+fi
 
 if [ -n "$CACHE_TYPE_K" ]
 then
