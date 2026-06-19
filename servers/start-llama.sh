@@ -3,7 +3,7 @@
 HOST="localhost"
 PORT="12434"
 SERVER="llama-server"
-MODEL="microsoft/phi-4-gguf:Q4_K_S"
+MODEL="microsoft/phi-4-gguf:IQ4_NL"
 CONTEXT_SIZE=16384
 CACHE_TYPE_K=q4_0
 CACHE_TYPE_V=q4_0
