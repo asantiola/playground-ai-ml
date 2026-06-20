@@ -4,8 +4,8 @@ HOST="localhost"
 PORT="12434"
 SERVER="llama-server"
 MODEL="microsoft/phi-4-gguf:IQ4_NL"
-# MODEL="Qwen/Qwen2.5-Coder-14B-Instruct-GGUF:Q4_K_M"
 # MODEL="google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0"
+# MODEL="Qwen/Qwen2.5-Coder-14B-Instruct-GGUF:Q4_K_M"
 CONTEXT_SIZE=16384
 CACHE_TYPE_K=q4_0
 CACHE_TYPE_V=q4_0
@@ -48,6 +48,11 @@ if [ -n "$CACHE_TYPE_V" ]
 then
     PARMS+=" --cache-type-v $CACHE_TYPE_V"
 fi
+
+# if [ $ARG1 == "mtp" ]
+# then
+#     PARMS+=" --spec-type draft-mtp --spec-draft-n-max 3"
+# fi
 
 echo "=========================================================="
 echo " Starting $SERVER"
