@@ -4,6 +4,7 @@ HOST="localhost"
 PORT="12434"
 SERVER="llama-server"
 MODEL="microsoft/phi-4-gguf:IQ4_NL"
+# MODEL="Qwen/Qwen2.5-Coder-14B-Instruct-GGUF:Q4_K_M"
 # MODEL="google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0"
 CONTEXT_SIZE=16384
 CACHE_TYPE_K=q4_0

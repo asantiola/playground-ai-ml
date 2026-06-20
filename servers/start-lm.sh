@@ -4,6 +4,7 @@ HOST="localhost"
 PORT="12434"
 SERVER="mlx_lm server"
 MODEL="mlx-community/phi-4-6bit"
+# MODEL="mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
 MAX_TOKENS=8192
 
 PARMS="-m $SERVER"
