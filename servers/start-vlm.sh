@@ -6,6 +6,7 @@ HOST="localhost"
 PORT="12434"
 SERVER=mlx_vlm.server
 MODEL="mlx-community/gemma-4-12B-it-6bit"
+# MODEL="mlx-community/Qwen3.5-9B-6bit"
 MAX_KV_SIZE=16384
 DRAFT_MODEL=""
 MTP=""
