@@ -4,13 +4,14 @@ HOST="localhost"
 PORT="12434"
 SERVER="llama-server"
 MODEL="microsoft/phi-4-gguf:IQ4_NL"
+# MODEL="google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0"
 CONTEXT_SIZE=16384
 CACHE_TYPE_K=q4_0
 CACHE_TYPE_V=q4_0
 FLASH_ATTN=on
 
 SERVER="llama-server"
-PARMS="--n-gpu-layers all --parallel 1"
+PARMS="--parallel 1"
 
 if [ -n "$MODEL" ]
 then
@@ -29,7 +30,7 @@ fi
 
 if [ -n "$FLASH_ATTN" ]
 then
-    PARMS+=" --flash-attn $FLASH_ATTN"
+    PARMS+=" --flash-attn $FLASH_ATTN -t 10 -b 2048 -ub 512"
 fi
 
 if [ -n "$CONTEXT_SIZE" ]
