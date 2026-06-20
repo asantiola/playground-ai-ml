@@ -31,7 +31,7 @@ embeddings_model_name, embeddings = selection_embeddings()
 #     check_embedding_ctx_length=False,
 # )
 
-pdf_path = workspaces + "/playground-ai-ml/data/Stock_Market_Performance_2024.pdf"
+pdf_path = workspaces + "/playground-ai-ml/data/documents-pdf/Stock_Market_Performance_2024.pdf"
 
 if not os.path.exists(pdf_path):
     raise FileNotFoundError(f"PDF file not found: {pdf_path}")
