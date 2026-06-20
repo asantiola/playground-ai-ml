@@ -51,7 +51,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 splits = text_splitter.split_documents(pages)
 
-persist_directory = workspaces + "/playground-ai-ml/.chromadb"
+persist_directory = workspaces + "/playground-ai-ml/data/chromadb/stocks24"
 collection_name = "stock_market"
 
 if os.path.exists(persist_directory) and os.path.isdir(persist_directory):

@@ -33,7 +33,7 @@ api_key = os.environ.get(
 #     check_embedding_ctx_length=False,
 # )
 
-persist_directory = workspaces + "/playground-ai-ml/.chromadb"
+persist_directory = workspaces + "/playground-ai-ml/data/chromadb/stocks24"
 collection_name = "stock_market"
 
 def auto_load_vector_store(persist_directory, collection_name):
