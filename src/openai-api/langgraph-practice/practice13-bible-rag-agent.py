@@ -162,7 +162,13 @@ def running_agent():
         user_input = input("\nWhat is your question: ")
         if user_input.lower() in ['exit', 'quit', 'bye']:
             break
-            
+
+        if user_input.lower() == 'clear':
+            active_id = config["configurable"]["thread_id"]
+            memory.storage.pop(active_id, None)
+            print("\n[System: Memory safely wiped from RAM! Starting fresh.]")
+            continue
+
         messages = [HumanMessage(content=user_input)] # converts back to a HumanMessage type
 
         result = rag_agent.invoke({"messages": messages}, config=config)
