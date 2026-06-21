@@ -3,6 +3,7 @@ data/
 .vscode/
 .DS_Store
 shared-data
+__pycache__/
 
 mlx_vlm.log
 mlx_vlm.pid
