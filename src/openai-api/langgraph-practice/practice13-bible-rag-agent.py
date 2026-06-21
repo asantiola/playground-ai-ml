@@ -50,7 +50,16 @@ except Exception as e:
 
 @tool
 def retriever_tool(query: str, book: str = None, chapter: int = None):
-    """Searches the KJV Bible. Use optional book and chapter filters for exact verse lookups."""
+    """Searches the KJV Bible. Use optional book and chapter filters for exact verse lookups.
+
+    Args:
+        query (str): The search query or keywords to look for in the Bible.
+        book (str): Optional Book in the Bible.
+        chapter (int): Optional Chapter in the Book in the Bible.
+    
+    Returns:
+        str: The info obtained from RAG.
+    """
     
     search_kwargs = {"k": 8}
     
@@ -119,7 +128,7 @@ def take_action(state: AgentState) -> AgentState:
     tool_calls = state['messages'][-1].tool_calls
     results = []
     for t in tool_calls:
-        # print(f"Calling Tool: {t['name']} with query: {t['args'].get('query', 'No query provided')}")
+        print(f"Calling Tool: {t['name']} with query: {t['args'].get('query', 'No query provided')}")
         
         if not t['name'] in tools_dict: # Checks if a valid tool is present
             # print(f"\nTool: {t['name']} does not exist.")
@@ -160,10 +169,10 @@ def running_agent():
     
     while True:
         user_input = input("\nWhat is your question: ")
-        if user_input.lower() in ['exit', 'quit', 'bye']:
+        if user_input.lower() in ['/exit', '/quit', '/bye']:
             break
 
-        if user_input.lower() == 'clear':
+        if user_input.lower() == '/clear':
             active_id = config["configurable"]["thread_id"]
             memory.storage.pop(active_id, None)
             print("\n[System: Memory safely wiped from RAM! Starting fresh.]")
