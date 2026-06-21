@@ -74,25 +74,16 @@ prompt = ChatPromptTemplate.from_messages([
     human_message_template
 ])
 
-rewrite_prompt = ChatPromptTemplate.from_template(
-    "Extract only the core search keywords or question from this user request. "
-    "Strip out formatting requests or commands like 'read me', 'print', or 'bullet points'.\n\n"
-    "Request: {raw_question}\n"
-    "Search Query:"
-)
-
-query_rewriter = rewrite_prompt | llm | StrOutputParser()
-
 rag_chain = (
     {
-        "context": (lambda x: query_rewriter.invoke({"raw_question": x})) | retriever | format_docs, 
-        "question": RunnablePassthrough()
+        "context": retriever | format_docs, 
+        "question": RunnablePassthrough(),
     }
     | prompt
     | llm
     | StrOutputParser()
 )
 
-for chunk in rag_chain.stream("Did Satan and God talk to each other?"):
+for chunk in rag_chain.stream("Give a sample where age is mentioned in the bible."):
     print(chunk, end="", flush=True)
 print("\n")
