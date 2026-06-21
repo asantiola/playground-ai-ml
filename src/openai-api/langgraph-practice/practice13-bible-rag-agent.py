@@ -119,21 +119,21 @@ def take_action(state: AgentState) -> AgentState:
     tool_calls = state['messages'][-1].tool_calls
     results = []
     for t in tool_calls:
-        print(f"Calling Tool: {t['name']} with query: {t['args'].get('query', 'No query provided')}")
+        # print(f"Calling Tool: {t['name']} with query: {t['args'].get('query', 'No query provided')}")
         
         if not t['name'] in tools_dict: # Checks if a valid tool is present
-            print(f"\nTool: {t['name']} does not exist.")
+            # print(f"\nTool: {t['name']} does not exist.")
             result = "Incorrect Tool Name, Please Retry and Select tool from List of Available tools."
         
         else:
             result = tools_dict[t['name']].invoke(t['args'].get('query', ''))
-            print(f"Result length: {len(str(result))}")
+            # print(f"Result length: {len(str(result))}")
             
 
         # Appends the Tool Message
         results.append(ToolMessage(tool_call_id=t['id'], name=t['name'], content=str(result)))
 
-    print("Tools Execution Complete. Back to the model!")
+    # print("Tools Execution Complete. Back to the model!")
     return {'messages': results}
 
 graph = StateGraph(AgentState)
