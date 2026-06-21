@@ -47,7 +47,7 @@ except Exception as e:
 
 retriever = vector_store.as_retriever(
     search_type="similarity",
-    search_kwargs={"k": 5}, # K is the amount of chunks to return
+    search_kwargs={"k": 16}, # K is the amount of chunks to return
 )
 
 llm = ChatOpenAI(
@@ -84,6 +84,6 @@ rag_chain = (
     | StrOutputParser()
 )
 
-for chunk in rag_chain.stream("Give a sample where age is mentioned in the bible."):
+for chunk in rag_chain.stream("What is in Leviticus 18?"):
     print(chunk, end="", flush=True)
 print("\n")
