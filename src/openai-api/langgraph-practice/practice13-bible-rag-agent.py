@@ -1,4 +1,5 @@
 from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.memory import MemorySaver
 from typing import TypedDict, Annotated, Sequence
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, ToolMessage
 from operator import add as add_message
@@ -47,26 +48,33 @@ except Exception as e:
     print(f"Error setting up ChromaDB: {e}")
     raise
 
-retriever = vector_store.as_retriever(
-    search_type="similarity",
-    search_kwargs={"k": 16}, # K is the amount of chunks to return
-)
-
 @tool
-def retriever_tool(query: str):
-    """This tool searches and returns the information from KJV Bible."""
+def retriever_tool(query: str, book: str = None, chapter: int = None):
+    """Searches the KJV Bible. Use optional book and chapter filters for exact verse lookups."""
+    
+    search_kwargs = {"k": 8}
+    
+    # If the LLM specifies a book/chapter, use absolute metadata filtering
+    if book or chapter:
+        filter_dict = {}
+        if book:
+            filter_dict["book"] = book.strip().capitalize()
+        if chapter:
+            filter_dict["chapter"] = int(chapter)
+            
+        search_kwargs["where"] = filter_dict
 
-    docs = retriever.invoke(query)
+    local_retriever = vector_store.as_retriever(
+        search_type="similarity",
+        search_kwargs=search_kwargs
+    )
+    
+    docs = local_retriever.invoke(query)
 
     if not docs:
-        return "I found no relevant information in the Stock Market Performance 2024 document."
-    
-    results = []
-
-    for i, doc in enumerate(docs):
-        results.append(f"Document {i+1}:\n{doc.page_content}")
-    
-    return "\n\n".join(results)
+        return "No relevant verses found matching those criteria."
+        
+    return "\n".join(doc.page_content for doc in docs)
 
 llm = ChatOpenAI(
     model="mlx-community/gemma-4-12B-it-6bit",
@@ -143,7 +151,9 @@ graph.add_conditional_edges(
 )
 graph.add_edge("retriever_agent", "llm")
 
-rag_agent = graph.compile()
+memory = MemorySaver()
+rag_agent = graph.compile(checkpointer=memory)
+config = {"configurable": {"thread_id": "session_1"}}
 
 def running_agent():
     print("\n=== RAG AGENT===")
@@ -155,7 +165,7 @@ def running_agent():
             
         messages = [HumanMessage(content=user_input)] # converts back to a HumanMessage type
 
-        result = rag_agent.invoke({"messages": messages})
+        result = rag_agent.invoke({"messages": messages}, config=config)
         
         print("\n=== ANSWER ===")
         print(result['messages'][-1].content)
