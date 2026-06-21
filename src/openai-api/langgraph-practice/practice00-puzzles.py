@@ -26,13 +26,39 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
+model_names = [
+    "mlx-community/gemma-4-12B-it-6bit",
+    "ggml-org/gpt-oss-20b-GGUF",
+    "mlx-community/phi-4-6bit",
+]
+
+model_details = [
+    {
+        "model": "mlx-community/gemma-4-12B-it-6bit",
+        "temperature": 0.0,
+        "max_completion_tokens": 4096
+    },
+    {
+        "model": "ggml-org/gpt-oss-20b-GGUF",
+        "temperature": 1.0,
+        "max_completion_tokens": None
+    },
+    {
+        "model": "mlx-community/phi-4-6bit",
+        "temperature": 0.0,
+        "max_completion_tokens": 4096
+    },
+]
+
+# model_chosen = selection("models", model_names, model_details)
+model_chosen = model_details[0]
+
 llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-6bit",
-    # model="mlx-community/phi-4-6bit",
+    model=model_chosen["model"],
     base_url=openai_base_url,
     api_key=api_key,
-    temperature=0,
-    max_completion_tokens=4096
+    temperature=model_chosen["temperature"],
+    max_completion_tokens=model_chosen["max_completion_tokens"]
 )
 
 system_prompt_show = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
