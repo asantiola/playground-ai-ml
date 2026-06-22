@@ -60,7 +60,6 @@ path_vulture = workspaces + "/playground-ai-ml/data/images/vulture.jpg"
 path_screenshot = workspaces + "/playground-ai-ml/data/images/screenshot-sample.png"
 path_handwriting = workspaces + "/playground-ai-ml/data/images/handwriting.jpg"
 path_meme = workspaces + "/playground-ai-ml/data/images/meme.jpg"
-path_geometry_puzzle = workspaces + "/playground-ai-ml/data/images/geometry_puzzle.jpg"
 path_logic_puzzle = workspaces + "/playground-ai-ml/data/images/logic_puzzle.jpg"
 
 images_names = [
@@ -68,7 +67,6 @@ images_names = [
     "screenshot",
     "handwriting",
     "meme",
-    "geometry puzzle",
     "logic puzzle",
 ]
 
@@ -77,7 +75,6 @@ images = [
     path_screenshot,
     path_handwriting,
     path_meme,
-    path_geometry_puzzle,
     path_logic_puzzle,
 ]
 
