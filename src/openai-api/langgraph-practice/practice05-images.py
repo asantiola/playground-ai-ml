@@ -62,7 +62,6 @@ path_handwriting = workspaces + "/playground-ai-ml/data/images/handwriting.jpg"
 path_meme = workspaces + "/playground-ai-ml/data/images/meme.jpg"
 path_geometry_puzzle = workspaces + "/playground-ai-ml/data/images/geometry_puzzle.jpg"
 path_logic_puzzle = workspaces + "/playground-ai-ml/data/images/logic_puzzle.jpg"
-path_matches_puzzle = workspaces + "/playground-ai-ml/data/images/matches_puzzle.jpg"
 
 images_names = [
     "vulture",
@@ -71,7 +70,6 @@ images_names = [
     "meme",
     "geometry puzzle",
     "logic puzzle",
-    "matches puzzle",
 ]
 
 images = [
@@ -81,7 +79,6 @@ images = [
     path_meme,
     path_geometry_puzzle,
     path_logic_puzzle,
-    path_matches_puzzle,
 ]
 
 what = selection("image", images_names, images)
