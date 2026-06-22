@@ -67,7 +67,7 @@ def retriever_tool(
     if query is None:
         query = ""
         
-    base_k = 24
+    base_k = 8
     if verses:
         search_kwargs = {"k": max(base_k, len(verses) + 4)}
     else:
