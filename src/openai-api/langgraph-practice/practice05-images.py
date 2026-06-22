@@ -30,12 +30,17 @@ def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
+prompt = """Describe this image. If you see text, print what you read. If it is not in English, translate it.
+If it is a puzzle, approach problems step-by-step, verify boundary conditions, 
+and rigorously check your assumptions before calculating the final answer.
+"""
+
 def describe(image_path):
     message = HumanMessage(
         content=[
             {
                 "type": "text",
-                "text": "Describe this image. If you see text, print what you read. If it is not in English, translate it too.",
+                "text": prompt,
             },
             {
                 "type": "image_url",
@@ -53,12 +58,14 @@ path_vulture = workspaces + "/playground-ai-ml/data/images/vulture.jpg"
 path_screenshot = workspaces + "/playground-ai-ml/data/images/screenshot-sample.png"
 path_handwriting = workspaces + "/playground-ai-ml/data/images/handwriting.jpg"
 path_meme = workspaces + "/playground-ai-ml/data/images/meme.jpg"
+path_geometry_puzzle = workspaces + "/playground-ai-ml/data/images/geometry_puzzle.jpg"
 
 images_names = [
     "vulture",
     "screenshot",
     "handwriting",
     "meme",
+    "geometry puzzle"
 ]
 
 images = [
@@ -66,6 +73,7 @@ images = [
     path_screenshot,
     path_screenshot,
     path_meme,
+    path_geometry_puzzle,
 ]
 
 what = selection("image", images_names, images)
