@@ -71,7 +71,7 @@ images_names = [
 images = [
     path_vulture,
     path_screenshot,
-    path_screenshot,
+    path_handwriting,
     path_meme,
     path_geometry_puzzle,
 ]
