@@ -31,7 +31,7 @@ embeddings_model_name, embeddings = selection_embeddings()
 #     check_embedding_ctx_length=False,
 # )
 
-pdf_path = workspaces + "/playground-ai-ml/data/documents-pdf/Stock_Market_Performance_2024.pdf"
+pdf_path = os.path.join(workspaces, "playground-ai-ml/data/documents-pdf/Stock_Market_Performance_2024.pdf")
 
 if not os.path.exists(pdf_path):
     raise FileNotFoundError(f"PDF file not found: {pdf_path}")
@@ -51,7 +51,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 splits = text_splitter.split_documents(pages)
 
-persist_directory = workspaces + "/playground-ai-ml/data/chromadb/stocks24"
+persist_directory = os.path.join(workspaces, "playground-ai-ml/data/chromadb/stocks24")
 collection_name = "stock_market"
 
 if os.path.exists(persist_directory) and os.path.isdir(persist_directory):

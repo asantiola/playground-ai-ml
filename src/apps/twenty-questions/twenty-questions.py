@@ -208,7 +208,7 @@ if __name__ == "__main__":
     checkpointer = MemorySaver()
     app = graph.compile(checkpointer=checkpointer)
 
-    # drawing_filename = workspaces + "/playground-ai-ml/data/drawing.png"
+    # drawing_filename = os.path.join(workspaces, "playground-ai-ml/data/drawing.png")
     # app.get_graph().draw_mermaid_png(output_file_path=drawing_filename)
 
     config = {"configurable": {"thread_id": "session_abc123"}}

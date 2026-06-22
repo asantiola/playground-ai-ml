@@ -26,7 +26,7 @@ llm = ChatOpenAI(
     api_key=api_key,
 )
 
-financial_file = workspaces + "/playground-ai-ml/data/financial01.json"
+financial_file = os.path.join(workspaces, "playground-ai-ml/data/financial01.json")
 
 try:
     with open(financial_file, "r") as f:

@@ -21,8 +21,8 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-command_path = workspaces + "/playground-ai-ml/.venv/bin/python"
-mcp_path = workspaces + "/playground-ai-ml/src/openai-api/langgraph-practice/practice08-mcp-server.py"
+command_path = os.path.join(workspaces, "playground-ai-ml/.venv/bin/python")
+mcp_path = os.path.join(workspaces, "playground-ai-ml/src/openai-api/langgraph-practice/practice08-mcp-server.py")
 
 async def run_client():
     client = MultiServerMCPClient(

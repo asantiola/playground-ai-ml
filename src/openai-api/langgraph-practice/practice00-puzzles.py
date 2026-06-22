@@ -78,7 +78,7 @@ You MUST structure your response exactly like this:
 
 puzzles_names = []
 puzzles = []
-puzzle_path = workspaces + "/playground-ai-ml/data/puzzles"
+puzzle_path = os.path.join(workspaces, "playground-ai-ml/data/puzzles")
 search_pattern = os.path.join(puzzle_path, "*.txt")
 for file_path in sorted(glob.glob(search_pattern)):
     with open(file_path, "r") as file:
