@@ -1,5 +1,5 @@
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage
 from practice00_common import selection
 import base64
 import os
@@ -31,36 +31,32 @@ def encode_audio(audio_path):
     with open(audio_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
-def describe(audio_path):
-    system_prompt = (
-        "You are an expert audio analyst and acoustic engineer. Your task is to analyze "
-        "audio clips with precise attention to detail, covering speech content, vocal characteristics, "
-        "background environment, and audio quality."
-    )
-    human_prompt = (
-        "What is being said in the audio file? If not in English, translate it too."
-    )
-    messages = [
-        SystemMessage(content=system_prompt),
-        HumanMessage(
-            content=[
-                {
-                    "type": "text",
-                    "text": human_prompt,
-                },
-                {
-                    "type": "input_audio",
-                    "input_audio": {
-                        "data": encode_audio(audio_path),
-                        "format": "mp3", # OpenAI strictly requires "wav" or "mp3"
-                    },
-                },
-            ]
-        )
-    ]
+prompt = """Describe what you hear in this audio file thoroughly.
+    If you hear words, print all you understand. If it is not in English, translate it.
+    If it is a puzzle, approach problems step-by-step, verify boundary conditions, 
+    and rigorously check your assumptions before calculating the final answer.
+"""
 
-    response = llm.invoke(messages)
-    print(f"\n===== AI RESPONSE =====\n{response.content}\n")
+def describe(audio_path):
+    message = HumanMessage(
+        content=[
+            {
+                "type": "text",
+                "text": prompt,
+            },
+            {
+                "type": "input_audio",
+                "input_audio": {
+                    "data": encode_audio(audio_path),
+                    "format": "mp3", # OpenAI strictly requires "wav" or "mp3"
+                },
+            },
+        ]
+    )
+
+    print("\n===== AI RESPONSE =====\n")
+    for chunk in llm.stream([message]):
+        print(chunk.content, end="", flush=True)
 
 # recorded using MacOS Voice Memos, Settings -> Audio Quality -> Lossless
 # drag recording to data folder
@@ -70,15 +66,18 @@ def describe(audio_path):
 
 path_brown_fox = os.path.join(workspaces, "playground-ai-ml/data/audios/brown_fox.wav")
 path_itik = os.path.join(workspaces, "playground-ai-ml/data/audios/itik.mp3")
+path_puzzle = os.path.join(workspaces, "playground-ai-ml/data/audios/puzzle.mp3")
 
 audios_names = [
     "brown fox",
     "itik",
+    "puzzle",
 ]
 
 audios = [
     path_brown_fox,
     path_itik,
+    path_puzzle,
 ]
 
 what = selection("audio", audios_names, audios)
