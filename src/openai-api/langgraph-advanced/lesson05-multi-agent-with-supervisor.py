@@ -24,31 +24,38 @@ llm = ChatOpenAI(
     model="mlx-community/gemma-4-12B-it-6bit",
     base_url=openai_base_url,
     api_key=api_key,
-    temperature=0.2,
+    temperature=0.0,
+)
+
+creative_llm = ChatOpenAI(
+    model="mlx-community/gemma-4-12B-it-6bit",
+    base_url=openai_base_url,
+    api_key=api_key,
+    temperature=0.7,
 )
 
 geographer_prompt = "You are a Geographer. Describe climates, terrain, and city layouts."
 geographer = create_agent(
-    model=llm, 
+    model=creative_llm, 
     system_prompt=geographer_prompt,
     name="geographer",
-    tools=[]
+    tools=[],
 )
 
 historian_prompt = "You are a Historian. Create timelines and backstories for civilizations."
 historian = create_agent(
-    model=llm,
+    model=creative_llm,
     system_prompt=historian_prompt,
     name="historian",
-    tools=[]
+    tools=[],
 )
 
 critic_prompt = "You are a Social Critic. Describe power structures, factions, and daily life."
 critic = create_agent(
-    model=llm,
+    model=creative_llm,
     system_prompt=critic_prompt,
     name="critic",
-    tools=[]
+    tools=[],
 )
 
 supervisor_prompt = """
