@@ -24,10 +24,6 @@ llm = ChatOpenAI(
     base_url=openai_base_url,
     api_key=api_key,
     temperature=0.0,
-    extra_body={
-        "frequency_penalty": 0.6,
-        "presence_penalty": 0.4
-    }
 )
 
 def encode_image(image_path):
@@ -66,7 +62,6 @@ path_screenshot = os.path.join(workspaces, "playground-ai-ml/data/images/screens
 path_handwriting = os.path.join(workspaces, "playground-ai-ml/data/images/handwriting.jpg")
 path_meme = os.path.join(workspaces, "playground-ai-ml/data/images/meme.jpg")
 path_logic_puzzle = os.path.join(workspaces, "playground-ai-ml/data/images/logic_puzzle.jpg")
-path_bible_page = os.path.join(workspaces, "playground-ai-ml/data/images/lev18.png")
 
 images_names = [
     "vulture",
@@ -74,7 +69,6 @@ images_names = [
     "handwriting",
     "meme",
     "logic puzzle",
-    "bible page",
 ]
 
 images = [
@@ -83,7 +77,6 @@ images = [
     path_handwriting,
     path_meme,
     path_logic_puzzle,
-    path_bible_page,
 ]
 
 what = selection("image", images_names, images)
