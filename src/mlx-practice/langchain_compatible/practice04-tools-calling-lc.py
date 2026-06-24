@@ -13,7 +13,7 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 import json
 import re
 
-model_path="mlx-community/gemma-4-12B-it-6bit"
+model_path="mlx-community/gemma-4-12B-it-qat-6bit"
 
 class MLXVLChat(BaseChatModel):
     model_path: str

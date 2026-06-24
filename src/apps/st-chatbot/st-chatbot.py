@@ -55,7 +55,7 @@ with st.sidebar:
     model_option = st.selectbox(
         "Select a Model Architecture",
         options=[
-            "mlx-community/gemma-4-12B-it-6bit"
+            "mlx-community/gemma-4-12B-it-qat-6bit"
         ],
         index=0,
     )

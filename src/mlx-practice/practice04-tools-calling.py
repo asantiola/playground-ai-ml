@@ -156,7 +156,7 @@ def execute_tool_calls(response_obj):
         "tool_results": results
     }
 
-model_id = "mlx-community/gemma-4-12B-it-6bit"
+model_id = "mlx-community/gemma-4-12B-it-qat-6bit"
 print(f"Loading model {model_id}...")
 model, processor = load(model_id)
 config = model.config

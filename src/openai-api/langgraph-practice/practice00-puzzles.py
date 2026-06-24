@@ -27,14 +27,14 @@ api_key = os.environ.get(
 )
 
 model_names = [
-    "mlx-community/gemma-4-12B-it-6bit",
+    "mlx-community/gemma-4-12B-it-qat-6bit",
     "ggml-org/gpt-oss-20b-GGUF",
     "mlx-community/phi-4-6bit",
 ]
 
 model_details = [
     {
-        "model": "mlx-community/gemma-4-12B-it-6bit",
+        "model": "mlx-community/gemma-4-12B-it-qat-6bit",
         "temperature": 0.0,
         "max_completion_tokens": 4096
     },

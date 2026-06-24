@@ -3,7 +3,7 @@ import mlx.core as mx
 import sys
 import gc
 
-model_path = "mlx-community/gemma-4-12B-it-6bit"
+model_path = "mlx-community/gemma-4-12B-it-qat-6bit"
 streaming = True
 
 def mlx_vlm_call(model_path, messages, streaming=True):
