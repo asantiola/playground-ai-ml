@@ -28,8 +28,7 @@ api_key = os.environ.get(
 
 model_names = [
     "mlx-community/gemma-4-12B-it-qat-6bit",
-    "ggml-org/gpt-oss-20b-GGUF",
-    "mlx-community/phi-4-6bit",
+    "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
 ]
 
 model_details = [
@@ -39,19 +38,13 @@ model_details = [
         "max_completion_tokens": 4096
     },
     {
-        "model": "ggml-org/gpt-oss-20b-GGUF",
-        "temperature": 1.0,
-        "max_completion_tokens": None
-    },
-    {
-        "model": "mlx-community/phi-4-6bit",
+        "model": "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
         "temperature": 0.0,
-        "max_completion_tokens": 4096
+        "max_completion_tokens": None
     },
 ]
 
-# model_chosen = selection("models", model_names, model_details)
-model_chosen = model_details[0]
+model_chosen = selection("models", model_names, model_details)
 
 llm = ChatOpenAI(
     model=model_chosen["model"],
