@@ -51,19 +51,22 @@ with st.sidebar:
     st.caption("Manage your active LLM lifecycle and history here.")
     st.divider()
 
-    # Model Selection dropdown
+    # Model Selection dropdown with an empty default choice
     model_option = st.selectbox(
         "Select a Model Architecture",
         options=[
-            "mlx-community/gemma-4-12B-it-qat-6bit"
+            "",  # Blank default option
+            "mlx-community/gemma-4-12B-it-qat-6bit",
+            "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
         ],
         index=0,
+        format_func=lambda x: "Choose a model..." if x == "" else x
     )
 
-    # Autoload logic: Check if the selection differs from what's currently loaded
-    if model_option != st.session_state.loaded_model_name and api_key:
+    # Autoload logic: Ensure a valid model is selected and it differs from current session state
+    if model_option and model_option != st.session_state.loaded_model_name and api_key:
         try:
-            # Initialize LangChain ChatOpenAI object with your custom base URL automatically
+            # Initialize LangChain ChatOpenAI object with your custom base URL
             st.session_state.llm_instance = ChatOpenAI(
                 base_url=openai_base_url,
                 model=model_option,
@@ -74,6 +77,11 @@ with st.sidebar:
             st.toast(f"Successfully loaded {model_option}!", icon="✅")
         except Exception as e:
             st.error(f"Failed to load model: {str(e)}")
+            
+    # Reset state if user switches back to the blank selection
+    elif model_option == "" and st.session_state.loaded_model_name is not None:
+        st.session_state.llm_instance = None
+        st.session_state.loaded_model_name = None
 
     st.divider()
 
@@ -99,7 +107,7 @@ if st.session_state.loaded_model_name:
     )
 else:
     st.warning(
-        "**No Active Model:** Please ensure an API Key is set to automatically load the model.",
+        "**No Active Model:** Please select a model from the sidebar to begin chatting.",
         icon="🔴",
     )
 
@@ -114,7 +122,7 @@ for message in st.session_state.messages:
         with st.chat_message("assistant"):
             st.markdown(message.content)
 
-# Chat Input Block
+# Chat Input Block (remains disabled until llm_instance exists)
 if prompt := st.chat_input(
     "Type a message...", disabled=(st.session_state.llm_instance is None)
 ):
