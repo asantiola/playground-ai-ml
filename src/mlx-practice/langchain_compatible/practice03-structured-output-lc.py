@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from mlx_vlm import load
 from mlx_vlm.generate import stream_generate
 
-model_path="mlx-community/gemma-4-12B-it-qat-6bit"
+model_path="mlx-community/gemma-4-12B-it-6bit"
 
 class MLXVLChat(BaseChatModel):
     model_path: str

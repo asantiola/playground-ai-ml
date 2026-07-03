@@ -2,7 +2,7 @@ import json
 from mlx_vlm import generate, load
 from pydantic import BaseModel, Field
 
-model_path = "mlx-community/gemma-4-12B-it-qat-6bit"
+model_path = "mlx-community/gemma-4-12B-it-6bit"
 
 
 # 1. Define your Response class

@@ -3,7 +3,7 @@ from mlx_vlm.prompt_utils import apply_chat_template
 from PIL import Image
 import cv2
 
-model_path = "mlx-community/gemma-4-12B-it-qat-6bit"
+model_path = "mlx-community/gemma-4-12B-it-6bit"
 model, processor = load(model_path)
 
 video_path = "./data/videos/plants.mp4"

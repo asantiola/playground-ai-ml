@@ -56,7 +56,7 @@ with st.sidebar:
         "Select a Model Architecture",
         options=[
             "",  # Blank default option
-            "mlx-community/gemma-4-12B-it-qat-6bit",
+            "mlx-community/gemma-4-12B-it-6bit",
             "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
         ],
         index=0,

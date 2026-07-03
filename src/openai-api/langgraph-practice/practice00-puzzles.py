@@ -27,13 +27,13 @@ api_key = os.environ.get(
 )
 
 model_names = [
-    "mlx-community/gemma-4-12B-it-qat-6bit",
+    "mlx-community/gemma-4-12B-it-6bit",
     "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
 ]
 
 model_details = [
     {
-        "model": "mlx-community/gemma-4-12B-it-qat-6bit",
+        "model": "mlx-community/gemma-4-12B-it-6bit",
         "temperature": 0.0,
         "max_completion_tokens": 4096
     },

@@ -21,14 +21,14 @@ api_key = os.environ.get(
 )
 
 llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-qat-6bit",
+    model="mlx-community/gemma-4-12B-it-6bit",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=0.0,
 )
 
 creative_llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-qat-6bit",
+    model="mlx-community/gemma-4-12B-it-6bit",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=0.7,

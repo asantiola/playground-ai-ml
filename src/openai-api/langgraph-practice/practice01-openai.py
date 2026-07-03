@@ -20,7 +20,7 @@ client = openai.OpenAI(
 
 completion = client.chat.completions.create(
     # model="ai/llama3.1:latest", 
-    model="mlx-community/gemma-4-12B-it-qat-6bit", 
+    model="mlx-community/gemma-4-12B-it-6bit", 
     messages=[
         {"role": "system", "content": "You are a helpful AI assistant."},
         {"role": "user", "content": "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."}
