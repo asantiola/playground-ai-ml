@@ -60,14 +60,14 @@ messages = [
 ]
 
 # Load model and processor components
-model, tokenizer = load(model_path)
-prompt = tokenizer.apply_chat_template(
+model, processor = load(model_path)
+prompt = processor.apply_chat_template(
     messages, tokenize=False, add_generation_prompt=True
 )
 
 print("Generating structured text...")
 # 3. Generate raw text from the model
-text_output = generate(model, tokenizer, prompt, verbose=False)
+text_output = generate(model, processor, prompt, verbose=False)
 
 try:
     # 4. Parse the output back into your complete Response object
