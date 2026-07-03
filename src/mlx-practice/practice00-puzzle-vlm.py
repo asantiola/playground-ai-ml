@@ -9,6 +9,8 @@ streaming = True
 def mlx_vlm_call(model_path, messages, streaming=True):
     model, processor = load(model_path)
     prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    full_response = ""
+    show_thinking = False
 
     if streaming:
         print("Streaming:")
@@ -18,8 +20,17 @@ def mlx_vlm_call(model_path, messages, streaming=True):
             prompt,
             max_tokens=8192
         ):
-            sys.stdout.write(chunk.text)
-            sys.stdout.flush()
+            full_response += chunk.text
+    
+            if "</thinking>" in full_response and not show_thinking:
+                show_thinking = True
+                # Print anything that came after </thinking> in this chunk
+                parts = full_response.split("</thinking>")
+                if len(parts) > 1:
+                    print(parts[1].strip(), end="", flush=True)
+            elif show_thinking:
+                # We are safely past the thinking phase, print normally
+                print(chunk.text, end="", flush=True)
         print("\n\n")
     else:
         print("Generating:")
@@ -43,9 +54,14 @@ def mlx_vlm_call(model_path, messages, streaming=True):
         print(f"response.peak_memory: {response.peak_memory}")
         print("\n\n")
 
-system_prompt = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
-You approach problems step-by-step, verify boundary conditions, 
-and rigorously check your assumptions before calculating the final answer.
+system_prompt = """You are a precise, direct calculator. 
+Your task is to solve mathematical and logic puzzles. 
+
+You MUST structure your response exactly like this:
+'<thinking>
+[Write all your step-by-step logic, calculations, and analysis here. Take as much space as you need.]
+</thinking>'
+[Write ONLY the final answer here. If it is a number, print just the number. If it requires a brief label, keep it under 10 words.]
 """
 
 puzzle_einstein = """There are five houses of different colors adjacent to one another on a road. 
