@@ -10,7 +10,7 @@ def mlx_vlm_call(model_path, messages, streaming=True):
     model, processor = load(model_path)
     prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     full_response = ""
-    show_thinking = False
+    show_thinking = True
 
     if streaming:
         print("Streaming:")
