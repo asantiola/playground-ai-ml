@@ -1,6 +1,6 @@
 from mlx_vlm import load, generate
 
-model_path="mlx-community/gemma-4-12B-it-6bit"
+model_path="mlx-community/gemma-4-12B-it-qat-6bit"
 model, processor = load(model_path)
 
 print(f"processor: {processor}\n")

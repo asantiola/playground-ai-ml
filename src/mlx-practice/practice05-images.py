@@ -2,7 +2,7 @@ from mlx_vlm import load, stream_generate
 from mlx_vlm.prompt_utils import apply_chat_template
 import sys
 
-model_path = "mlx-community/gemma-4-12B-it-6bit"
+model_path = "mlx-community/gemma-4-12B-it-qat-4bit"
 model, processor = load(model_path)
 
 image_path = "./data/images/handwriting.jpg"

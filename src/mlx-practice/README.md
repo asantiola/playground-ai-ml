@@ -3,7 +3,7 @@
 
 ### Install
 ```
-pip install --upgrade mlx-vlm mlx-lm mlx
+pip install --upgrade mlx-vlm mlx-lm mlx mlx-embeddings
 ```
 
 ### Uninstall

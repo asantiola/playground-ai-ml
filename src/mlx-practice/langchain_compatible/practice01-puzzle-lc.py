@@ -6,7 +6,7 @@ from typing import Any, Iterator, List, Optional
 from mlx_vlm import load
 from mlx_vlm.generate import stream_generate
 
-model_path="mlx-community/gemma-4-12B-it-6bit"
+model_path="mlx-community/gemma-4-12B-it-qat-6bit"
 
 system_prompt = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.
 You approach problems step-by-step, verify boundary conditions, 

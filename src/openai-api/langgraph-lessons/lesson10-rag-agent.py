@@ -78,7 +78,7 @@ def retriever_tool(query: str) -> str:
     return "\n\n".join(results)
 
 llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-6bit",
+    model="mlx-community/gemma-4-12B-it-qat-6bit",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=0,
