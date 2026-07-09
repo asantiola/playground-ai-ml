@@ -16,9 +16,13 @@ api_key = os.environ.get(
 # docker desktop
 llm = ChatOpenAI(
     model="mlx-community/gemma-4-12B-it-qat-6bit", 
-    temperature=0,
     base_url=openai_base_url,
     api_key=api_key,
+    temperature=1.0,
+    extra_body={
+        "top_p": 0.95,
+        "top_k": 64,
+    },
 )
 
 messages = [

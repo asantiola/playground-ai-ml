@@ -30,10 +30,14 @@ def get_stock_price(ticker: str):
 tools = [get_weather, get_stock_price]
 
 llm = ChatOpenAI(
+    model="mlx-community/gemma-4-12B-it-qat-6bit",
     base_url=openai_base_url,
     api_key=api_key,
-    model="mlx-community/gemma-4-12B-it-qat-6bit",
-    temperature=0,
+    temperature=1.0,
+    extra_body={
+        "top_p": 0.95,
+        "top_k": 64,
+    },
 )
 
 llm_with_tools = llm.bind_tools(tools)

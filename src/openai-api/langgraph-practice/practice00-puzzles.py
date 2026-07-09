@@ -28,19 +28,39 @@ api_key = os.environ.get(
 
 model_names = [
     "mlx-community/gemma-4-12B-it-qat-6bit",
+    "google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0",
     "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
 ]
 
 model_details = [
     {
         "model": "mlx-community/gemma-4-12B-it-qat-6bit",
-        "temperature": 0.0,
-        "max_completion_tokens": 4096
+        "max_completion_tokens": 4096,
+        "temperature": 1.0,
+        "extra_body": {
+            "top_p": 0.95,
+            "top_k": 64,
+        },
+    },
+    {
+        "model": "google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0",
+        "max_completion_tokens": None,
+        "temperature": 1.0,
+        "extra_body": None,
+        "extra_body": {
+            "top_p": 0.95,
+            "top_k": 64,
+        },
     },
     {
         "model": "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
-        "temperature": 0.0,
-        "max_completion_tokens": None
+        "max_completion_tokens": None,
+        "temperature": 1.0,
+        "extra_body": None,
+        "extra_body": {
+            "top_p": 0.95,
+            "top_k": 64,
+        },
     },
 ]
 
@@ -51,7 +71,8 @@ llm = ChatOpenAI(
     base_url=openai_base_url,
     api_key=api_key,
     temperature=model_chosen["temperature"],
-    max_completion_tokens=model_chosen["max_completion_tokens"]
+    max_completion_tokens=model_chosen["max_completion_tokens"],
+    extra_body=model_chosen["extra_body"],
 )
 
 system_prompt_show = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.

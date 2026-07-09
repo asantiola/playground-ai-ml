@@ -32,6 +32,11 @@ llm = ChatOpenAI(
     model="mlx-community/gemma-4-12B-it-qat-6bit",
     base_url=openai_base_url,
     api_key=api_key,
+    temperature=1.0,
+    extra_body={
+        "top_p": 0.95,
+        "top_k": 64,
+    },
 )
 
 embeddings = OpenAIEmbeddings(
@@ -146,7 +151,7 @@ def get_stock_quotes(symbol: str) -> Union[StockQuote, str]:
     
     return nyse_top_19_less_oracle[symbol]
 
-persist_directory = os.path.join(workspaces, "playground-ai-ml/.chromadb")
+persist_directory = os.path.join(workspaces, "playground-ai-ml/data/chromadb/stocks24")
 collection_name = "stock_market"
 
 try:
