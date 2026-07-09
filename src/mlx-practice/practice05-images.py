@@ -2,7 +2,7 @@ from mlx_vlm import load, stream_generate
 from mlx_vlm.prompt_utils import apply_chat_template
 import sys
 
-model_path = "mlx-community/gemma-4-12B-it-qat-4bit"
+model_path = "mlx-community/gemma-4-12B-it-qat-6bit"
 model, processor = load(model_path)
 
 image_path = "./data/images/handwriting.jpg"
@@ -32,7 +32,9 @@ for chunk in stream_generate(
     processor, 
     formatted_prompt,
     image=image_path,
-    temperature=0.0,
+    temperature=1.0,
+    top_p=0.95,
+    top_k=64,
 ):
     sys.stdout.write(chunk.text)
     sys.stdout.flush()

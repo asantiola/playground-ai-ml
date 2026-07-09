@@ -67,7 +67,15 @@ prompt = processor.apply_chat_template(
 
 print("Generating structured text...")
 # 3. Generate raw text from the model
-text_output = generate(model, processor, prompt, verbose=False)
+text_output = generate(
+    model,
+    processor,
+    prompt,
+    verbose=False,
+    temperature=0.1,
+    top_p=0.95,
+    top_k=64,
+)
 
 try:
     # 4. Parse the output back into your complete Response object

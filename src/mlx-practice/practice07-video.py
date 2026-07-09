@@ -56,7 +56,9 @@ output = generate(
     processor, 
     formatted_prompt,
     image=frames,
-    temperature=0.0      
+    temperature=1.0,
+    top_p=0.95,
+    top_k=64,
 )
 
 print(output.text)

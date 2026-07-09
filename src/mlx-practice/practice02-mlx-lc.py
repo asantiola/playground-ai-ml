@@ -20,6 +20,15 @@ prompt = processor.apply_chat_template(messages, tokenize=False, add_generation_
 
 print(f"prompt: {prompt}\n")
 
-response = generate(model, processor, prompt, verbose=False)
+response = generate(
+    model, 
+    processor, 
+    prompt, 
+    verbose=False,
+    max_tokens=8192,
+    temperature=1.0,
+    top_p=0.95,
+    top_k=64,
+)
 
 print(f"response: {response}")

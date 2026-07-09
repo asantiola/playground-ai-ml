@@ -36,7 +36,9 @@ output = generate(
     processor, 
     formatted_prompt,
     audio=audio_path,
-    temperature=0.0      
+    temperature=0.1,
+    top_p=0.95,
+    top_k=64,
 )
 
 print(output.text)

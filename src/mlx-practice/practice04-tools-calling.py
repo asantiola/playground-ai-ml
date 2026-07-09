@@ -183,6 +183,8 @@ def run_pipeline(user_query: str):
         prompt=formatted_prompt,
         max_tokens=4096,
         temperature=1.0,
+        top_p=0.95,
+        top_k=64,
         verbose=False,
         extra_sampling_args={
             "json_schema": RESPONSE_SCHEMA

@@ -3,7 +3,7 @@ import mlx.core as mx
 import sys
 import gc
 
-model_path = "mlx-community/gemma-4-12B-it-qat-4bit"
+model_path = "mlx-community/gemma-4-12B-it-qat-6bit"
 streaming = True
 
 def mlx_vlm_call(model_path, messages, streaming=True):
@@ -18,7 +18,10 @@ def mlx_vlm_call(model_path, messages, streaming=True):
             model,
             processor, 
             prompt,
-            max_tokens=8192
+            max_tokens=8192,
+            temperature=1.0,
+            top_p=0.95,
+            top_k=64,
         ):
             full_response += chunk.text
     
