@@ -28,7 +28,7 @@ api_key = os.environ.get(
 
 model_names = [
     "mlx-community/gemma-4-12B-it-qat-6bit",
-    "google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0",
+    "mlx-community/Qwen2.5-Coder-7B-Instruct-8bit",
     "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
 ]
 
@@ -43,13 +43,13 @@ model_details = [
         },
     },
     {
-        "model": "google/gemma-4-12B-it-qat-q4_0-gguf:Q4_0",
+        "model": "mlx-community/Qwen2.5-Coder-7B-Instruct-8bit",
         "max_completion_tokens": None,
-        "temperature": 1.0,
+        "temperature": 0.2,
         "extra_body": None,
         "extra_body": {
-            "top_p": 0.95,
-            "top_k": 64,
+            "top_p": 0.8,
+            "top_k": 20,
         },
     },
     {
