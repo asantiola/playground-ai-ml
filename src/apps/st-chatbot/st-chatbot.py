@@ -71,7 +71,11 @@ with st.sidebar:
                 base_url=openai_base_url,
                 model=model_option,
                 openai_api_key=api_key,
-                temperature=0.1
+                temperature=1.0,
+                extra_body={
+                    "top_p": 0.95,
+                    "top_k": 64,
+                },
             )
             st.session_state.loaded_model_name = model_option
             st.toast(f"Successfully loaded {model_option}!", icon="✅")
