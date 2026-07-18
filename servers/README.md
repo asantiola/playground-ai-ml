@@ -62,3 +62,8 @@ python -m mlx_lm server --model mlx-community/phi-4-6bit --host localhost --port
 ```
 llama-server -hf ggml-org/gpt-oss-20b-GGUF --host localhost --port 12434 -c 0 --jinja
 ```
+
+### Inside podman containers, can reach the models:
+```
+curl http://host.containers.internal:12434/v1/models
+```
