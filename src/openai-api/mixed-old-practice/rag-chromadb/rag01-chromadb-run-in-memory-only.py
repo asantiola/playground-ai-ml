@@ -22,7 +22,7 @@ hf_embeddings = HuggingFaceEmbeddings(
     encode_kwargs={"normalize_embeddings": False},
 )
 
-doc_path = HOME + "/repo/playground-ai-ml/data/documents-txt"
+doc_path = HOME + "/repo/playground-ai-ml/shared-data/python/documents-txt"
 documents = []
 for filename in os.listdir(doc_path):
     if filename.endswith('.txt'):
@@ -71,7 +71,7 @@ def query(question):
     })
     print(f"Answer: {answer.content}\n\n")
 
-questions = HOME + "/repo/playground-ai-ml/data/questions.txt"
+questions = HOME + "/repo/playground-ai-ml/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

@@ -16,7 +16,7 @@ oa_embeddings = OpenAIEmbeddings(
     check_embedding_ctx_length=False,
 )
 
-doc_path = "/Users/asantiola/repo/playground-ai-ml/data/documents-txt"
+doc_path = "/Users/asantiola/repo/playground-ai-ml/shared-data/python/documents-txt"
 documents = []
 for filename in os.listdir(doc_path):
     if filename.endswith('.txt'):
@@ -65,7 +65,7 @@ def query(question):
     })
     print(f"Answer: {answer.content}\n\n")
 
-questions = "/Users/asantiola/repo/playground-ai-ml/data/questions.txt"
+questions = "/Users/asantiola/repo/playground-ai-ml/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

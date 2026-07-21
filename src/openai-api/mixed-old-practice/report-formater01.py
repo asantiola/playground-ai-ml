@@ -7,8 +7,8 @@ from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 HOME=os.environ["HOME"]
-db_name = HOME + "/repo/playground-ai-ml/data/sql-transactions.db"
-db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-transactions.db"
+db_name = HOME + "/repo/playground-ai-ml/shared-data/python/sql-transactions.db"
+db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/shared-data/python/sql-transactions.db"
 
 api_url = "http://model-runner.docker.internal/engines/v1"
 api_key = "docker"

@@ -78,7 +78,7 @@ def print_tables(cursor):
 
     print("")
 
-db_name = HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
+db_name = HOME + "/repo/playground-ai-ml/shared-data/python/sql-agentic-ai.db"
 db_type = "sqlite3"
 
 conn = None

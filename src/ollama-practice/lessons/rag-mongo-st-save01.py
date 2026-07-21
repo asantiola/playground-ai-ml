@@ -13,7 +13,7 @@ mongodb_pass = os.environ.get("MONGODB_PASS", "pass")
 mongodb_conn = f"mongodb://{mongodb_user}:{mongodb_pass}@{mongodb_host}:27017/?directConnection=true"
 print(f"MongoDB host string: {mongodb_host}")
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -33,7 +33,7 @@ print(f"Using LLM temp: {llm_temp}")
 print(f"Embedding model '{sentencetransformer_embeddings_model}' maximum sequence length: {sentence_transformer.max_seq_length}")
 print(f"Embedding dimension: {embedding_dimension}")
 
-doc_path = "/workspace/data/documents"
+doc_path = "/workspace/shared-data/python/documents"
 files = [os.path.join(doc_path, file) for file in os.listdir(doc_path)]
 
 # Load and prepare documents

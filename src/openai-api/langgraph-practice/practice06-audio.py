@@ -68,9 +68,9 @@ def describe(audio_path):
 # `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.wav`
 # `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.mp3`
 
-path_brown_fox = os.path.join(workspaces, "playground-ai-ml/data/audios/brown_fox.wav")
-path_itik = os.path.join(workspaces, "playground-ai-ml/data/audios/itik.mp3")
-path_puzzle = os.path.join(workspaces, "playground-ai-ml/data/audios/puzzle.mp3")
+path_brown_fox = os.path.join(workspaces, "playground-ai-ml/shared-data/python/audios/brown_fox.wav")
+path_itik = os.path.join(workspaces, "playground-ai-ml/shared-data/python/audios/itik.mp3")
+path_puzzle = os.path.join(workspaces, "playground-ai-ml/shared-data/python/audios/puzzle.mp3")
 
 audios_names = [
     "brown fox",

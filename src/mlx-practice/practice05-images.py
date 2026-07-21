@@ -5,7 +5,7 @@ import sys
 model_path = "mlx-community/gemma-4-12B-it-qat-6bit"
 model, processor = load(model_path)
 
-image_path = "./data/images/handwriting.jpg"
+image_path = "./shared-data/python/images/handwriting.jpg"
 
 prompt = """Give a brief description of what you see, then do the following:
 - If you see text, print what you see. If it is not in English, translate it.

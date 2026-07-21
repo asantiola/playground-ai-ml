@@ -18,7 +18,7 @@ redis_pass = os.environ.get("REDIS_PASS", "redis_pass")
 redis_url = f"redis://{redis_user}:{redis_pass}@{redis_host}:6379"
 print(f"Redis host: {redis_host}")
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -46,7 +46,7 @@ print(f"Embedding model '{embeddings_model}' maximum sequence length: {sentence_
 print(f"Embedding dimension: {embedding_dimension}")
 print(f"hf_embeddings_device: {hf_embeddings_device}")
 
-doc_path = "/workspace/data/documents"
+doc_path = "/workspace/shared-data/python/documents"
 files = [os.path.join(doc_path, file) for file in os.listdir(doc_path)]
 
 
@@ -114,7 +114,7 @@ def query(question):
     answer = rag_application.run(question)
     print(f"Answer: {answer.content}\n\n")
 
-questions = "/workspace/data/questions.txt"
+questions = "/workspace/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

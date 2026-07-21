@@ -285,7 +285,7 @@ llm = ChatOpenAI(
     api_key="docker",
 )
 
-dbname = HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
+dbname = HOME + "/repo/playground-ai-ml/shared-data/python/sql-agentic-ai.db"
 
 try:
     db = MySqlite3Db(dbname=dbname)

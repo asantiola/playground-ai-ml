@@ -6,7 +6,7 @@ import json
 import os
 
 HOME = os.environ["HOME"]
-financial_file = HOME + "/playground-ai-ml/data/financial01.json"
+financial_file = HOME + "/playground-ai-ml/shared-data/python/financial01.json"
 
 try:
     with open(financial_file, "r") as f:

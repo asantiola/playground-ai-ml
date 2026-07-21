@@ -76,6 +76,6 @@ def describe(video_path):
     response = llm.invoke([message])
     print(f"\n===== AI RESPONSE =====\n{response.content}\n")
 
-path_plants = os.path.join(workspaces, "playground-ai-ml/data/videos/plants.mp4")
+path_plants = os.path.join(workspaces, "playground-ai-ml/shared-data/python/videos/plants.mp4")
 
 describe(path_plants)

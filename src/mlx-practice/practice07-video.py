@@ -6,7 +6,7 @@ import cv2
 model_path = "mlx-community/gemma-4-12B-it-qat-6bit"
 model, processor = load(model_path)
 
-video_path = "./data/videos/plants.mp4"
+video_path = "./shared-data/python/videos/plants.mp4"
 cap = cv2.VideoCapture(video_path)
 
 video_fps = cap.get(cv2.CAP_PROP_FPS)

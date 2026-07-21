@@ -41,9 +41,9 @@ def create_retriever(doc_path):
 
     return vector_store.as_retriever()
 
-retriever_billiards = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/billiards")
-retriever_guitars = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/guitars")
-retriever_technologies = create_retriever(HOME + "/repo/playground-ai-ml/data/routing-txt/technologies")
+retriever_billiards = create_retriever(HOME + "/repo/playground-ai-ml/shared-data/python/routing-txt/billiards")
+retriever_guitars = create_retriever(HOME + "/repo/playground-ai-ml/shared-data/python/routing-txt/guitars")
+retriever_technologies = create_retriever(HOME + "/repo/playground-ai-ml/shared-data/python/routing-txt/technologies")
 
 def select_retriever(question: str):
     """

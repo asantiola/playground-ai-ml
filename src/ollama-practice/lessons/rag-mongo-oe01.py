@@ -22,7 +22,7 @@ rag_collection = "rag_oe_collection"
 collection = mongo_client[rag_db][rag_collection]
 print("collection.estimated_document_count(): ", collection.estimated_document_count(), "\n")
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -107,7 +107,7 @@ def query(question):
     )
     print(f"Answer: {response.message.content}\n\n")
 
-questions = "/workspace/data/questions.txt"
+questions = "/workspace/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

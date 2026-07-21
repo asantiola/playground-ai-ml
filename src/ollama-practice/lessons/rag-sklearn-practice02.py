@@ -37,7 +37,7 @@ print(f"Ollama URL: {ollama_url}")
 
 # print(f"Apache URL: {apache_url}")
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -56,9 +56,9 @@ print(f"Using LLM temp: {llm_temp}")
 print(f"Embedding model '{embeddings_model}' maximum sequence length: {SentenceTransformer(embeddings_model).max_seq_length}")
 print(f"hf_embeddings_device: {hf_embeddings_device}")
 
-doc_path = "/workspace/data/documents"
-# doc_path = "/workspace/data/documents-doc"
-# doc_path = "/workspace/data/documents-pdf"
+doc_path = "/workspace/shared-data/python/documents"
+# doc_path = "/workspace/shared-data/python/documents-doc"
+# doc_path = "/workspace/shared-data/python/documents-pdf"
 files = [os.path.join(doc_path, file) for file in os.listdir(doc_path)]
 # urls = [ f"{apache_url}/", f"{apache_url}/Billiards.html", f"{apache_url}/Guitars.html", f"{apache_url}/SoftwareEngineering.html"]
 
@@ -122,7 +122,7 @@ def query(question):
     answer = rag_chain.invoke({ "input" : question })
     print(f"Answer: {answer["answer"]}\n\n")
 
-questions = "/workspace/data/questions.txt"
+questions = "/workspace/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

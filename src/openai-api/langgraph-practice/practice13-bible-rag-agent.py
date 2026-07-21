@@ -26,7 +26,7 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-persist_directory = os.path.join(workspaces, "playground-ai-ml/data/chromadb/bibles")
+persist_directory = os.path.join(workspaces, "playground-ai-ml/shared-data/python/chromadb/bibles")
 collection_name = "kjv"
 
 def auto_load_vector_store(persist_directory, collection_name):

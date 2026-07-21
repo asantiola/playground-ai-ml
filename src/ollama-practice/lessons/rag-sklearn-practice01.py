@@ -29,7 +29,7 @@ ollama_url = f"http://{ollama_host}:11434"
 
 print(f"Ollama URL: {ollama_url}")
 
-ollama_config_file = "/home/dclxvi/repo/playground-ai/data/ollama_conf.json"
+ollama_config_file = "/home/dclxvi/repo/playground-ai/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -54,7 +54,7 @@ print(f"hf_embeddings_device: {hf_embeddings_device}")
 print(f"Splitter chunk size: {splitter_chunk_size}")
 print(f"Splitter chunk overlap: {splitter_chunk_overlap}")
 
-doc_path = "/home/dclxvi/repo/playground-ai/data/documents-txt"
+doc_path = "/home/dclxvi/repo/playground-ai/shared-data/python/documents-txt"
 files = [os.path.join(doc_path, file) for file in os.listdir(doc_path)]
 
 # urls = [
@@ -140,7 +140,7 @@ def query(question):
     answer = rag_application.run(question)
     print(f"Answer: {answer}\n\n")
 
-questions = "/home/dclxvi/repo/playground-ai/data/questions.txt"
+questions = "/home/dclxvi/repo/playground-ai/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

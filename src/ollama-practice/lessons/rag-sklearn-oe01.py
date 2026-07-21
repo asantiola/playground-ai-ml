@@ -11,7 +11,7 @@ ollama_url = f"http://{ollama_host}:11434"
 
 print(f"Ollama URL: {ollama_url}")
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -36,7 +36,7 @@ oe_embeddings = OllamaEmbeddings(
 )
 
 # SKLearn persist path
-persist_path = "/workspace/data/sklearn-oe"
+persist_path = "/workspace/shared-data/python/sklearn-oe"
 
 vector_store = SKLearnVectorStore(
     persist_path=persist_path,
@@ -94,7 +94,7 @@ def query(question):
     answer = rag_application.run(question)
     print(f"Answer: {answer}\n\n")
 
-questions = "/workspace/data/questions.txt"
+questions = "/workspace/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

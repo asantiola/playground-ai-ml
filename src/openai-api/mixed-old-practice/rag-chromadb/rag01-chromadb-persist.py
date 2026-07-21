@@ -20,7 +20,7 @@ hf_embeddings = HuggingFaceEmbeddings(
     encode_kwargs={"normalize_embeddings": False},
 )
 
-doc_path = HOME + "/repo/playground-ai-ml/data/documents-txt"
+doc_path = HOME + "/repo/playground-ai-ml/shared-data/python/documents-txt"
 documents = []
 for filename in os.listdir(doc_path):
     if filename.endswith('.txt'):

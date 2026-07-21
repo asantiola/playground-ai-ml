@@ -189,10 +189,10 @@ query_agents = QueryAgents(
         "api_key": "docker",
         "llm_model": "ai/gpt-oss:latest",
         "embeddings_model": "ai/mxbai-embed-large",
-        "db_uri": "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db",
-        "doc_billiards": HOME + "/repo/playground-ai-ml/data/routing-txt/billiards/",
-        "doc_guitars": HOME + "/repo/playground-ai-ml/data/routing-txt/guitars/",
-        "doc_technologies": HOME + "/repo/playground-ai-ml/data/routing-txt/technologies/",
+        "db_uri": "sqlite:///" + HOME + "/repo/playground-ai-ml/shared-data/python/sql-agentic-ai.db",
+        "doc_billiards": HOME + "/repo/playground-ai-ml/shared-data/python/routing-txt/billiards/",
+        "doc_guitars": HOME + "/repo/playground-ai-ml/shared-data/python/routing-txt/guitars/",
+        "doc_technologies": HOME + "/repo/playground-ai-ml/shared-data/python/routing-txt/technologies/",
     }
 )
 

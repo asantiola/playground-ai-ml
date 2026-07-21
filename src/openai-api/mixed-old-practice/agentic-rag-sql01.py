@@ -18,7 +18,7 @@ api_key = "docker"
 llm_model = "ai/gpt-oss:latest"
 embeddings_model = "ai/mxbai-embed-large"
 
-db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
+db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/shared-data/python/sql-agentic-ai.db"
 db = SQLDatabase.from_uri(db_uri)
 
 llm = ChatOpenAI(
@@ -43,9 +43,9 @@ oa_embeddings = OpenAIEmbeddings(
 # - query technologies vector store
 # - query company sql db
 
-db_billiards = HOME + "/repo/playground-ai-ml/data/billiards.db"
-db_guitars = HOME + "/repo/playground-ai-ml/data/guitars.db"
-db_technologies = HOME + "/repo/playground-ai-ml/data/technologies.db"
+db_billiards = HOME + "/repo/playground-ai-ml/shared-data/python/billiards.db"
+db_guitars = HOME + "/repo/playground-ai-ml/shared-data/python/guitars.db"
+db_technologies = HOME + "/repo/playground-ai-ml/shared-data/python/technologies.db"
 
 def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
     vector_store = Chroma(

@@ -151,7 +151,7 @@ def get_stock_quotes(symbol: str) -> Union[StockQuote, str]:
     
     return nyse_top_19_less_oracle[symbol]
 
-persist_directory = os.path.join(workspaces, "playground-ai-ml/data/chromadb/stocks24")
+persist_directory = os.path.join(workspaces, "playground-ai-ml/shared-data/python/chromadb/stocks24")
 collection_name = "stock_market"
 
 try:

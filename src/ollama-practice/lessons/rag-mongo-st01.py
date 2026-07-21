@@ -18,7 +18,7 @@ mongodb_pass = os.environ.get("MONGODB_PASS", "pass")
 mongodb_conn = f"mongodb://{mongodb_user}:{mongodb_pass}@{mongodb_host}:27017/?directConnection=true"
 print(f"MongoDB host string: {mongodb_host}")
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -44,7 +44,7 @@ hf_embeddings = HuggingFaceEmbeddings(
 print(f"Using LLM model: {llm_model}")
 print(f"Using LLM temp: {llm_temp}")
 
-doc_path = "/workspace/data/documents"
+doc_path = "/workspace/shared-data/python/documents"
 files = [os.path.join(doc_path, file) for file in os.listdir(doc_path)]
 
 client = MongoClient(mongodb_conn)
@@ -118,7 +118,7 @@ def query(question):
     answer = rag_application.run(question)
     print(f"Answer: {answer.content}\n\n")
 
-questions = "/workspace/data/questions.txt"
+questions = "/workspace/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

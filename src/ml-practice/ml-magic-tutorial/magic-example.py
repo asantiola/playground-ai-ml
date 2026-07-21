@@ -8,7 +8,7 @@ from imblearn.over_sampling import RandomOverSampler
 
 # %%
 cols = ['fLength','fWidth','fSize','fConc','fConc1','fAsym','fM3Long','fM3Trans','fAlpha','fDist','class']
-df = pd.read_csv('../../data/magic/magic04.data', names=cols)
+df = pd.read_csv('../../shared-data/python/magic/magic04.data', names=cols)
 
 # %%
 df.head()

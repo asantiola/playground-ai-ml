@@ -183,7 +183,7 @@ def ask_question(cursor, question):
     answer = format_answer(question=question, sql_response=sql_response)
     print(f"\nquestion: {question}\nanswer: {answer}\n")
 
-db_name = HOME + "/repo/playground-ai-ml/data/sql-multiple-agents01.db"
+db_name = HOME + "/repo/playground-ai-ml/shared-data/python/sql-multiple-agents01.db"
 do_setup = False
 try:
     do_setup = not os.path.exists(db_name)

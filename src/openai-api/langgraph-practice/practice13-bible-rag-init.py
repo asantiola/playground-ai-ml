@@ -53,8 +53,8 @@ book_mapping = {
     62: "1_John", 63: "2_John", 64: "3_John", 65: "Jude", 66: "Revelation"
 }
 
-json_file = os.path.join(workspaces, "playground-ai-ml/data/kjv.json")
-persist_directory = os.path.join(workspaces, "playground-ai-ml/data/chromadb/bibles")
+json_file = os.path.join(workspaces, "playground-ai-ml/shared-data/python/kjv.json")
+persist_directory = os.path.join(workspaces, "playground-ai-ml/shared-data/python/chromadb/bibles")
 collection_name = "kjv"
 
 if os.path.exists(persist_directory) and os.path.isdir(persist_directory):

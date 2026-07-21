@@ -61,11 +61,11 @@ def describe(image_path):
     for chunk in llm.stream([message]):
         print(chunk.content, end="", flush=True)
 
-path_vulture = os.path.join(workspaces, "playground-ai-ml/data/images/vulture.jpg")
-path_screenshot = os.path.join(workspaces, "playground-ai-ml/data/images/screenshot-sample.png")
-path_handwriting = os.path.join(workspaces, "playground-ai-ml/data/images/handwriting.jpg")
-path_meme = os.path.join(workspaces, "playground-ai-ml/data/images/meme.jpg")
-path_logic_puzzle = os.path.join(workspaces, "playground-ai-ml/data/images/logic_puzzle.jpg")
+path_vulture = os.path.join(workspaces, "playground-ai-ml/shared-data/python/images/vulture.jpg")
+path_screenshot = os.path.join(workspaces, "playground-ai-ml/shared-data/python/images/screenshot-sample.png")
+path_handwriting = os.path.join(workspaces, "playground-ai-ml/shared-data/python/images/handwriting.jpg")
+path_meme = os.path.join(workspaces, "playground-ai-ml/shared-data/python/images/meme.jpg")
+path_logic_puzzle = os.path.join(workspaces, "playground-ai-ml/shared-data/python/images/logic_puzzle.jpg")
 
 images_names = [
     "vulture",

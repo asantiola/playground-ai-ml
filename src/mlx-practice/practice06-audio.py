@@ -10,8 +10,8 @@ model, processor = load(model_path)
 # `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.wav`
 # `ffmpeg -i boses.m4a -ar 16000 -ac 1 boses.mp3`
 
-# audio_path = "./data/audios/brown_fox.wav"
-audio_path = "./data/audios/itik.mp3"
+# audio_path = "./shared-data/python/audios/brown_fox.wav"
+audio_path = "./shared-data/python/audios/itik.mp3"
 
 messages = [
     {

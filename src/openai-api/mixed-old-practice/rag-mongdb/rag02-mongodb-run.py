@@ -82,7 +82,7 @@ def query(question):
     })
     print(f"Answer: {answer.content}\n\n")
 
-questions = HOME + "/repo/playground-ai-ml/data/questions.txt"
+questions = HOME + "/repo/playground-ai-ml/shared-data/python/questions.txt"
 with open(questions) as file:
     for line in file:
         query(line.rstrip())

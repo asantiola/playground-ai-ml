@@ -6,7 +6,7 @@ import json
 ollama_host = os.environ.get("OLLAMA_HOST", "localhost")
 ollama_url = f"http://{ollama_host}:11434"
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -25,7 +25,7 @@ client = Client(
     host=ollama_url
 )
 
-debate_config_file = "/workspace/data/debate_conf.json"
+debate_config_file = "/workspace/shared-data/python/debate_conf.json"
 with open(debate_config_file) as file:
     debate_config = json.load(file)
 

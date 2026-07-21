@@ -9,7 +9,7 @@ import json
 ollama_host = os.environ.get("OLLAMA_HOST", "localhost")
 ollama_url = f"http://{ollama_host}:11434"
 
-ollama_config_file = "/workspace/data/ollama_conf.json"
+ollama_config_file = "/workspace/shared-data/python/ollama_conf.json"
 with open(ollama_config_file) as file:
     ollama_config = json.load(file)
 
@@ -30,7 +30,7 @@ oe_embeddings = OllamaEmbeddings(
 )
 
 # SKLearn persist path
-persist_path = "/workspace/data/sklearn-oe"
+persist_path = "/workspace/shared-data/python/sklearn-oe"
 
 vector_store = SKLearnVectorStore(
     persist_path=persist_path,

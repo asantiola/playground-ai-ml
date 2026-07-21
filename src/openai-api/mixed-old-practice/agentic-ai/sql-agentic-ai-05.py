@@ -11,7 +11,7 @@ from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessageProm
 # practice code agentic RAG
 
 HOME=os.environ["HOME"]
-db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/data/sql-agentic-ai.db"
+db_uri = "sqlite:///" + HOME + "/repo/playground-ai-ml/shared-data/python/sql-agentic-ai.db"
 db = SQLDatabase.from_uri(db_uri)
 
 api_url = "http://model-runner.docker.internal/engines/v1"
@@ -74,9 +74,9 @@ def get_retriever(oa_embeddings: OpenAIEmbeddings, store_path: str):
     )
     return vector_store.as_retriever()
 
-db_billiards = HOME + "/repo/playground-ai-ml/data/billiards.db"
-db_guitars = HOME + "/repo/playground-ai-ml/data/guitars.db"
-db_technologies = HOME + "/repo/playground-ai-ml/data/technologies.db"
+db_billiards = HOME + "/repo/playground-ai-ml/shared-data/python/billiards.db"
+db_guitars = HOME + "/repo/playground-ai-ml/shared-data/python/guitars.db"
+db_technologies = HOME + "/repo/playground-ai-ml/shared-data/python/technologies.db"
 
 retriever_billiards = get_retriever(oa_embeddings, db_billiards)
 retriever_guitars = get_retriever(oa_embeddings, db_guitars)

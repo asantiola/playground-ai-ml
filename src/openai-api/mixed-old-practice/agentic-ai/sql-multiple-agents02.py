@@ -212,7 +212,7 @@ def ask_question(cursor, question):
     else:
         query_llm(question=question)
 
-db_name = HOME + "/repo/playground-ai-ml/data/sql-multiple-agents02.db"
+db_name = HOME + "/repo/playground-ai-ml/shared-data/python/sql-multiple-agents02.db"
 do_setup = False
 try:
     do_setup = not os.path.exists(db_name)
