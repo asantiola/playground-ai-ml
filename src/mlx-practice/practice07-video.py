@@ -14,7 +14,7 @@ print(f"Video FPS: {video_fps}")
 
 # Calculate frame interval for half a second (0.5 seconds)
 # e.g., if video is 30 FPS, it samples every 15 frames. If 60 FPS, every 30 frames.
-frame_interval = max(1, int(video_fps * 0.5))
+frame_interval = max(1, int(video_fps * 0.25))
 
 frames = []
 frame_count = 0

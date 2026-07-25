@@ -63,7 +63,7 @@ def extract_frames_from_mp4(video_path, fps=1):
     return frames
 
 def describe(video_path):
-    frames = extract_frames_from_mp4(video_path, fps=2)
+    frames = extract_frames_from_mp4(video_path, fps=0.25)
     content = [
         {
             "type": "text",
