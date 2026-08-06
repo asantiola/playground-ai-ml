@@ -16,10 +16,11 @@ api_key = os.environ.get(
 
 # docker desktop
 llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-qat-6bit", 
+    # model="mlx-community/gemma-4-12B-it-qat-6bit",
+    model="unsloth/gemma-4-12b-it-GGUF:UD-Q6_K_XL",
     base_url=openai_base_url,
     api_key=api_key,
-    temperature=0.1,
+    temperature=1.0,
     extra_body={
         "top_p": 0.95,
         "top_k": 64,
@@ -42,8 +43,8 @@ class Response(BaseModel):
 prompt = ChatPromptTemplate.from_messages(
     [
         SystemMessagePromptTemplate.from_template("""
-            You are a helpful assistant that answers the input.
-            Keep your answer brief.
+            You are a logical assistant. In the reasoning field, write a concise step-by-step 
+            elimination log (1-2 short sentences per hint) BEFORE giving the final answer.
         """),
         HumanMessagePromptTemplate.from_template("Input: {input}"),
     ]
