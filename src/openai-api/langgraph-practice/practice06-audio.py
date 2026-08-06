@@ -21,7 +21,8 @@ api_key = os.environ.get(
 
 llm = ChatOpenAI(
     # model="mlx-community/gemma-4-12B-it-qat-6bit",
-    model="unsloth/gemma-4-12b-it-GGUF:UD-Q6_K_XL",
+    # model="unsloth/gemma-4-12b-it-GGUF:UD-Q6_K_XL",
+    model="google/gemma-4-12B-it-qat-q4_0-gguf",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=0.1,
