@@ -53,7 +53,7 @@ model_details = [
         },
     },
     {
-        "model": "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
+        "model": "unsloth/gemma-4-12b-it-GGUF:UD-Q6_K_XL",
         "max_completion_tokens": None,
         "temperature": 0.1,
         "extra_body": None,

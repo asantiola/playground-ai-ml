@@ -3,7 +3,8 @@
 WORKDIR="/Users/asantiola/workspaces/playground-ai-ml/"
 cd "$WORKDIR"
 
-MODEL=${1:-"Qwen/Qwen2.5-Coder-14B-Instruct-GGUF:Q5_0"}
+MODEL=${1:-"unsloth/gemma-4-12b-it-GGUF:UD-Q6_K_XL"}
 
 set -x
-llama-server -hf $MODEL --host localhost --port 12434
+llama-server -hf $MODEL --host localhost --port 12434 --ctx-size 16384 \
+    --gpu-layers all --chat-template-kwargs '{"enable_thinking":false}'
