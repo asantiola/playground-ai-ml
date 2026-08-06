@@ -36,7 +36,7 @@ model_details = [
     {
         "model": "mlx-community/gemma-4-12B-it-qat-6bit",
         "max_completion_tokens": 4096,
-        "temperature": 1.0,
+        "temperature": 0.1,
         "extra_body": {
             "top_p": 0.95,
             "top_k": 64,
@@ -55,7 +55,7 @@ model_details = [
     {
         "model": "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
         "max_completion_tokens": None,
-        "temperature": 1.0,
+        "temperature": 0.1,
         "extra_body": None,
         "extra_body": {
             "top_p": 0.95,
