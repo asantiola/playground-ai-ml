@@ -2,10 +2,10 @@ from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Annotated, Sequence
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage, ToolMessage
 from operator import add as add_message
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.tools import tool
-from lesson10_common import get_embeddings
+# from lesson10_common import get_embeddings
 import os
 import chromadb
 
@@ -17,6 +17,11 @@ workspaces = os.environ.get(
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
     "http://localhost:12434/v1"
+)
+
+openai_base_url_embedding = os.environ.get(
+    "OPENAI_BASE_URL_EMBEDDING", 
+    "http://localhost:12435/v1"
 )
 
 api_key = os.environ.get(
@@ -42,7 +47,14 @@ def auto_load_vector_store(persist_directory, collection_name):
     model_class_name = collection.metadata.get("embedding_class")
 
     print(f"auto-detected embeddings model: {model_class_name}")
-    embeddings = get_embeddings(model_class_name)
+    # embeddings = get_embeddings(model_class_name)
+    embeddings = OpenAIEmbeddings(
+        model=model_class_name,
+        base_url=openai_base_url_embedding,
+        api_key=api_key,
+        # disable check_embedding_ctx_length if your local model has different constraints
+        check_embedding_ctx_length=False,
+    )
 
     return Chroma(
         embedding_function=embeddings,

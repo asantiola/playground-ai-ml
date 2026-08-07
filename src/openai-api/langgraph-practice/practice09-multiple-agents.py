@@ -23,13 +23,18 @@ openai_base_url = os.environ.get(
     "http://localhost:12434/v1"
 )
 
+openai_base_url_embedding = os.environ.get(
+    "OPENAI_BASE_URL_EMBEDDING", 
+    "http://localhost:12435/v1"
+)
+
 api_key = os.environ.get(
     "OPENAI_API_KEY",
     "your-default-key"
 )
 
 llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-qat-6bit",
+    model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=1.0,
@@ -40,9 +45,9 @@ llm = ChatOpenAI(
 )
 
 embeddings = OpenAIEmbeddings(
-    model="ai/embeddinggemma:300M-Q8_0",
-    base_url="http://model-runner.docker.internal/engines/v1",
-    api_key="docker",
+    model="unsloth/embeddinggemma-300m-GGUF:Q8_0",
+    base_url=openai_base_url_embedding,
+    api_key=api_key,
     # disable check_embedding_ctx_length if your local model has different constraints
     check_embedding_ctx_length=False,
 )
