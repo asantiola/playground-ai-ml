@@ -17,11 +17,10 @@ api_key = os.environ.get(
 # docker desktop
 llm = ChatOpenAI(
     # model="mlx-community/gemma-4-12B-it-qat-6bit",
-    # model="unsloth/gemma-4-12b-it-GGUF:UD-Q6_K_XL",
-    model="google/gemma-4-12B-it-qat-q4_0-gguf",
+    model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
     base_url=openai_base_url,
     api_key=api_key,
-    temperature=1.0,
+    temperature=0.1,
     extra_body={
         "top_p": 0.95,
         "top_k": 64,
@@ -68,4 +67,4 @@ Hints:
 """
 
 response = chain.invoke({ "input": puzzle_question })
-print(f"answer: {response.answer}, confidence_score: {response.confidence_score}")
+print(f"answer: {response.answer}, confidence_score: {response.confidence_score}, reasoning: {response.reasoning}")

@@ -56,8 +56,8 @@ with st.sidebar:
         "Select a Model Architecture",
         options=[
             "",  # Blank default option
+            "unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
             "mlx-community/gemma-4-12B-it-qat-6bit",
-            "google/gemma-4-E4B-it-qat-q4_0-gguf:Q4_0",
         ],
         index=0,
         format_func=lambda x: "Choose a model..." if x == "" else x

@@ -27,12 +27,22 @@ api_key = os.environ.get(
 )
 
 model_names = [
+    "unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
     "mlx-community/gemma-4-12B-it-qat-6bit",
     "google/gemma-4-12B-it-qat-q4_0-gguf",
-    "unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
 ]
 
 model_details = [
+    {
+        "model": "unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
+        "max_completion_tokens": None,
+        "temperature": 0.1,
+        "extra_body": None,
+        "extra_body": {
+            "top_p": 0.95,
+            "top_k": 64,
+        },
+    },
     {
         "model": "mlx-community/gemma-4-12B-it-qat-6bit",
         "max_completion_tokens": 4096,
@@ -44,16 +54,6 @@ model_details = [
     },
     {
         "model": "google/gemma-4-12B-it-qat-q4_0-gguf",
-        "max_completion_tokens": None,
-        "temperature": 0.1,
-        "extra_body": None,
-        "extra_body": {
-            "top_p": 0.95,
-            "top_k": 64,
-        },
-    },
-    {
-        "model": "unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
         "max_completion_tokens": None,
         "temperature": 0.1,
         "extra_body": None,
