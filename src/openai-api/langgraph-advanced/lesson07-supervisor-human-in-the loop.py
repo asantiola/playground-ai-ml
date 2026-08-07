@@ -140,7 +140,8 @@ def place_order(symbol: str, action: str, shares: int, limit_price: float, order
     }
 
 llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-qat-6bit",
+    # model="mlx-community/gemma-4-12B-it-qat-6bit",
+    model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=1.0,
