@@ -9,13 +9,6 @@ workspaces = os.environ.get(
     "/workspaces"
 )
 
-# Docker Model Runner
-# openai_base_url = os.environ.get(
-#     "OPENAI_BASE_URL", 
-#     "http://localhost:12434/engines/v1"
-# )
-
-# MLX
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
     "http://localhost:12434/v1"
@@ -26,53 +19,15 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-model_names = [
-    "unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
-    "mlx-community/gemma-4-12B-it-qat-6bit",
-    "google/gemma-4-12B-it-qat-q4_0-gguf",
-]
-
-model_details = [
-    {
-        "model": "unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
-        "max_completion_tokens": None,
-        "temperature": 0.1,
-        "extra_body": None,
-        "extra_body": {
-            "top_p": 0.95,
-            "top_k": 64,
-        },
-    },
-    {
-        "model": "mlx-community/gemma-4-12B-it-qat-6bit",
-        "max_completion_tokens": 4096,
-        "temperature": 0.1,
-        "extra_body": {
-            "top_p": 0.95,
-            "top_k": 64,
-        },
-    },
-    {
-        "model": "google/gemma-4-12B-it-qat-q4_0-gguf",
-        "max_completion_tokens": None,
-        "temperature": 0.1,
-        "extra_body": None,
-        "extra_body": {
-            "top_p": 0.95,
-            "top_k": 64,
-        },
-    },
-]
-
-model_chosen = selection("models", model_names, model_details)
-
 llm = ChatOpenAI(
-    model=model_chosen["model"],
+    model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
     base_url=openai_base_url,
     api_key=api_key,
-    temperature=model_chosen["temperature"],
-    max_completion_tokens=model_chosen["max_completion_tokens"],
-    extra_body=model_chosen["extra_body"],
+    temperature=1.0,
+    extra_body={
+        "top_p": 0.95,
+        "top_k": 64,
+    },
 )
 
 system_prompt_show = """You are an expert mathematical logician who specializes in combinatorics and probability puzzles.

@@ -1,6 +1,7 @@
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
-from practice13_common import selection_embeddings
+from langchain_openai import OpenAIEmbeddings
+# from practice13_common import selection_embeddings
 import os
 import json
 import shutil
@@ -10,9 +11,9 @@ workspaces = os.environ.get(
     "/workspaces"
 )
 
-openai_base_url = os.environ.get(
-    "OPENAI_BASE_URL", 
-    "http://localhost:12434/v1"
+openai_base_url_embedding = os.environ.get(
+    "OPENAI_BASE_URL_EMBEDDING", 
+    "http://localhost:12435/v1"
 )
 
 api_key = os.environ.get(
@@ -20,17 +21,14 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-embeddings_model_name, embeddings = selection_embeddings()
-
-# # Docker Model Runner:
-# embeddings = OpenAIEmbeddings(
-#     model="ai/embeddinggemma:300M-Q8_0",
-#     base_url=openai_base_url,
-#     api_key=api_key,
-#     # disable check_embedding_ctx_length if your local model has different constraints
-#     check_embedding_ctx_length=False,
-# )
-
+embeddings_model_name = "unsloth/embeddinggemma-300m-GGUF:Q8_0"
+embeddings = OpenAIEmbeddings(
+    model=embeddings_model_name,
+    base_url=openai_base_url_embedding,
+    api_key=api_key,
+    # disable check_embedding_ctx_length if your local model has different constraints
+    check_embedding_ctx_length=False,
+)
 
 book_mapping = {
     # Old Testament (1-39)

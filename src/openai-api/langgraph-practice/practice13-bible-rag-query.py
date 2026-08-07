@@ -1,9 +1,8 @@
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_core.prompts import ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain_chroma import Chroma
-from practice13_common import get_embeddings
 import os
 import chromadb
 
@@ -17,9 +16,22 @@ openai_base_url = os.environ.get(
     "http://localhost:12434/v1"
 )
 
+openai_base_url_embedding = os.environ.get(
+    "OPENAI_BASE_URL_EMBEDDING", 
+    "http://localhost:12435/v1"
+)
+
 api_key = os.environ.get(
     "OPENAI_API_KEY",
     "your-default-key"
+)
+
+embeddings = OpenAIEmbeddings(
+    model="unsloth/embeddinggemma-300m-GGUF:Q8_0",
+    base_url=openai_base_url_embedding,
+    api_key=api_key,
+    # disable check_embedding_ctx_length if your local model has different constraints
+    check_embedding_ctx_length=False,
 )
 
 persist_directory = os.path.join(workspaces, "playground-ai-ml/shared-data/python/chromadb/bibles")
@@ -31,7 +43,7 @@ def auto_load_vector_store(persist_directory, collection_name):
     model_class_name = collection.metadata.get("embedding_class")
 
     print(f"auto-detected embeddings model: {model_class_name}")
-    embeddings = get_embeddings(model_class_name)
+    # embeddings = get_embeddings(model_class_name)
 
     return Chroma(
         embedding_function=embeddings,
@@ -51,7 +63,7 @@ retriever = vector_store.as_retriever(
 )
 
 llm = ChatOpenAI(
-    model="mlx-community/gemma-4-12B-it-qat-6bit",
+    model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=1.0,
