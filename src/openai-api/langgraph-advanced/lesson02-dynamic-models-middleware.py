@@ -121,7 +121,6 @@ tools_financial = [lookup_stock_symbol, get_stock_quotes]
 tools_general = [get_current_date_time, get_weather]
 tools_all = [get_current_date_time, get_weather, lookup_stock_symbol, get_stock_quotes]
 
-# model="mlx-community/gemma-4-12B-it-qat-6bit"
 model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL"
 
 llm_general = ChatOpenAI(
