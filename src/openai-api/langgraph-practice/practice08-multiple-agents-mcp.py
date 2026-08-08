@@ -21,20 +21,25 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-command_path = os.path.join(workspaces, "playground-ai-ml/.venv/bin/python")
-mcp_path = os.path.join(workspaces, "playground-ai-ml/src/openai-api/langgraph-practice/practice08-mcp-server.py")
+# command_path = os.path.join(workspaces, "playground-ai-ml/.venv/bin/python")
+# mcp_path = os.path.join(workspaces, "playground-ai-ml/src/openai-api/langgraph-practice/practice08-mcp-server.py")
+mcp_server_url = "http://localhost:22434/sse"
 
 async def run_client():
     client = MultiServerMCPClient(
         {
-            "my_local_server": {
-                "command": command_path,
-                "args": [mcp_path],
-                "transport": "stdio",
-                "env": {
-                    "ANONYMIZED_TELEMETRY": "false",    # to disable telemetry
-                    "WORKSPACES": "/Users/asantiola/workspaces",
-                }, 
+            # "my_local_server": {
+            #     "command": command_path,
+            #     "args": [mcp_path],
+            #     "transport": "stdio",
+            #     "env": {
+            #         "ANONYMIZED_TELEMETRY": "false",    # to disable telemetry
+            #         "WORKSPACES": "/Users/asantiola/workspaces",
+            #     }, 
+            # }
+            "my_remote_server": {
+                "url": mcp_server_url,
+                "transport": "sse",
             }
         }
     )

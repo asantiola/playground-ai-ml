@@ -10,7 +10,7 @@ import os
 # # the logging is to disable INFO logs
 # mcp = FastMCP("ToolsServer", log_level="WARNING")
 
-mcp = FastMCP("ToolsServer")
+mcp = FastMCP("ToolsServer", host="localhost", port=22434)
 
 workspaces = os.environ.get(
     "WORKSPACES",
@@ -177,4 +177,5 @@ def retriever_tool(query: str) -> str:
     return "\n\n".join(results)
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    #mcp.run(transport="stdio")
+    mcp.run(transport="sse")
