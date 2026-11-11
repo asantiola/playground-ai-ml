@@ -19,7 +19,7 @@ workspaces = os.environ.get(
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://localhost:12434/v1"
+    "http://host.docker.internal:12434/engines/v1"
 )
 
 api_key = os.environ.get(

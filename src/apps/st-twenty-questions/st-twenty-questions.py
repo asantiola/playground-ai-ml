@@ -14,7 +14,7 @@ st.set_page_config(page_title="20 Questions Game", page_icon="🎮")
 st.title("🎮 The 20 Questions Game")
 
 # Setup API and Environment Variables
-openai_base_url = os.environ.get("OPENAI_BASE_URL", "http://localhost:12434/v1")
+openai_base_url = os.environ.get("OPENAI_BASE_URL", "http://host.docker.internal:12434/engines/v1")
 api_key = os.environ.get("OPENAI_API_KEY", "your-default-key")
 
 max_guess = 20
@@ -23,7 +23,7 @@ max_guess = 20
 def get_llm():
     return ChatOpenAI(
         # model="mlx-community/gemma-4-12B-it-qat-6bit",
-        model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
+        model="ai/gemma4:12b-q4_K_M",
         base_url=openai_base_url,
         api_key=api_key,
         temperature=1.0,

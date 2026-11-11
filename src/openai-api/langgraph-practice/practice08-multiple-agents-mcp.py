@@ -13,7 +13,7 @@ workspaces = os.environ.get(
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://localhost:12434/v1"
+    "http://host.docker.internal:12434/engines/v1"
 )
 
 api_key = os.environ.get(
@@ -46,7 +46,7 @@ async def run_client():
 
     tools = await client.get_tools()
     llm = ChatOpenAI(
-        model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
+        model="ai/gemma4:12b-q4_K_M",
         base_url=openai_base_url,
         api_key=api_key,
         temperature=1.0,

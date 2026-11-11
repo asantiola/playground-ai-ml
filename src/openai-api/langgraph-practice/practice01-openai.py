@@ -5,7 +5,7 @@ import os
 
 openai_base_url = os.environ.get(
     "OPENAI_BASE_URL", 
-    "http://localhost:12434/v1"
+    "http://host.docker.internal:12434/engines/v1"
 )
 
 api_key = os.environ.get(
@@ -21,7 +21,7 @@ client = openai.OpenAI(
 completion = client.chat.completions.create(
     # model="ai/llama3.1:latest", 
     # model="mlx-community/gemma-4-12B-it-qat-6bit",
-    model="unsloth/gemma-4-12B-it-qat-GGUF:UD-Q4_K_XL",
+    model="ai/gemma4:12b-q4_K_M",
     messages=[
         {"role": "system", "content": "You are a helpful AI assistant."},
         {"role": "user", "content": "Create a short story about a chicken and a cat. Just create the story. No need to provide the analysis or explanation."}
