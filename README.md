@@ -63,3 +63,4 @@ fi
     - http://model-runner.docker.internal/engines/v1
     - to enjoy gemma4:
         - docker model configure ai/gemma4:12b-q4_K_M -- --ctx-size 8192 --reasoning off
+        - or add it in devcontainer.json
