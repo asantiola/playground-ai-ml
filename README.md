@@ -61,3 +61,5 @@ fi
 - Docker Model Runner
     - http://localhost:12434/engines/v1
     - http://model-runner.docker.internal/engines/v1
+    - to enjoy gemma4:
+        - docker model configure ai/gemma4:12b-q4_K_M -- --ctx-size 8192 --reasoning off
