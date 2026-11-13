@@ -20,7 +20,7 @@ api_key = os.environ.get(
 )
 
 llm = ChatOpenAI(
-    model="ai/gemma4:12b-q4_K_M",
+    model="ai/gemma4:12B",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=1.0,
@@ -35,7 +35,7 @@ def encode_audio(audio_path):
     with open(audio_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
-prompt = """Describe what you hear in this audio file thoroughly.
+prompt = """Describe what you hear in this audio file as accurately as you can.
     If you hear words, print all you understand. If it is not in English, translate it.
     If it is a puzzle, approach problems step-by-step, verify boundary conditions, 
     and rigorously check your assumptions before calculating the final answer.

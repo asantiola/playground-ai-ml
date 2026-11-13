@@ -120,7 +120,7 @@ def get_stock_quotes(symbol: str) -> Union[StockQuote, str]:
 tools = [get_current_date_time, lookup_stock_symbol, get_stock_quotes]
 
 llm = ChatOpenAI(
-    model="ai/gemma4:12b-q4_K_M",
+    model="ai/gemma4:12B",
     base_url=openai_base_url,
     api_key=api_key,
     temperature=1.0,
