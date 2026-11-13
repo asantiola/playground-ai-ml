@@ -13,7 +13,7 @@ workspaces = os.environ.get(
 
 openai_base_url_embedding = os.environ.get(
     "OPENAI_BASE_URL_EMBEDDING", 
-    "http://localhost:12435/v1"
+    "http://host.docker.internal:12434/engines/v1"
 )
 
 api_key = os.environ.get(
@@ -21,7 +21,7 @@ api_key = os.environ.get(
     "your-default-key"
 )
 
-embeddings_model_name = "unsloth/embeddinggemma-300m-GGUF:Q8_0"
+embeddings_model_name = "ai/embeddinggemma:300M-Q8_0"
 embeddings = OpenAIEmbeddings(
     model=embeddings_model_name,
     base_url=openai_base_url_embedding,
